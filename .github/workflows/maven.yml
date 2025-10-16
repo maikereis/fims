@@ -64,7 +64,7 @@ jobs:
           import requests
 
           # Parse JaCoCo XML
-          cov_file = Path("coverage.xml")
+          cov_file = Path("jacoco.xml")
           with cov_file.open() as f:
               doc = xmltodict.parse(f.read())
           counters = doc['report']['counter']
