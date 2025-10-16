@@ -1,6 +1,11 @@
 package com.mqped.fims.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
 public class Address {
+    @Id
     private String id;
 
     private String state;
