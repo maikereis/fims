@@ -35,7 +35,7 @@ public class AddressController {
 
     // READ ONE
     @GetMapping("/{id}")
-    public ResponseEntity<Address> getAddressById(@PathVariable String id) {
+    public ResponseEntity<Address> getAddressById(@PathVariable Integer id) {
         Optional<Address> address = service.findById(id);
         return address.map(a -> new ResponseEntity<>(a, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -43,7 +43,7 @@ public class AddressController {
 
     // DELETE
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAddress(@PathVariable String id) {
+    public ResponseEntity<Void> deleteAddress(@PathVariable Integer id) {
         Optional<Address> existingAddress = service.findById(id);
         if (existingAddress.isPresent()) {
             service.deleteById(id);

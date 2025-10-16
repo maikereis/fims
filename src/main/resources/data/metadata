@@ -1,0 +1,19 @@
+### Visão Geral do Dataset
+Este dataset contém uma amostra de endereços extraídos do Cadastro Nacional de Endereços para Fins Estatísticos (CNEFE), com foco nas áreas urbanas do estado do Pará, Brasil.
+Inclui informações geográficas, administrativas e logísticas úteis para geocodificação, análise espacial e gestão de utilidades (por exemplo, distribuição de energia elétrica, roteamento de inspeções e detecção de perdas).
+ 
+### Informações do Dataset
+
+Nome: 15_PA.csv.sample
+
+Fonte: Projeto de Dados CNEFE (Instituto Brasileiro de Geografia e Estatística, IBGE)
+
+URL: https://github.com/maikereis/CNEFE-data
+
+Autor: @maikereis
+
+Região: Pará, Brasil
+
+Subconjunto: Municípios da Região Metropolitana de Belém
+
+Amostragem: 10.000 linhas aleatórias selecionadas do arquivo 15_PA.csv, filtradas pelos municípios: "Belém", "Ananindeua", "Marituba", "Castanhal", "Santa Izabel", "Benevides", "Barcarena", "Outeiro", "Mosqueiro".

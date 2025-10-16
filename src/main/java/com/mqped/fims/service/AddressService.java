@@ -1,38 +1,60 @@
 package com.mqped.fims.service;
 
 import com.mqped.fims.model.Address;
-import com.mqped.fims.repository.AddressRepository;
+import com.mqped.fims.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class AddressService {
-    private final AddressRepository repository;
+public class AddressService implements CrudRepository<Address, Integer> {
+    private final Map<Integer, Address> hashMap = new ConcurrentHashMap<>();
+    private final AtomicInteger nextId = new AtomicInteger(1);
 
-    public AddressService(AddressRepository repository) {
-        this.repository = repository;
-    }
-
+    @Override
     public Address add(Address address) {
-        return repository.save(address);
+        address.setId(nextId.getAndIncrement());
+        hashMap.put(address.getId(), address);
+        return address;
     }
 
+    @Override
     public List<Address> findAll() {
-        return repository.findAll();
+        return new ArrayList<>(hashMap.values());
     }
 
-    public Optional<Address> findById(String id) {
-        return repository.findById(id);
+    @Override
+    public Optional<Address> findById(Integer id) {
+        return Optional.ofNullable(hashMap.get(id));
     }
 
-    public Address save(Address address) {
-        return repository.save(address);
+    @Override
+    public Optional<Address> update(Integer id, Address address) {
+        if (!hashMap.containsKey(id)) {
+            return Optional.empty();
+        }
+        address.setId(id); // ensure ID consistency
+        hashMap.put(id, address);
+        return Optional.of(address);
     }
 
-    public void deleteById(String id) {
-        repository.deleteById(id);
+    @Override
+    public boolean deleteById(Integer id) {
+        return hashMap.remove(id) != null;
     }
 
+    @Override
+    public boolean existsById(Integer id) {
+        return hashMap.containsKey(id);
+    }
+
+    @Override
+    public long count() {
+        return hashMap.size();
+    }
 }
