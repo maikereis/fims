@@ -1,12 +1,9 @@
 package com.mqped.fims.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-
-@Entity
 public class Address {
-    @Id
-    private String id;
+    private Integer id;
+
+    private String addressId;
 
     private String state;
 
@@ -32,16 +29,24 @@ public class Address {
 
     private Double longitude;
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
     public String getState() {
         return state;
+    }
+
+    public String getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(String addressId) {
+        this.addressId = addressId;
     }
 
     public void setState(String state) {
@@ -139,7 +144,8 @@ public class Address {
     @Override
     public String toString() {
         return "Address{" +
-                "id='" + id + '\'' +
+                "id=" + id +
+                ", addressId='" + addressId + '\'' +
                 ", state='" + state + '\'' +
                 ", municipality='" + municipality + '\'' +
                 ", district='" + district + '\'' +
