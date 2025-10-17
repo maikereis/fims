@@ -94,7 +94,7 @@ class AddressControllerTest {
     @Test
     void testDeleteAddress_returnsNoContentWhenFound() {
         when(service.findById(1)).thenReturn(Optional.of(address1));
-        doNothing().when(service).deleteById(1);
+        when(service.deleteById(1)).thenReturn(true);
 
         ResponseEntity<Void> response = controller.deleteAddress(1);
 
