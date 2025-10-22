@@ -17,7 +17,7 @@ class ClientTest {
         LocalDateTime birthDate = LocalDateTime.of(1990, 5, 10, 0, 0);
         LocalDateTime createdAt = LocalDateTime.now();
 
-        client.setId("C123");
+        client.setId(123);
         client.setName("Maria Silva");
         client.setCpf("123.456.789-00");
         client.setBirthDate(birthDate);
@@ -26,7 +26,7 @@ class ClientTest {
         client.setGenre("F");
         client.setCreatedAt(createdAt);
 
-        assertEquals("C123", client.getId());
+        assertEquals(123, client.getId());
         assertEquals("Maria Silva", client.getName());
         assertEquals("123.456.789-00", client.getCpf());
         assertEquals(birthDate, client.getBirthDate());
@@ -55,7 +55,7 @@ class ClientTest {
     @DisplayName("Should include main fields in toString output")
     void testToStringContainsKeyFields() {
         Client client = new Client();
-        client.setId("C001");
+        client.setId(123);
         client.setName("Carlos Pereira");
         client.setBirthDate(LocalDateTime.of(1985, 8, 20, 0, 0));
         client.setGenre("M");
@@ -63,7 +63,7 @@ class ClientTest {
         String str = client.toString();
 
         assertTrue(str.contains("Client{"), "toString should start with class name");
-        assertTrue(str.contains("C001"), "toString should contain ID");
+        assertTrue(str.contains("id=123"), "Should contain id");
         assertTrue(str.contains("Carlos Pereira"), "toString should contain name");
         assertTrue(str.contains("1985"), "toString should contain birth year");
         assertTrue(str.contains("M"), "toString should contain genre");
@@ -131,11 +131,11 @@ class ClientTest {
     @DisplayName("Should handle minimal client information (only required fields)")
     void testMinimalClientData() {
         Client client = new Client();
-        client.setId("C100");
+        client.setId(123);
         client.setName("João Souza");
         client.setCpf("123.456.789-10");
 
-        assertEquals("C100", client.getId());
+        assertEquals(123, client.getId());
         assertEquals("João Souza", client.getName());
         assertEquals("123.456.789-10", client.getCpf());
 

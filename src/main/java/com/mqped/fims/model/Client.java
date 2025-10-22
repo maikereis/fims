@@ -3,7 +3,7 @@ package com.mqped.fims.model;
 import java.time.LocalDateTime;
 
 public class Client {
-    private String id;
+    private Integer id;
     private String name;
     private String cpf;
     private LocalDateTime birthDate;
@@ -12,11 +12,11 @@ public class Client {
     private String genre;
     private LocalDateTime createdAt;
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
