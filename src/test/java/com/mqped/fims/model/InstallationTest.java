@@ -63,7 +63,7 @@ class InstallationTest {
         assertTrue(str.contains("id=123"), "Should contain id");
         assertTrue(str.contains("Rua dos Caripunas"), "Should contain address street");
         assertTrue(str.contains("PA"), "Should contain state");
-        assertTrue(str.contains("createAt"), "Should contain createAt field");
+        assertTrue(str.contains("createdAt"), "Should contain createdAt field");
         assertTrue(str.contains("deletedAt"), "Should contain deletedAt field");
     }
 

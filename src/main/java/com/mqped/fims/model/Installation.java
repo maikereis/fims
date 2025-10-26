@@ -6,7 +6,7 @@ public class Installation {
 
     private Integer id;
     private Address address;
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
     private LocalDateTime deletedAt;
 
     public Integer getId() {
@@ -26,11 +26,11 @@ public class Installation {
     }
 
     public LocalDateTime getCreateAt() {
-        return createAt;
+        return createdAt;
     }
 
-    public void setCreateAt(LocalDateTime createAt) {
-        this.createAt = createAt;
+    public void setCreateAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public LocalDateTime getDeletedAt() {
@@ -46,7 +46,7 @@ public class Installation {
         return "Installation{" +
                 "id=" + id +
                 ", address=" + (address != null ? address.toString() : "null") +
-                ", createAt=" + createAt +
+                ", createdAt=" + createdAt +
                 ", deletedAt=" + deletedAt +
                 '}';
     }
