@@ -1,0 +1,20 @@
+### Visão Geral do Dataset
+Este repositório contém um gerador de dados sintéticos de clientes brasileiros (pessoas físicas e jurídicas), com formatos realistas para CPF, CNPJ, nomes, datas e outros atributos relevantes. Os dados são destinados a testes de software, análise de dados e preenchimento de bancos de dados de desenvolvimento.
+
+### Informações do Dataset
+
+Nome: fake-clients.csv (gerado via script)
+
+Fonte: Repositório Fake Clients (https://github.com/maikereis/fake-clients)
+
+Autor: @maikereis
+
+Região: Brasil
+
+Subconjunto: Personalizável – usuários podem definir o tamanho da população, proporção entre pessoas físicas e jurídicas, e número de registros.
+
+Amostragem: Dados sintéticos gerados com proporções configuráveis; por padrão, 9.900 pessoas físicas e 99 empresas (razão 100:1).
+
+Formato: CSV, com campos como nome, CPF/CNPJ, data de nascimento, nome da mãe (para pessoas físicas), e razão social (para empresas).
+
+Uso: População de ambientes de teste, desenvolvimento de software, simulação de cenários de análise de dados e experimentos de machine learning.
