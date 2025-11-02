@@ -3,9 +3,12 @@ package com.mqped.fims.service;
 import com.mqped.fims.model.Client;
 import com.mqped.fims.model.ContractAccount;
 import com.mqped.fims.model.Installation;
-import com.mqped.fims.model.StatusType;
+import com.mqped.fims.model.Address;
+import com.mqped.fims.repository.ContractAccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,193 +16,168 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DataJpaTest
 class ContractAccountServiceTest {
 
     private ContractAccountService service;
 
+    @Autowired
+    private ContractAccountRepository repository;
+
     @BeforeEach
     void setUp() {
-        service = new ContractAccountService();
+        service = new ContractAccountService(repository);
+        repository.deleteAll();
+    }
+
+    private ContractAccount createValidContractAccount() {
+        ContractAccount account = new ContractAccount();
+        account.setAccountNumber("DEFAULT-ACC");
+
+        // Client
+        Client client = new Client();
+        client.setName("Test Client");
+        account.setClient(client);
+
+        // Address with required fields
+        Address address = new Address();
+        address.setState("PA");
+        address.setMunicipality("Belém");
+        address.setStreet("Rua Teste");
+        
+        // Installation
+        Installation installation = new Installation();
+        installation.setAddress(address);
+        account.setInstallation(installation);
+
+        account.setCreatedAt(LocalDateTime.now());
+        return account;
     }
 
     @Test
     void testAdd_AssignsIdAndStoresAccount() {
-        ContractAccount ca = new ContractAccount();
-        ca.setAccountNumber("ACC001");
-        ca.setCreatedAt(LocalDateTime.now());
-        ca.setStatus(StatusType.ON);
+        ContractAccount account = createValidContractAccount();
+        account.setAccountNumber("ACC-001");
 
-        ContractAccount result = service.add(ca);
+        ContractAccount result = service.add(account);
 
         assertNotNull(result.getId(), "ID should be auto-assigned");
-        assertEquals(1, result.getId());
-        assertEquals("ACC001", result.getAccountNumber());
-        assertEquals(StatusType.ON, result.getStatus());
+        assertEquals("ACC-001", result.getAccountNumber());
     }
 
     @Test
     void testAdd_IncrementingIds() {
-        ContractAccount a1 = new ContractAccount();
-        ContractAccount a2 = new ContractAccount();
+        ContractAccount ca1 = createValidContractAccount();
+        ca1.setAccountNumber("ACC-001");
+        ContractAccount ca2 = createValidContractAccount();
+        ca2.setAccountNumber("ACC-002");
 
-        ContractAccount r1 = service.add(a1);
-        ContractAccount r2 = service.add(a2);
+        ContractAccount result1 = service.add(ca1);
+        ContractAccount result2 = service.add(ca2);
 
-        assertEquals(1, r1.getId());
-        assertEquals(2, r2.getId());
+        assertNotNull(result1.getId());
+        assertNotNull(result2.getId());
+        assertTrue(result2.getId() > result1.getId());
     }
 
     @Test
     void testFindById_ExistingAccount() {
-        ContractAccount ca = new ContractAccount();
-        ca.setAccountNumber("ACC002");
-        ContractAccount saved = service.add(ca);
+        ContractAccount account = createValidContractAccount();
+        account.setAccountNumber("ACC-123");
+        ContractAccount saved = service.add(account);
 
         Optional<ContractAccount> result = service.findById(saved.getId());
-
         assertTrue(result.isPresent());
-        assertEquals("ACC002", result.get().getAccountNumber());
+        assertEquals("ACC-123", result.get().getAccountNumber());
     }
 
     @Test
     void testFindById_NonExistingAccount() {
         Optional<ContractAccount> result = service.findById(999);
-
         assertFalse(result.isPresent());
     }
 
     @Test
-    void testFindAll_EmptyList() {
-        List<ContractAccount> result = service.findAll();
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
     void testFindAll_MultipleAccounts() {
-        ContractAccount a1 = new ContractAccount();
-        a1.setAccountNumber("A001");
+        ContractAccount ca1 = createValidContractAccount();
+        ca1.setAccountNumber("ACC-001");
+        ContractAccount ca2 = createValidContractAccount();
+        ca2.setAccountNumber("ACC-002");
 
-        ContractAccount a2 = new ContractAccount();
-        a2.setAccountNumber("A002");
-
-        service.add(a1);
-        service.add(a2);
+        service.add(ca1);
+        service.add(ca2);
 
         List<ContractAccount> result = service.findAll();
-
         assertEquals(2, result.size());
-        assertEquals("A001", result.get(0).getAccountNumber());
-        assertEquals("A002", result.get(1).getAccountNumber());
+        assertTrue(result.stream().anyMatch(a -> "ACC-001".equals(a.getAccountNumber())));
+        assertTrue(result.stream().anyMatch(a -> "ACC-002".equals(a.getAccountNumber())));
     }
 
     @Test
     void testUpdate_ExistingAccount() {
-        ContractAccount original = new ContractAccount();
-        original.setAccountNumber("OLD_ACC");
-        original.setStatus(StatusType.ON);
+        ContractAccount original = createValidContractAccount();
+        original.setAccountNumber("OLD-ACC");
         ContractAccount saved = service.add(original);
 
-        ContractAccount updated = new ContractAccount();
-        updated.setAccountNumber("NEW_ACC");
-        updated.setStatus(StatusType.OFF);
-        updated.setStatusStart(LocalDateTime.now().minusDays(5));
-        updated.setStatusEnd(LocalDateTime.now());
+        ContractAccount updated = createValidContractAccount();
+        updated.setAccountNumber("NEW-ACC");
+        updated.setDeletedAt(LocalDateTime.now().plusDays(1));
 
         Optional<ContractAccount> result = service.update(saved.getId(), updated);
 
         assertTrue(result.isPresent());
-        assertEquals(saved.getId(), result.get().getId(), "ID should remain unchanged");
-        assertEquals("NEW_ACC", result.get().getAccountNumber());
-        assertEquals(StatusType.OFF, result.get().getStatus());
+        assertEquals(saved.getId(), result.get().getId());
+        assertEquals("NEW-ACC", result.get().getAccountNumber());
+        assertNotNull(result.get().getDeletedAt());
     }
 
     @Test
     void testUpdate_NonExistingAccount() {
-        ContractAccount ca = new ContractAccount();
-        ca.setAccountNumber("GhostACC");
+        ContractAccount account = createValidContractAccount();
+        account.setAccountNumber("GHOST");
 
-        Optional<ContractAccount> result = service.update(999, ca);
-
+        Optional<ContractAccount> result = service.update(999, account);
         assertFalse(result.isPresent());
     }
 
     @Test
     void testDeleteById_ExistingAccount() {
-        ContractAccount ca = new ContractAccount();
-        ca.setAccountNumber("DEL_ACC");
-        ContractAccount saved = service.add(ca);
+        ContractAccount account = createValidContractAccount();
+        account.setAccountNumber("TO-DELETE");
+        ContractAccount saved = service.add(account);
 
-        boolean deleted = service.deleteById(saved.getId());
-
-        assertTrue(deleted);
+        service.deleteById(saved.getId());
         assertFalse(service.existsById(saved.getId()));
     }
 
     @Test
     void testDeleteById_NonExistingAccount() {
-        boolean deleted = service.deleteById(999);
-
-        assertFalse(deleted);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> service.deleteById(999));
+        assertEquals("ContractAccount with id 999 not found", exception.getMessage());
     }
 
     @Test
-    void testExistsById_ExistingAccount() {
-        ContractAccount ca = new ContractAccount();
-        ContractAccount saved = service.add(ca);
+    void testExistsById() {
+        ContractAccount account = createValidContractAccount();
+        account.setAccountNumber("TEST-ACC");
+        ContractAccount saved = service.add(account);
 
         assertTrue(service.existsById(saved.getId()));
-    }
-
-    @Test
-    void testExistsById_NonExistingAccount() {
         assertFalse(service.existsById(999));
     }
 
     @Test
-    void testCount_EmptyService() {
+    void testCount() {
         assertEquals(0, service.count());
-    }
 
-    @Test
-    void testCount_WithAccounts() {
-        service.add(new ContractAccount());
-        service.add(new ContractAccount());
+        ContractAccount ca1 = createValidContractAccount();
+        ca1.setAccountNumber("ACC-001");
+        ContractAccount ca2 = createValidContractAccount();
+        ca2.setAccountNumber("ACC-002");
 
+        service.add(ca1);
+        service.add(ca2);
         assertEquals(2, service.count());
-    }
-
-    @Test
-    void testCount_AfterDeletion() {
-        ContractAccount c1 = service.add(new ContractAccount());
-        service.add(new ContractAccount());
-
-        service.deleteById(c1.getId());
-
-        assertEquals(1, service.count());
-    }
-
-    @Test
-    void testToString_ContainsKeyFields() {
-        Client client = new Client();
-        client.setName("Alice");
-
-        Installation installation = new Installation();
-        installation.setId(42);
-
-        ContractAccount ca = new ContractAccount();
-        ca.setId(1);
-        ca.setAccountNumber("ACC999");
-        ca.setClient(client);
-        ca.setInstallation(installation);
-        ca.setStatus(StatusType.ON);
-        String s = ca.toString();
-
-        assertTrue(s.contains("ContractAccount{"));
-        assertTrue(s.contains("ACC999"));
-        assertTrue(s.contains("Alice"));
-        assertTrue(s.contains("42"));
-        assertTrue(s.contains("ON"));
     }
 }

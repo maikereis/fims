@@ -48,13 +48,13 @@ class InstallationControllerTest {
         installation1 = new Installation();
         installation1.setId(1);
         installation1.setAddress(address1);
-        installation1.setCreateAt(LocalDateTime.now().minusDays(100));
+        installation1.setCreatedAt(LocalDateTime.now().minusDays(100));
         installation1.setDeletedAt(null);
 
         installation2 = new Installation();
         installation2.setId(2);
         installation2.setAddress(address2);
-        installation2.setCreateAt(LocalDateTime.now().minusDays(50));
+        installation2.setCreatedAt(LocalDateTime.now().minusDays(50));
         installation2.setDeletedAt(null);
     }
 
@@ -85,9 +85,8 @@ class InstallationControllerTest {
         ResponseEntity<List<Installation>> response = controller.getAllInstallations();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        var body = response.getBody();
-        assertNotNull(body);
-        assertEquals(2, body.size());
+        assertNotNull(response.getBody());
+        assertEquals(2, response.getBody().size());
         verify(service, times(1)).findAll();
     }
 
@@ -117,7 +116,7 @@ class InstallationControllerTest {
     void testUpdateInstallation_returnsUpdatedInstallationWhenFound() {
         Installation updated = new Installation();
         updated.setAddress(installation1.getAddress());
-        updated.setCreateAt(installation1.getCreateAt());
+        updated.setCreatedAt(installation1.getCreatedAt());
 
         when(service.update(1, updated)).thenReturn(Optional.of(updated));
 
@@ -142,7 +141,8 @@ class InstallationControllerTest {
     @Test
     void testDeleteInstallation_returnsNoContentWhenFound() {
         when(service.existsById(1)).thenReturn(true);
-        when(service.deleteById(1)).thenReturn(true);
+        // JPA-style delete: doNothing()
+        doNothing().when(service).deleteById(1);
 
         ResponseEntity<Void> response = controller.deleteInstallation(1);
 

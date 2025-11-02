@@ -52,9 +52,8 @@ public class ClientLoader implements ApplicationRunner {
                 clientService.add(client);
             }
 
-            Collection<Client> clients = clientService.findAll();
-            clients.forEach(System.out::println);
-
+            // Collection<Client> clients = clientService.findAll();
+            // clients.forEach(System.out::println);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -65,16 +65,14 @@ public class InstallationLoader implements ApplicationRunner {
                 // --- Build Installation ---
                 Installation installation = new Installation();
                 installation.setAddress(address);
-                installation.setCreateAt(parseDate(fields[13]));
+                installation.setCreatedAt(parseDate(fields[13]));
                 installation.setDeletedAt(parseDate(fields[14]));
 
                 installationService.add(installation);
             }
 
-            // Print loaded installations
-            Collection<Installation> installations = installationService.findAll();
-            installations.forEach(System.out::println);
-
+            // Collection<Installation> installations = installationService.findAll();
+            // installations.forEach(System.out::println);
         } catch (IOException e) {
             e.printStackTrace();
         }

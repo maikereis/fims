@@ -54,8 +54,8 @@ public class AddressLoader implements ApplicationRunner {
                 addressService.add(address);
             }
 
-            Collection<Address> addresses = addressService.findAll();
-            addresses.forEach(System.out::println);
+            //Collection<Address> addresses = addressService.findAll();
+            //addresses.forEach(System.out::println);
         } catch (IOException e) {
             // Tratar exceções de I/O
             e.printStackTrace();

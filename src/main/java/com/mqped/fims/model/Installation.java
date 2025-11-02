@@ -1,13 +1,35 @@
 package com.mqped.fims.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "installations")
 public class Installation {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "address_id")
     private Address address;
     private LocalDateTime createdAt;
     private LocalDateTime deletedAt;
+
+    // Backward reference to ContractAccounts
+    @OneToMany(mappedBy = "installation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ContractAccount> contractAccounts;
 
     public Integer getId() {
         return id;
@@ -25,11 +47,11 @@ public class Installation {
         this.address = address;
     }
 
-    public LocalDateTime getCreateAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreateAt(LocalDateTime createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -39,6 +61,14 @@ public class Installation {
 
     public void setDeletedAt(LocalDateTime deletedAt) {
         this.deletedAt = deletedAt;
+    }
+
+    public List<ContractAccount> getContractAccounts() {
+        return contractAccounts;
+    }
+
+    public void setContractAccounts(List<ContractAccount> contractAccounts) {
+        this.contractAccounts = contractAccounts;
     }
 
     @Override

@@ -1,61 +1,90 @@
 package com.mqped.fims.service;
 
 import com.mqped.fims.model.Client;
-import com.mqped.fims.repository.CrudRepository;
+import com.mqped.fims.repository.ClientRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class ClientService implements CrudRepository<Client, Integer> {
+public class ClientService implements CrudService<Client, Integer> {
 
-    private final Map<Integer, Client> hashMap = new ConcurrentHashMap<>();
-    private final AtomicInteger nextId = new AtomicInteger(1);
+    private final ClientRepository repository;
+
+    public ClientService(ClientRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
     public Client add(Client client) {
-        client.setId(nextId.getAndIncrement());
-        hashMap.put(client.getId(), client);
-        return client;
+        validate(client);
+        return repository.save(client);
     }
 
     @Override
     public List<Client> findAll() {
-        return new ArrayList<>(hashMap.values());
+        return repository.findAll();
     }
 
     @Override
     public Optional<Client> findById(Integer id) {
-        return Optional.ofNullable(hashMap.get(id));
+        return repository.findById(id);
     }
 
     @Override
     public Optional<Client> update(Integer id, Client client) {
-        if (!hashMap.containsKey(id)) {
-            return Optional.empty();
-        }
-        client.setId(id); // ensure ID consistency
-        hashMap.put(id, client);
-        return Optional.of(client);
+        validate(client);
+
+        return repository.findById(id).map(existing -> {
+            existing.setName(client.getName());
+            existing.setCpf(client.getCpf());
+            existing.setBirthDate(client.getBirthDate());
+            existing.setMotherName(client.getMotherName());
+            existing.setCnpj(client.getCnpj());
+            existing.setGenre(client.getGenre());
+            existing.setCreatedAt(client.getCreatedAt()); // optional, depends if you want to allow updating creation
+                                                          // timestamp
+
+            return repository.save(existing);
+        });
     }
 
     @Override
-    public boolean deleteById(Integer id) {
-        return hashMap.remove(id) != null;
+    public void deleteById(Integer id) {
+        if (!repository.existsById(id)) {
+            throw new IllegalArgumentException("Client with id " + id + " not found");
+        }
+        repository.deleteById(id);
     }
 
     @Override
     public boolean existsById(Integer id) {
-        return hashMap.containsKey(id);
+        return repository.existsById(id);
     }
 
     @Override
     public long count() {
-        return hashMap.size();
+        return repository.count();
+    }
+
+    private void validate(Client client) {
+        if (client == null) {
+            throw new IllegalArgumentException("Client cannot be null");
+        }
+        if (client.getName() == null || client.getName().isBlank()) {
+            throw new IllegalArgumentException("Client name is required");
+        }
+
+        String cpf = client.getCpf();
+        if (cpf != null && !cpf.isBlank() && !isValidCpf(cpf)) {
+            throw new IllegalArgumentException("Invalid CPF format. Expected XXX.XXX.XXX-XX");
+        }
+    }
+
+    private boolean isValidCpf(String cpf) {
+        if (cpf == null)
+            return false;
+        return cpf.matches("\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}");
     }
 }

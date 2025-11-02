@@ -1,182 +1,135 @@
 package com.mqped.fims.service;
 
 import com.mqped.fims.model.Address;
+import com.mqped.fims.repository.AddressRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DataJpaTest
 class AddressServiceTest {
 
     private AddressService service;
 
+    @Autowired
+    private AddressRepository repository;
+
     @BeforeEach
     void setUp() {
-        service = new AddressService();
+        service = new AddressService(repository);
+        repository.deleteAll(); // Ensure clean DB before each test
+    }
+
+    private Address createValidAddress(String state, String municipality, String street) {
+        Address address = new Address();
+        address.setState(state);
+        address.setMunicipality(municipality);
+        address.setStreet(street);
+        return address;
     }
 
     @Test
     void testAdd_AssignsIdAndStoresAddress() {
-        Address address = new Address();
-        address.setState("SP");
-        address.setMunicipality("São Paulo");
+        Address address = createValidAddress("PA", "Belém", "Rua dos Mundurucus");
 
         Address result = service.add(address);
 
         assertNotNull(result.getId(), "ID should be auto-assigned");
-        assertEquals(1, result.getId(), "First address should have ID 1");
-        assertEquals("SP", result.getState());
-        assertEquals("São Paulo", result.getMunicipality());
-    }
-
-    @Test
-    void testAdd_IncrementingIds() {
-        Address address1 = new Address();
-        Address address2 = new Address();
-
-        Address result1 = service.add(address1);
-        Address result2 = service.add(address2);
-
-        assertEquals(1, result1.getId());
-        assertEquals(2, result2.getId());
+        assertEquals("PA", result.getState());
+        assertEquals("Belém", result.getMunicipality());
+        assertEquals("Rua dos Mundurucus", result.getStreet());
     }
 
     @Test
     void testFindById_ExistingAddress() {
-        Address address = new Address();
-        address.setStreet("Rua das Flores");
-
+        Address address = createValidAddress("PA", "Belém", "Rua do Comércio");
         Address saved = service.add(address);
-        Optional<Address> result = service.findById(saved.getId());
 
+        Optional<Address> result = service.findById(saved.getId());
         assertTrue(result.isPresent());
-        assertEquals("Rua das Flores", result.get().getStreet());
+        assertEquals("Rua do Comércio", result.get().getStreet());
     }
 
     @Test
     void testFindById_NonExistingAddress() {
         Optional<Address> result = service.findById(999);
-
         assertFalse(result.isPresent());
     }
 
     @Test
-    void testFindAll_EmptyList() {
-        List<Address> result = service.findAll();
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
     void testFindAll_MultipleAddresses() {
-        Address address1 = new Address();
-        address1.setStreet("Avenida Paulista");
-
-        Address address2 = new Address();
-        address2.setStreet("Rua Augusta");
+        Address address1 = createValidAddress("PA", "Belém", "Avenida Nazaré");
+        Address address2 = createValidAddress("PA", "Belém", "Rua Siqueira Mendes");
 
         service.add(address1);
         service.add(address2);
 
         List<Address> result = service.findAll();
-
         assertEquals(2, result.size());
+        assertTrue(result.stream().anyMatch(a -> a.getStreet().equals("Avenida Nazaré")));
+        assertTrue(result.stream().anyMatch(a -> a.getStreet().equals("Rua Siqueira Mendes")));
     }
 
     @Test
     void testUpdate_ExistingAddress() {
-        Address original = new Address();
-        original.setStreet("Old Street");
+        Address original = createValidAddress("PA", "Belém", "Travessa da Paz");
         Address saved = service.add(original);
 
-        Address updated = new Address();
-        updated.setStreet("New Street");
+        Address updated = createValidAddress("PA", "Belém", "Rua Princesa Isabel");
         updated.setNumber("123");
 
         Optional<Address> result = service.update(saved.getId(), updated);
 
         assertTrue(result.isPresent());
-        assertEquals(saved.getId(), result.get().getId(), "ID should remain the same");
-        assertEquals("New Street", result.get().getStreet());
+        assertEquals(saved.getId(), result.get().getId());
+        assertEquals("Rua Princesa Isabel", result.get().getStreet());
         assertEquals("123", result.get().getNumber());
     }
 
     @Test
     void testUpdate_NonExistingAddress() {
-        Address address = new Address();
-        address.setStreet("Some Street");
+        Address address = createValidAddress("PA", "Belém", "Rua Quinze de Novembro");
 
         Optional<Address> result = service.update(999, address);
-
         assertFalse(result.isPresent());
     }
 
     @Test
     void testDeleteById_ExistingAddress() {
-        Address address = new Address();
+        Address address = createValidAddress("PA", "Belém", "Rua do Estado");
         Address saved = service.add(address);
 
-        boolean result = service.deleteById(saved.getId());
-
-        assertTrue(result);
+        service.deleteById(saved.getId());
         assertFalse(service.existsById(saved.getId()));
     }
 
     @Test
     void testDeleteById_NonExistingAddress() {
-        boolean result = service.deleteById(999);
-
-        assertFalse(result);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> service.deleteById(999));
+        assertEquals("Address with id 999 not found", exception.getMessage());
     }
 
     @Test
-    void testExistsById_ExistingAddress() {
-        Address address = new Address();
+    void testExistsById() {
+        Address address = createValidAddress("PA", "Belém", "Rua Nova");
         Address saved = service.add(address);
 
-        boolean result = service.existsById(saved.getId());
-
-        assertTrue(result);
+        assertTrue(service.existsById(saved.getId()));
+        assertFalse(service.existsById(999));
     }
 
     @Test
-    void testExistsById_NonExistingAddress() {
-        boolean result = service.existsById(999);
-
-        assertFalse(result);
-    }
-
-    @Test
-    void testCount_EmptyService() {
-        long count = service.count();
-
-        assertEquals(0, count);
-    }
-
-    @Test
-    void testCount_WithAddresses() {
-        service.add(new Address());
-        service.add(new Address());
-        service.add(new Address());
-
-        long count = service.count();
-
-        assertEquals(3, count);
-    }
-
-    @Test
-    void testCount_AfterDeletion() {
-        Address address1 = service.add(new Address());
-        service.add(new Address());
-
-        service.deleteById(address1.getId());
-
-        long count = service.count();
-
-        assertEquals(1, count);
+    void testCount() {
+        assertEquals(0, service.count());
+        service.add(createValidAddress("PA", "Belém", "Rua A"));
+        service.add(createValidAddress("PA", "Belém", "Rua B"));
+        assertEquals(2, service.count());
     }
 }

@@ -1,60 +1,78 @@
 package com.mqped.fims.service;
 
 import com.mqped.fims.model.Installation;
-import com.mqped.fims.repository.CrudRepository;
+import com.mqped.fims.repository.InstallationRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class InstallationService implements CrudRepository<Installation, Integer> {
-    private final Map<Integer, Installation> hashMap = new ConcurrentHashMap<>();
-    private final AtomicInteger nextId = new AtomicInteger(1);
+public class InstallationService implements CrudService<Installation, Integer> {
+
+    private final InstallationRepository repository;
+
+    public InstallationService(InstallationRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
     public Installation add(Installation installation) {
-        installation.setId(nextId.getAndIncrement());
-        hashMap.put(installation.getId(), installation);
-        return installation;
+        validate(installation);
+        return repository.save(installation);
     }
 
     @Override
     public List<Installation> findAll() {
-        return new ArrayList<>(hashMap.values());
+        return repository.findAll();
     }
 
     @Override
     public Optional<Installation> findById(Integer id) {
-        return Optional.ofNullable(hashMap.get(id));
+        return repository.findById(id);
     }
 
     @Override
     public Optional<Installation> update(Integer id, Installation installation) {
-        if (!hashMap.containsKey(id)) {
-            return Optional.empty();
-        }
-        installation.setId(id); // ensure ID consistency
-        hashMap.put(id, installation);
-        return Optional.of(installation);
+        validate(installation);
+
+        return repository.findById(id).map(existing -> {
+            existing.setAddress(installation.getAddress());
+            existing.setCreatedAt(installation.getCreatedAt());
+            existing.setDeletedAt(installation.getDeletedAt());
+            // Add more fields if your Installation model expands
+
+            return repository.save(existing);
+        });
     }
 
     @Override
-    public boolean deleteById(Integer id) {
-        return hashMap.remove(id) != null;
+    public void deleteById(Integer id) {
+        if (!repository.existsById(id)) {
+            throw new IllegalArgumentException("Installation with id " + id + " not found");
+        }
+        repository.deleteById(id);
     }
 
     @Override
     public boolean existsById(Integer id) {
-        return hashMap.containsKey(id);
+        return repository.existsById(id);
     }
 
     @Override
     public long count() {
-        return hashMap.size();
+        return repository.count();
+    }
+
+    private void validate(Installation installation) {
+        if (installation == null) {
+            throw new IllegalArgumentException("Installation cannot be null");
+        }
+        if (installation.getAddress() == null) {
+            throw new IllegalArgumentException("Installation must have an address");
+        }
+        if (installation.getCreatedAt() == null) {
+            throw new IllegalArgumentException("Installation creation date is required");
+        }
     }
 }

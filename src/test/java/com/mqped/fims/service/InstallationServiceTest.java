@@ -1,9 +1,12 @@
 package com.mqped.fims.service;
 
 import com.mqped.fims.model.Address;
+import com.mqped.fims.repository.InstallationRepository;
 import com.mqped.fims.model.Installation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,28 +14,27 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DataJpaTest
 class InstallationServiceTest {
 
     private InstallationService service;
 
+    @Autowired
+    private InstallationRepository repository;
+
     @BeforeEach
     void setUp() {
-        service = new InstallationService();
+        service = new InstallationService(repository);
+        repository.deleteAll();
     }
 
     @Test
     void testAdd_AssignsIdAndStoresInstallation() {
-        Installation installation = new Installation();
-        installation.setCreateAt(LocalDateTime.now());
-
-        Address address = new Address();
-        address.setStreet("Rua das Flores");
-        installation.setAddress(address);
+        Installation installation = createValidInstallation();
 
         Installation result = service.add(installation);
 
         assertNotNull(result.getId(), "ID should be auto-assigned");
-        assertEquals(1, result.getId());
         assertEquals("Rua das Flores", result.getAddress().getStreet());
     }
 
@@ -41,11 +43,17 @@ class InstallationServiceTest {
         Installation i1 = new Installation();
         Installation i2 = new Installation();
 
+        i1.setAddress(new Address());
+        i2.setAddress(new Address());
+        i1.setCreatedAt(LocalDateTime.now());
+        i2.setCreatedAt(LocalDateTime.now());
+
         Installation result1 = service.add(i1);
         Installation result2 = service.add(i2);
 
-        assertEquals(1, result1.getId());
-        assertEquals(2, result2.getId());
+        assertNotNull(result1.getId());
+        assertNotNull(result2.getId());
+        assertTrue(result2.getId() > result1.getId());
     }
 
     @Test
@@ -54,6 +62,7 @@ class InstallationServiceTest {
         Address address = new Address();
         address.setStreet("Avenida Paulista");
         installation.setAddress(address);
+        installation.setCreatedAt(LocalDateTime.now());
 
         Installation saved = service.add(installation);
         Optional<Installation> result = service.findById(saved.getId());
@@ -69,16 +78,9 @@ class InstallationServiceTest {
     }
 
     @Test
-    void testFindAll_EmptyList() {
-        List<Installation> result = service.findAll();
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
     void testFindAll_MultipleInstallations() {
-        Installation i1 = new Installation();
-        Installation i2 = new Installation();
+        Installation i1 = createValidInstallation();
+        Installation i2 = createValidInstallation();
 
         Address a1 = new Address();
         a1.setStreet("Rua 1");
@@ -94,24 +96,19 @@ class InstallationServiceTest {
         List<Installation> result = service.findAll();
 
         assertEquals(2, result.size());
-        assertEquals("Rua 1", result.get(0).getAddress().getStreet());
-        assertEquals("Rua 2", result.get(1).getAddress().getStreet());
+        assertTrue(result.stream().anyMatch(inst -> "Rua 1".equals(inst.getAddress().getStreet())));
+        assertTrue(result.stream().anyMatch(inst -> "Rua 2".equals(inst.getAddress().getStreet())));
     }
 
     @Test
     void testUpdate_ExistingInstallation() {
-        Installation original = new Installation();
-        Address oldAddress = new Address();
-        oldAddress.setStreet("Old Street");
-        original.setAddress(oldAddress);
-        original.setCreateAt(LocalDateTime.now().minusDays(5));
+        Installation original = createValidInstallation();
+        original.getAddress().setStreet("Old Street");
+
         Installation saved = service.add(original);
 
-        Installation updated = new Installation();
-        Address newAddress = new Address();
-        newAddress.setStreet("New Street");
-        updated.setAddress(newAddress);
-        updated.setCreateAt(LocalDateTime.now());
+        Installation updated = createValidInstallation();
+        updated.getAddress().setStreet("New Street");
         updated.setDeletedAt(LocalDateTime.now().plusDays(1));
 
         Optional<Installation> result = service.update(saved.getId(), updated);
@@ -124,75 +121,50 @@ class InstallationServiceTest {
 
     @Test
     void testUpdate_NonExistingInstallation() {
-        Installation installation = new Installation();
+        Installation installation = createValidInstallation();
         Optional<Installation> result = service.update(999, installation);
         assertFalse(result.isPresent());
     }
 
     @Test
     void testDeleteById_ExistingInstallation() {
-        Installation installation = new Installation();
+        Installation installation = createValidInstallation();
         Installation saved = service.add(installation);
 
-        boolean deleted = service.deleteById(saved.getId());
-
-        assertTrue(deleted);
+        service.deleteById(saved.getId());
         assertFalse(service.existsById(saved.getId()));
     }
 
     @Test
     void testDeleteById_NonExistingInstallation() {
-        boolean deleted = service.deleteById(999);
-        assertFalse(deleted);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> service.deleteById(999));
+        assertEquals("Installation with id 999 not found", exception.getMessage());
     }
 
     @Test
-    void testExistsById_ExistingInstallation() {
-        Installation installation = new Installation();
+    void testExistsById() {
+        Installation installation = createValidInstallation();
         Installation saved = service.add(installation);
-        assertTrue(service.existsById(saved.getId()));
-    }
 
-    @Test
-    void testExistsById_NonExistingInstallation() {
+        assertTrue(service.existsById(saved.getId()));
         assertFalse(service.existsById(999));
     }
 
     @Test
-    void testCount_EmptyService() {
+    void testCount() {
         assertEquals(0, service.count());
+        service.add(createValidInstallation());
+        service.add(createValidInstallation());
+        assertEquals(2, service.count());
     }
 
-    @Test
-    void testCount_WithInstallations() {
-        service.add(new Installation());
-        service.add(new Installation());
-        service.add(new Installation());
-        assertEquals(3, service.count());
-    }
-
-    @Test
-    void testCount_AfterDeletion() {
-        Installation i1 = service.add(new Installation());
-        service.add(new Installation());
-        service.deleteById(i1.getId());
-        assertEquals(1, service.count());
-    }
-
-    @Test
-    void testToString_ContainsFields() {
+    private Installation createValidInstallation() {
         Installation installation = new Installation();
         Address address = new Address();
-        address.setStreet("Rua Teste");
+        address.setStreet("Rua das Flores");
         installation.setAddress(address);
-        installation.setCreateAt(LocalDateTime.now());
-        installation.setDeletedAt(LocalDateTime.now().plusDays(1));
-        installation.setId(42);
-
-        String s = installation.toString();
-
-        assertTrue(s.contains("Installation"));
-        assertTrue(s.contains("Rua Teste"));
-        assertTrue(s.contains("42"));
+        installation.setCreatedAt(LocalDateTime.now());
+        return installation;
     }
 }

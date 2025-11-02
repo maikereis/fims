@@ -1,70 +1,89 @@
 package com.mqped.fims.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import com.mqped.fims.model.ContractAccount;
+import com.mqped.fims.repository.ContractAccountRepository;
 import org.springframework.stereotype.Service;
 
-import com.mqped.fims.model.ContractAccount;
-import com.mqped.fims.repository.CrudRepository;
+import java.util.List;
+import java.util.Optional;
 
 @Service
-public class ContractAccountService implements CrudRepository<ContractAccount, Integer> {
-    private final Map<Integer, ContractAccount> hashMap = new ConcurrentHashMap<>();
-    private final AtomicInteger nextId = new AtomicInteger(1);
+public class ContractAccountService implements CrudService<ContractAccount, Integer> {
+
+    private final ContractAccountRepository repository;
+
+    public ContractAccountService(ContractAccountRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
     public ContractAccount add(ContractAccount contractAccount) {
-        contractAccount.setId(nextId.getAndIncrement());
-        hashMap.put(contractAccount.getId(), contractAccount);
-        return contractAccount;
+        validate(contractAccount);
+        return repository.save(contractAccount);
     }
 
     @Override
     public List<ContractAccount> findAll() {
-        return new ArrayList<>(hashMap.values());
+        return repository.findAll();
     }
 
     @Override
     public Optional<ContractAccount> findById(Integer id) {
-        return Optional.ofNullable(hashMap.get(id));
+        return repository.findById(id);
     }
 
     @Override
     public Optional<ContractAccount> update(Integer id, ContractAccount contractAccount) {
-        if (!hashMap.containsKey(id)) {
-            return Optional.empty();
-        }
-        contractAccount.setId(id);
-        hashMap.put(id, contractAccount);
-        return Optional.of(contractAccount);
+        validate(contractAccount);
+
+        return repository.findById(id).map(existing -> {
+            existing.setAccountNumber(contractAccount.getAccountNumber());
+            existing.setClient(contractAccount.getClient());
+            existing.setInstallation(contractAccount.getInstallation());
+            existing.setCreatedAt(contractAccount.getCreatedAt());
+            existing.setDeletedAt(contractAccount.getDeletedAt());
+            existing.setStatus(contractAccount.getStatus());
+            existing.setStatusStart(contractAccount.getStatusStart());
+            existing.setStatusEnd(contractAccount.getStatusEnd());
+
+            return repository.save(existing);
+        });
     }
 
     @Override
-    public boolean deleteById(Integer id) {
-        return hashMap.remove(id) != null;
+    public void deleteById(Integer id) {
+        if (!repository.existsById(id)) {
+            throw new IllegalArgumentException("ContractAccount with id " + id + " not found");
+        }
+        repository.deleteById(id);
     }
 
     @Override
     public boolean existsById(Integer id) {
-        return hashMap.containsKey(id);
+        return repository.existsById(id);
     }
 
     @Override
     public long count() {
-        return hashMap.size();
+        return repository.count();
     }
 
-    public Map<Integer, ContractAccount> getHashMap() {
-        return hashMap;
+    private void validate(ContractAccount contractAccount) {
+        if (contractAccount == null) {
+            throw new IllegalArgumentException("ContractAccount cannot be null");
+        }
+        if (contractAccount.getAccountNumber() == null || contractAccount.getAccountNumber().isBlank()) {
+            throw new IllegalArgumentException("Account number is required");
+        }
+        if (contractAccount.getClient() == null) {
+            throw new IllegalArgumentException("Client is required");
+        }
+        if (contractAccount.getInstallation() == null) {
+            throw new IllegalArgumentException("Installation is required");
+        }
+        if (contractAccount.getCreatedAt() == null) {
+            throw new IllegalArgumentException("Creation date is required");
+        }
+        // Optional: add more rules for status, statusStart, statusEnd, etc.
     }
-
-    public AtomicInteger getNextId() {
-        return nextId;
-    }
-
 }

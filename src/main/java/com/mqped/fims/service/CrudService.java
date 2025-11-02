@@ -1,9 +1,9 @@
-package com.mqped.fims.repository;
+package com.mqped.fims.service;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface CrudRepository<T, ID> {
+public interface CrudService<T, ID> {
 
     T add(T entity);
 
@@ -13,7 +13,7 @@ public interface CrudRepository<T, ID> {
 
     Optional<T> update(ID id, T entity);
 
-    boolean deleteById(ID id);
+    void deleteById(ID id);
 
     boolean existsById(ID id);
 

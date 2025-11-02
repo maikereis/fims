@@ -23,12 +23,12 @@ class InstallationTest {
 
         installation.setId(123);
         installation.setAddress(address);
-        installation.setCreateAt(created);
+        installation.setCreatedAt(created);
         installation.setDeletedAt(deleted);
 
         assertEquals(123, installation.getId());
         assertEquals(address, installation.getAddress());
-        assertEquals(created, installation.getCreateAt());
+        assertEquals(created, installation.getCreatedAt());
         assertEquals(deleted, installation.getDeletedAt());
     }
 
@@ -39,7 +39,7 @@ class InstallationTest {
 
         assertNull(installation.getId());
         assertNull(installation.getAddress());
-        assertNull(installation.getCreateAt());
+        assertNull(installation.getCreatedAt());
         assertNull(installation.getDeletedAt());
     }
 
@@ -55,7 +55,7 @@ class InstallationTest {
 
         installation.setId(123);
         installation.setAddress(address);
-        installation.setCreateAt(LocalDateTime.of(2025, 10, 22, 18, 0));
+        installation.setCreatedAt(LocalDateTime.of(2025, 10, 22, 18, 0));
         installation.setDeletedAt(LocalDateTime.of(2025, 10, 23, 18, 0));
 
         String str = installation.toString();
@@ -93,11 +93,11 @@ class InstallationTest {
         LocalDateTime firstCreate = LocalDateTime.of(2025, 1, 1, 10, 0);
         LocalDateTime secondCreate = LocalDateTime.of(2025, 2, 1, 10, 0);
 
-        installation.setCreateAt(firstCreate);
-        assertEquals(firstCreate, installation.getCreateAt());
+        installation.setCreatedAt(firstCreate);
+        assertEquals(firstCreate, installation.getCreatedAt());
 
-        installation.setCreateAt(secondCreate);
-        assertEquals(secondCreate, installation.getCreateAt());
+        installation.setCreatedAt(secondCreate);
+        assertEquals(secondCreate, installation.getCreatedAt());
     }
 
     @Test

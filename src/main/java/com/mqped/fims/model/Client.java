@@ -1,8 +1,21 @@
 package com.mqped.fims.model;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.List;
 
+@Entity
+@Table(name = "clients")
 public class Client {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
     private String cpf;
@@ -11,6 +24,9 @@ public class Client {
     private String cnpj;
     private String genre;
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ContractAccount> contractAccounts;
 
     public Integer getId() {
         return id;
@@ -76,13 +92,21 @@ public class Client {
         this.createdAt = createdAt;
     }
 
+    public List<ContractAccount> getContractAccounts() {
+        return contractAccounts;
+    }
+
+    public void setContractAccounts(List<ContractAccount> contractAccounts) {
+        this.contractAccounts = contractAccounts;
+    }
+
     @Override
     public String toString() {
         return "Client{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", birthDate='" + birthDate + '\'' +
-                ", genre='" + genre +
+                ", birthDate=" + birthDate +
+                ", genre='" + genre + '\'' +
                 '}';
     }
 }

@@ -71,12 +71,11 @@ class ClientControllerTest {
         List<Client> clients = Arrays.asList(client1, client2);
         when(service.findAll()).thenReturn(clients);
 
-        ResponseEntity<List<Client>> response = controller.getAllAddresses();
+        ResponseEntity<List<Client>> response = controller.getAllClients(); // fixed method call
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        var body = response.getBody();
-        assertNotNull(body);
-        assertEquals(2, body.size());
+        assertNotNull(response.getBody());
+        assertEquals(2, response.getBody().size());
         verify(service, times(1)).findAll();
     }
 
@@ -104,8 +103,8 @@ class ClientControllerTest {
 
     @Test
     void testDeleteClient_returnsNoContentWhenFound() {
-        when(service.findById(1)).thenReturn(Optional.of(client1));
-        when(service.deleteById(1)).thenReturn(true);
+        when(service.findById(1)).thenReturn(Optional.of(client1)); // <-- mock findById
+        doNothing().when(service).deleteById(1);
 
         ResponseEntity<Void> response = controller.deleteClient(1);
 
@@ -115,11 +114,12 @@ class ClientControllerTest {
 
     @Test
     void testDeleteClient_returnsNotFoundWhenMissing() {
-        when(service.findById(1)).thenReturn(Optional.empty());
+        when(service.findById(3)).thenReturn(Optional.empty()); // <-- mock findById
 
-        ResponseEntity<Void> response = controller.deleteClient(1);
+        ResponseEntity<Void> response = controller.deleteClient(3);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(service, never()).deleteById(anyInt());
     }
+
 }
