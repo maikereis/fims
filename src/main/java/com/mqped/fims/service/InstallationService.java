@@ -64,6 +64,10 @@ public class InstallationService implements CrudService<Installation, Integer> {
         return repository.count();
     }
 
+    public Optional<Installation> findByAddressId(String addressId) {
+        return repository.findByAddress_AddressId(addressId);
+    }
+
     private void validate(Installation installation) {
         if (installation == null) {
             throw new IllegalArgumentException("Installation cannot be null");
