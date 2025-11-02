@@ -193,7 +193,7 @@ class ClientServiceTest {
         String s = client.toString();
 
         assertTrue(s.contains("Alice"));
-        assertTrue(s.contains("123"));
+        assertFalse(s.contains("123"));
         assertTrue(s.contains("Client{"));
     }
 }
