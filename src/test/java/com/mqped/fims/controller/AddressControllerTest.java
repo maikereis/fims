@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 class AddressControllerTest {
@@ -67,7 +68,9 @@ class AddressControllerTest {
         ResponseEntity<List<Address>> response = controller.getAllAddresses();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(2, response.getBody().size());
+        var body = response.getBody();
+        assertNotNull(body);
+        assertEquals(2, body.size());
         verify(service, times(1)).findAll();
     }
 
