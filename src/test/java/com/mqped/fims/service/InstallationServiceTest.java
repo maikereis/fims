@@ -1,8 +1,9 @@
 package com.mqped.fims.service;
 
 import com.mqped.fims.model.Address;
-import com.mqped.fims.repository.InstallationRepository;
 import com.mqped.fims.model.Installation;
+import com.mqped.fims.repository.AddressRepository;
+import com.mqped.fims.repository.InstallationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +23,14 @@ class InstallationServiceTest {
     @Autowired
     private InstallationRepository repository;
 
+    @Autowired
+    private AddressRepository addressRepository;
+
     @BeforeEach
     void setUp() {
         service = new InstallationService(repository);
         repository.deleteAll();
+        addressRepository.deleteAll();
     }
 
     @Test
@@ -40,13 +45,8 @@ class InstallationServiceTest {
 
     @Test
     void testAdd_IncrementingIds() {
-        Installation i1 = new Installation();
-        Installation i2 = new Installation();
-
-        i1.setAddress(new Address());
-        i2.setAddress(new Address());
-        i1.setCreatedAt(LocalDateTime.now());
-        i2.setCreatedAt(LocalDateTime.now());
+        Installation i1 = createValidInstallation();
+        Installation i2 = createValidInstallation();
 
         Installation result1 = service.add(i1);
         Installation result2 = service.add(i2);
@@ -58,11 +58,8 @@ class InstallationServiceTest {
 
     @Test
     void testFindById_ExistingInstallation() {
-        Installation installation = new Installation();
-        Address address = new Address();
-        address.setStreet("Avenida Paulista");
-        installation.setAddress(address);
-        installation.setCreatedAt(LocalDateTime.now());
+        Installation installation = createValidInstallation();
+        installation.getAddress().setStreet("Avenida Paulista");
 
         Installation saved = service.add(installation);
         Optional<Installation> result = service.findById(saved.getId());
@@ -80,15 +77,9 @@ class InstallationServiceTest {
     @Test
     void testFindAll_MultipleInstallations() {
         Installation i1 = createValidInstallation();
+        i1.getAddress().setStreet("Rua 1");
         Installation i2 = createValidInstallation();
-
-        Address a1 = new Address();
-        a1.setStreet("Rua 1");
-        Address a2 = new Address();
-        a2.setStreet("Rua 2");
-
-        i1.setAddress(a1);
-        i2.setAddress(a2);
+        i2.getAddress().setStreet("Rua 2");
 
         service.add(i1);
         service.add(i2);
@@ -160,9 +151,14 @@ class InstallationServiceTest {
     }
 
     private Installation createValidInstallation() {
-        Installation installation = new Installation();
         Address address = new Address();
+        address.setAddressId("ADDR-TEST-" + System.nanoTime());
+        address.setState("PA");
+        address.setMunicipality("Belém");
         address.setStreet("Rua das Flores");
+        address = addressRepository.save(address);
+
+        Installation installation = new Installation();
         installation.setAddress(address);
         installation.setCreatedAt(LocalDateTime.now());
         return installation;

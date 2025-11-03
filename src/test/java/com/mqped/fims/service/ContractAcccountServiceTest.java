@@ -4,7 +4,11 @@ import com.mqped.fims.model.Client;
 import com.mqped.fims.model.ContractAccount;
 import com.mqped.fims.model.Installation;
 import com.mqped.fims.model.Address;
+import com.mqped.fims.repository.ClientRepository;
 import com.mqped.fims.repository.ContractAccountRepository;
+import com.mqped.fims.repository.InstallationRepository;
+import com.mqped.fims.repository.AddressRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,35 +23,49 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 class ContractAccountServiceTest {
 
-    private ContractAccountService service;
+    @Autowired
+    private ContractAccountRepository contractAccountRepository;
 
     @Autowired
-    private ContractAccountRepository repository;
+    private ClientRepository clientRepository;
+
+    @Autowired
+    private InstallationRepository installationRepository;
+
+    @Autowired
+    private AddressRepository addressRepository;
+
+    private ContractAccountService service;
 
     @BeforeEach
     void setUp() {
-        service = new ContractAccountService(repository);
-        repository.deleteAll();
+        service = new ContractAccountService(contractAccountRepository);
+        contractAccountRepository.deleteAll();
+        installationRepository.deleteAll();
+        addressRepository.deleteAll();
+        clientRepository.deleteAll();
     }
 
     private ContractAccount createValidContractAccount() {
         ContractAccount account = new ContractAccount();
         account.setAccountNumber("DEFAULT-ACC");
 
-        // Client
         Client client = new Client();
         client.setName("Test Client");
+        client = clientRepository.save(client);
         account.setClient(client);
 
-        // Address with required fields
         Address address = new Address();
+        address.setAddressId("ADDR-001");
         address.setState("PA");
         address.setMunicipality("Belém");
         address.setStreet("Rua Teste");
-        
-        // Installation
+        address = addressRepository.save(address);
+
         Installation installation = new Installation();
         installation.setAddress(address);
+        installation.setCreatedAt(LocalDateTime.now());
+        installation = installationRepository.save(installation);
         account.setInstallation(installation);
 
         account.setCreatedAt(LocalDateTime.now());

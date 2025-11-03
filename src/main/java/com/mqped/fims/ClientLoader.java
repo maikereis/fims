@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Collection;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +18,7 @@ import com.mqped.fims.service.ClientService;
 import com.mqped.fims.util.StringNormalizer;
 
 @Component
+@Order(3)
 public class ClientLoader implements ApplicationRunner {
 
     @Value("${client.csv.path}")

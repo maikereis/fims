@@ -64,8 +64,12 @@ public class InstallationService implements CrudService<Installation, Integer> {
         return repository.count();
     }
 
-    public Optional<Installation> findByAddressId(String addressId) {
+    public List<Installation> findByAddressId(String addressId) {
         return repository.findByAddress_AddressId(addressId);
+    }
+
+    public List<Installation> findByAddressIdWithContracts(String addressId) {
+        return repository.findAllByAddressIdWithContracts(addressId);
     }
 
     private void validate(Installation installation) {

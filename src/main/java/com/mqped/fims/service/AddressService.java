@@ -69,7 +69,11 @@ public class AddressService implements CrudService<Address, Integer> {
     public long count() {
         return repository.count();
     }
-    
+
+    public Optional<Address> findByAddressId(String addressId) {
+        return repository.findByAddressId(addressId);
+    }
+
     public void validate(Address address) {
         if (address == null)
             throw new IllegalArgumentException("Address cannot be null");

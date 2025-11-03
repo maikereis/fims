@@ -21,7 +21,7 @@ public class Installation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = { CascadeType.MERGE })
     @JoinColumn(name = "address_id")
     private Address address;
     private LocalDateTime createdAt;
