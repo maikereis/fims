@@ -1,33 +1,41 @@
 package com.mqped.fims.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "addresses")
 public class Address {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
     private String addressId;
-
     private String state;
-
     private String municipality;
-
     private String district;
-
     private String subdistrict;
-
     private String neighborhood;
-
     private String street;
-
     private String streetType;
-
     private String number;
-
     private String complement;
-
     private String zipCode;
-
     private Double latitude;
-
     private Double longitude;
+
+    @OneToMany(mappedBy = "address", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("address-installation")
+    private List<Installation> installations = new ArrayList<>();
 
     public Integer getId() {
         return id;
@@ -139,6 +147,14 @@ public class Address {
 
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    public List<Installation> getInstallations() {
+        return installations;
+    }
+
+    public void setInstallations(List<Installation> installations) {
+        this.installations = installations;
     }
 
     @Override

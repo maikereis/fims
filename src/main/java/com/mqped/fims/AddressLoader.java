@@ -3,11 +3,11 @@ package com.mqped.fims;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Collection;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +15,7 @@ import com.mqped.fims.model.Address;
 import com.mqped.fims.service.AddressService;
 
 @Component
+@Order(1)
 public class AddressLoader implements ApplicationRunner {
 
     @Value("${address.csv.path}")
@@ -54,8 +55,8 @@ public class AddressLoader implements ApplicationRunner {
                 addressService.add(address);
             }
 
-            Collection<Address> addresses = addressService.findAll();
-            addresses.forEach(System.out::println);
+            //Collection<Address> addresses = addressService.findAll();
+            //addresses.forEach(System.out::println);
         } catch (IOException e) {
             // Tratar exceções de I/O
             e.printStackTrace();

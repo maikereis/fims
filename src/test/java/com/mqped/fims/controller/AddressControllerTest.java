@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 class AddressControllerTest {
@@ -67,6 +68,7 @@ class AddressControllerTest {
         ResponseEntity<List<Address>> response = controller.getAllAddresses();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals(2, response.getBody().size());
         verify(service, times(1)).findAll();
     }
@@ -94,7 +96,8 @@ class AddressControllerTest {
     @Test
     void testDeleteAddress_returnsNoContentWhenFound() {
         when(service.findById(1)).thenReturn(Optional.of(address1));
-        when(service.deleteById(1)).thenReturn(true);
+        // Simulate deleteById without returning boolean
+        doNothing().when(service).deleteById(1);
 
         ResponseEntity<Void> response = controller.deleteAddress(1);
 

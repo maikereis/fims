@@ -1,0 +1,24 @@
+### Visão Geral do Dataset
+Este repositório contém um gerador de dados sintéticos de instalações brasileiras, com registros realistas de endereços e timestamps de criação e exclusão. Os dados são destinados a testes de software, análise de dados e preenchimento de bancos de dados de desenvolvimento.
+
+### Informações do Dataset
+
+Nome: fake-installations.csv (gerado via script)
+
+Fonte: Repositório Fake Installations 
+
+URL: https://github.com/maikereis/fake-installations
+
+Autor: @maikereis
+
+Região: Brasil
+
+Subconjunto: Personalizável – usuários podem definir o número de registros e multiplicidade de instalações por endereço.
+
+Amostragem: Dados sintéticos gerados com distribuição probabilística:
+
+~85% dos endereços → 1 instalação
+
+~10% → 2–3 instalações
+
+~5% → 3–20 instalações (ex.: edifícios multiunidade)

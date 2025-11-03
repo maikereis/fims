@@ -1,60 +1,101 @@
 package com.mqped.fims.service;
 
+import com.mqped.fims.exceptions.InvalidDataException;
+import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.model.Address;
-import com.mqped.fims.repository.CrudRepository;
+import com.mqped.fims.model.Installation;
+import com.mqped.fims.repository.AddressRepository;
+
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class AddressService implements CrudRepository<Address, Integer> {
-    private final Map<Integer, Address> hashMap = new ConcurrentHashMap<>();
-    private final AtomicInteger nextId = new AtomicInteger(1);
+public class AddressService implements CrudService<Address, Integer> {
+
+    private final AddressRepository repository;
+
+    public AddressService(AddressRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
     public Address add(Address address) {
-        address.setId(nextId.getAndIncrement());
-        hashMap.put(address.getId(), address);
-        return address;
+        validate(address);
+
+        if (address.getInstallations() != null) {
+            for (Installation inst : address.getInstallations()) {
+                inst.setAddress(address);
+                inst.setId(null);
+            }
+        }
+
+        return repository.save(address);
     }
 
-    @Override
     public List<Address> findAll() {
-        return new ArrayList<>(hashMap.values());
+        return repository.findAll();
     }
 
-    @Override
     public Optional<Address> findById(Integer id) {
-        return Optional.ofNullable(hashMap.get(id));
+        return repository.findById(id);
     }
 
     @Override
     public Optional<Address> update(Integer id, Address address) {
-        if (!hashMap.containsKey(id)) {
-            return Optional.empty();
+        validate(address);
+
+        return repository.findById(id).map(existing -> {
+            existing.setAddressId(address.getAddressId());
+            existing.setState(address.getState());
+            existing.setMunicipality(address.getMunicipality());
+            existing.setDistrict(address.getDistrict());
+            existing.setSubdistrict(address.getSubdistrict());
+            existing.setNeighborhood(address.getNeighborhood());
+            existing.setStreet(address.getStreet());
+            existing.setStreetType(address.getStreetType());
+            existing.setNumber(address.getNumber());
+            existing.setComplement(address.getComplement());
+            existing.setZipCode(address.getZipCode());
+            existing.setLatitude(address.getLatitude());
+            existing.setLongitude(address.getLongitude());
+
+            return repository.save(existing);
+        });
+    }
+
+    @Override
+    public void deleteById(Integer id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Address with id " + id + " not found");
         }
-        address.setId(id); // ensure ID consistency
-        hashMap.put(id, address);
-        return Optional.of(address);
+        repository.deleteById(id);
     }
 
-    @Override
-    public boolean deleteById(Integer id) {
-        return hashMap.remove(id) != null;
-    }
-
-    @Override
     public boolean existsById(Integer id) {
-        return hashMap.containsKey(id);
+        return repository.existsById(id);
     }
 
-    @Override
     public long count() {
-        return hashMap.size();
+        return repository.count();
+    }
+
+    public Optional<Address> findByAddressId(String addressId) {
+        return repository.findByAddressId(addressId);
+    }
+
+    public void validate(Address address) {
+        if (address == null)
+            throw new InvalidDataException("Address cannot be null");
+        if (address.getState() == null || address.getState().isBlank()) {
+            throw new InvalidDataException("State is required");
+        }
+        if (address.getMunicipality() == null || address.getMunicipality().isBlank()) {
+            throw new InvalidDataException("Municipality is required");
+        }
+        if (address.getStreet() == null || address.getStreet().isBlank()) {
+            throw new InvalidDataException("Street is required");
+        }
     }
 }
