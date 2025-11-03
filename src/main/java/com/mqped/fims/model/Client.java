@@ -28,7 +28,7 @@ public class Client {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference("client-contractAccount")
     private List<ContractAccount> contractAccounts;
 
     public Integer getId() {

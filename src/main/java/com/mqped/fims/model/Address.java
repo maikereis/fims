@@ -1,5 +1,6 @@
 package com.mqped.fims.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -33,8 +34,8 @@ public class Address {
     private Double longitude;
 
     @OneToMany(mappedBy = "address", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<Installation> installations;
+    @JsonManagedReference("address-installation")
+    private List<Installation> installations = new ArrayList<>();
 
     public Integer getId() {
         return id;

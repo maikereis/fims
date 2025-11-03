@@ -27,12 +27,12 @@ public class ContractAccount {
 
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("client-contractAccount")
     private Client client;
 
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "installation_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("installation-contractAccount")
     private Installation installation;
     private LocalDateTime createdAt;
     private LocalDateTime deletedAt;

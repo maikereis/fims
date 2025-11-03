@@ -40,7 +40,12 @@ class ContractAccountServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ContractAccountService(contractAccountRepository);
+        service = new ContractAccountService(
+                contractAccountRepository,
+                clientRepository,
+                installationRepository);
+
+        // Clear all repositories to start fresh
         contractAccountRepository.deleteAll();
         installationRepository.deleteAll();
         addressRepository.deleteAll();

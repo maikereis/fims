@@ -3,7 +3,10 @@ package com.mqped.fims.service;
 import com.mqped.fims.exceptions.InvalidDataException;
 import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.model.ContractAccount;
+import com.mqped.fims.repository.ClientRepository;
 import com.mqped.fims.repository.ContractAccountRepository;
+import com.mqped.fims.repository.InstallationRepository;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,14 +16,25 @@ import java.util.Optional;
 public class ContractAccountService implements CrudService<ContractAccount, Integer> {
 
     private final ContractAccountRepository repository;
+    private final ClientRepository clientRepository;
+    private final InstallationRepository installationRepository;
 
-    public ContractAccountService(ContractAccountRepository repository) {
+    public ContractAccountService(ContractAccountRepository repository, ClientRepository clientRepository,
+            InstallationRepository installationRepository) {
         this.repository = repository;
+        this.clientRepository = clientRepository;
+        this.installationRepository = installationRepository;
     }
 
     @Override
     public ContractAccount add(ContractAccount contractAccount) {
-        validate(contractAccount);
+        if (contractAccount.getClient() == null || !clientRepository.existsById(contractAccount.getClient().getId())) {
+            throw new InvalidDataException("Client does not exist");
+        }
+        if (contractAccount.getInstallation() == null
+                || !installationRepository.existsById(contractAccount.getInstallation().getId())) {
+            throw new InvalidDataException("Installation does not exist");
+        }
         return repository.save(contractAccount);
     }
 

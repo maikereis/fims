@@ -3,6 +3,7 @@ package com.mqped.fims.service;
 import com.mqped.fims.exceptions.InvalidDataException;
 import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.model.Address;
+import com.mqped.fims.model.Installation;
 import com.mqped.fims.repository.AddressRepository;
 
 import org.springframework.stereotype.Service;
@@ -22,6 +23,14 @@ public class AddressService implements CrudService<Address, Integer> {
     @Override
     public Address add(Address address) {
         validate(address);
+
+        if (address.getInstallations() != null) {
+            for (Installation inst : address.getInstallations()) {
+                inst.setAddress(address);
+                inst.setId(null);
+            }
+        }
+
         return repository.save(address);
     }
 

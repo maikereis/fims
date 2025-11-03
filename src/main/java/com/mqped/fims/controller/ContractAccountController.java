@@ -38,16 +38,16 @@ public class ContractAccountController {
     public ResponseEntity<ContractAccount> getContractAccountById(@PathVariable Integer id) {
         Optional<ContractAccount> account = service.findById(id);
         return account.map(a -> new ResponseEntity<>(a, HttpStatus.OK))
-                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     // UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<ContractAccount> updateContractAccount(@PathVariable Integer id,
-                                                                 @RequestBody ContractAccount contractAccount) {
+            @RequestBody ContractAccount contractAccount) {
         Optional<ContractAccount> updated = service.update(id, contractAccount);
         return updated.map(a -> new ResponseEntity<>(a, HttpStatus.OK))
-                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     // DELETE

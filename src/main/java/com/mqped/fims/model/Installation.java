@@ -26,14 +26,14 @@ public class Installation {
 
     @ManyToOne(cascade = { CascadeType.MERGE })
     @JoinColumn(name = "address_id")
-    @JsonBackReference
+    @JsonBackReference("address-installation")
     private Address address;
     private LocalDateTime createdAt;
     private LocalDateTime deletedAt;
 
     // Backward reference to ContractAccounts
     @OneToMany(mappedBy = "installation", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference("installation-contractAccount")
     private List<ContractAccount> contractAccounts;
 
     public Integer getId() {
