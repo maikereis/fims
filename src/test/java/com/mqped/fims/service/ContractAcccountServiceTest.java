@@ -3,6 +3,7 @@ package com.mqped.fims.service;
 import com.mqped.fims.model.Client;
 import com.mqped.fims.model.ContractAccount;
 import com.mqped.fims.model.Installation;
+import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.model.Address;
 import com.mqped.fims.repository.ClientRepository;
 import com.mqped.fims.repository.ContractAccountRepository;
@@ -170,7 +171,7 @@ class ContractAccountServiceTest {
 
     @Test
     void testDeleteById_NonExistingAccount() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> service.deleteById(999));
         assertEquals("ContractAccount with id 999 not found", exception.getMessage());
     }

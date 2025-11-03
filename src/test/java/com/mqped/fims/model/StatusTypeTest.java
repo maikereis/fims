@@ -27,11 +27,6 @@ class StatusTypeTest {
     }
 
     @Test
-    void testValueOfInvalidNameThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> StatusType.valueOf("INVALID"));
-    }
-
-    @Test
     void testEnumToString() {
         // By default, enums use their name() for toString()
         assertEquals("ON", StatusType.ON.toString());

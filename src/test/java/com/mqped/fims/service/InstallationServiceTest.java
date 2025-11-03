@@ -1,5 +1,6 @@
 package com.mqped.fims.service;
 
+import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.model.Address;
 import com.mqped.fims.model.Installation;
 import com.mqped.fims.repository.AddressRepository;
@@ -128,7 +129,7 @@ class InstallationServiceTest {
 
     @Test
     void testDeleteById_NonExistingInstallation() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> service.deleteById(999));
         assertEquals("Installation with id 999 not found", exception.getMessage());
     }

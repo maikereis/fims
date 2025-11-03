@@ -1,5 +1,6 @@
 package com.mqped.fims.service;
 
+import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.model.Address;
 import com.mqped.fims.repository.AddressRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -111,7 +112,7 @@ class AddressServiceTest {
 
     @Test
     void testDeleteById_NonExistingAddress() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> service.deleteById(999));
         assertEquals("Address with id 999 not found", exception.getMessage());
     }

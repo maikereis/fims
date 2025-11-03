@@ -1,5 +1,7 @@
 package com.mqped.fims.service;
 
+import com.mqped.fims.exceptions.InvalidDataException;
+import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.model.Installation;
 import com.mqped.fims.repository.InstallationRepository;
 import org.springframework.stereotype.Service;
@@ -49,7 +51,7 @@ public class InstallationService implements CrudService<Installation, Integer> {
     @Override
     public void deleteById(Integer id) {
         if (!repository.existsById(id)) {
-            throw new IllegalArgumentException("Installation with id " + id + " not found");
+            throw new ResourceNotFoundException("Installation with id " + id + " not found");
         }
         repository.deleteById(id);
     }
@@ -74,13 +76,13 @@ public class InstallationService implements CrudService<Installation, Integer> {
 
     private void validate(Installation installation) {
         if (installation == null) {
-            throw new IllegalArgumentException("Installation cannot be null");
+            throw new InvalidDataException("Installation cannot be null");
         }
         if (installation.getAddress() == null) {
-            throw new IllegalArgumentException("Installation must have an address");
+            throw new InvalidDataException("Installation must have an address");
         }
         if (installation.getCreatedAt() == null) {
-            throw new IllegalArgumentException("Installation creation date is required");
+            throw new InvalidDataException("Installation creation date is required");
         }
     }
 }

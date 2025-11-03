@@ -1,5 +1,7 @@
 package com.mqped.fims.service;
 
+import com.mqped.fims.exceptions.InvalidDataException;
+import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.model.ContractAccount;
 import com.mqped.fims.repository.ContractAccountRepository;
 import org.springframework.stereotype.Service;
@@ -53,7 +55,7 @@ public class ContractAccountService implements CrudService<ContractAccount, Inte
     @Override
     public void deleteById(Integer id) {
         if (!repository.existsById(id)) {
-            throw new IllegalArgumentException("ContractAccount with id " + id + " not found");
+            throw new ResourceNotFoundException("ContractAccount with id " + id + " not found");
         }
         repository.deleteById(id);
     }
@@ -70,20 +72,19 @@ public class ContractAccountService implements CrudService<ContractAccount, Inte
 
     private void validate(ContractAccount contractAccount) {
         if (contractAccount == null) {
-            throw new IllegalArgumentException("ContractAccount cannot be null");
+            throw new InvalidDataException("ContractAccount cannot be null");
         }
         if (contractAccount.getAccountNumber() == null || contractAccount.getAccountNumber().isBlank()) {
-            throw new IllegalArgumentException("Account number is required");
+            throw new InvalidDataException("Account number is required");
         }
         if (contractAccount.getClient() == null) {
-            throw new IllegalArgumentException("Client is required");
+            throw new InvalidDataException("Client is required");
         }
         if (contractAccount.getInstallation() == null) {
-            throw new IllegalArgumentException("Installation is required");
+            throw new InvalidDataException("Installation is required");
         }
         if (contractAccount.getCreatedAt() == null) {
-            throw new IllegalArgumentException("Creation date is required");
+            throw new InvalidDataException("Creation date is required");
         }
-        // Optional: add more rules for status, statusStart, statusEnd, etc.
     }
 }

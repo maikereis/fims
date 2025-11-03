@@ -1,5 +1,6 @@
 package com.mqped.fims.service;
 
+import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.model.Client;
 import com.mqped.fims.repository.ClientRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -123,7 +124,7 @@ class ClientServiceTest {
 
     @Test
     void testDeleteById_NonExistingClient() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> service.deleteById(999));
         assertEquals("Client with id 999 not found", exception.getMessage());
     }
@@ -141,12 +142,12 @@ class ClientServiceTest {
     @Test
     void testCount() {
         assertEquals(0, service.count());
-        
+
         Client c1 = new Client();
         c1.setName("Rafael Lima");
         Client c2 = new Client();
         c2.setName("Fernanda Rocha");
-        
+
         service.add(c1);
         service.add(c2);
         assertEquals(2, service.count());

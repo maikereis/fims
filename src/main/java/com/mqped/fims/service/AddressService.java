@@ -1,5 +1,7 @@
 package com.mqped.fims.service;
 
+import com.mqped.fims.exceptions.InvalidDataException;
+import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.model.Address;
 import com.mqped.fims.repository.AddressRepository;
 
@@ -57,7 +59,7 @@ public class AddressService implements CrudService<Address, Integer> {
     @Override
     public void deleteById(Integer id) {
         if (!repository.existsById(id)) {
-            throw new IllegalArgumentException("Address with id " + id + " not found");
+            throw new ResourceNotFoundException("Address with id " + id + " not found");
         }
         repository.deleteById(id);
     }
@@ -76,15 +78,15 @@ public class AddressService implements CrudService<Address, Integer> {
 
     public void validate(Address address) {
         if (address == null)
-            throw new IllegalArgumentException("Address cannot be null");
+            throw new InvalidDataException("Address cannot be null");
         if (address.getState() == null || address.getState().isBlank()) {
-            throw new IllegalArgumentException("State is required");
+            throw new InvalidDataException("State is required");
         }
         if (address.getMunicipality() == null || address.getMunicipality().isBlank()) {
-            throw new IllegalArgumentException("Municipality is required");
+            throw new InvalidDataException("Municipality is required");
         }
         if (address.getStreet() == null || address.getStreet().isBlank()) {
-            throw new IllegalArgumentException("Street is required");
+            throw new InvalidDataException("Street is required");
         }
     }
 }

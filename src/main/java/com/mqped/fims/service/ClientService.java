@@ -1,5 +1,7 @@
 package com.mqped.fims.service;
 
+import com.mqped.fims.exceptions.InvalidDataException;
+import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.model.Client;
 import com.mqped.fims.repository.ClientRepository;
 import org.springframework.stereotype.Service;
@@ -53,7 +55,7 @@ public class ClientService implements CrudService<Client, Integer> {
     @Override
     public void deleteById(Integer id) {
         if (!repository.existsById(id)) {
-            throw new IllegalArgumentException("Client with id " + id + " not found");
+            throw new ResourceNotFoundException("Client with id " + id + " not found");
         }
         repository.deleteById(id);
     }
@@ -70,15 +72,15 @@ public class ClientService implements CrudService<Client, Integer> {
 
     private void validate(Client client) {
         if (client == null) {
-            throw new IllegalArgumentException("Client cannot be null");
+            throw new InvalidDataException("Client cannot be null");
         }
         if (client.getName() == null || client.getName().isBlank()) {
-            throw new IllegalArgumentException("Client name is required");
+            throw new InvalidDataException("Client name is required");
         }
 
         String cpf = client.getCpf();
         if (cpf != null && !cpf.isBlank() && !isValidCpf(cpf)) {
-            throw new IllegalArgumentException("Invalid CPF format. Expected XXX.XXX.XXX-XX");
+            throw new InvalidDataException("Invalid CPF format. Expected XXX.XXX.XXX-XX");
         }
     }
 
