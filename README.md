@@ -28,7 +28,6 @@ O FIMS resolve esse problema oferecendo um serviço de back-end minimalista, por
 
 * Obter uma visão estruturada e integrada das operações externas, facilitando a tomada de decisão e o planejamento estratégico.
 
-
 ## Features
 
 * CRUD APIs
@@ -37,6 +36,10 @@ O FIMS resolve esse problema oferecendo um serviço de back-end minimalista, por
 * Build com Maven (pom.xml)
 * Coleção Postman (postman.json) para testar os endpoints
 * Código modular, permitindo extensões como autenticação, dashboards e integração com ML
+
+## Documentação
+
+- [Endpoints da API](API.md) - Documentação completa de todos os endpoints
 
 ## Requisitos
 
