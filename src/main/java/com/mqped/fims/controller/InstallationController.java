@@ -1,5 +1,6 @@
 package com.mqped.fims.controller;
 
+import com.mqped.fims.model.dto.InstallationDTO;
 import com.mqped.fims.model.entity.Installation;
 import com.mqped.fims.service.InstallationService;
 import org.springframework.http.HttpStatus;
@@ -21,32 +22,44 @@ public class InstallationController {
 
     // CREATE
     @PostMapping
-    public ResponseEntity<Installation> createInstallation(@RequestBody Installation installation) {
+    public ResponseEntity<InstallationDTO> createInstallation(@RequestBody Installation installation) {
         Installation savedInstallation = service.add(installation);
-        return new ResponseEntity<>(savedInstallation, HttpStatus.CREATED);
+        return new ResponseEntity<>(InstallationDTO.fromEntity(savedInstallation), HttpStatus.CREATED);
     }
 
     // READ ALL
     @GetMapping
-    public ResponseEntity<List<Installation>> getAllInstallations() {
-        List<Installation> installations = service.findAll();
-        return new ResponseEntity<>(installations, HttpStatus.OK);
+    public ResponseEntity<List<InstallationDTO>> getAllInstallations() {
+        List<InstallationDTO> dtos = service.findAll().stream()
+                .map(InstallationDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    // READ ALL (WITHOUT ADDRESS DETAILS)
+    @GetMapping("/minimal")
+    public ResponseEntity<List<InstallationDTO>> getAllInstallationsMinimal() {
+        List<InstallationDTO> dtos = service.findAll().stream()
+                .map(InstallationDTO::fromEntityWithoutAddress)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // READ ONE
     @GetMapping("/{id}")
-    public ResponseEntity<Installation> getInstallationById(@PathVariable Integer id) {
+    public ResponseEntity<InstallationDTO> getInstallationById(@PathVariable Integer id) {
         Optional<Installation> installation = service.findById(id);
-        return installation.map(i -> new ResponseEntity<>(i, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return installation.map(i -> ResponseEntity.ok(InstallationDTO.fromEntity(i)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     // UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<Installation> updateInstallation(@PathVariable Integer id, @RequestBody Installation installation) {
+    public ResponseEntity<InstallationDTO> updateInstallation(@PathVariable Integer id, 
+                                                               @RequestBody Installation installation) {
         Optional<Installation> updated = service.update(id, installation);
-        return updated.map(i -> new ResponseEntity<>(i, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return updated.map(i -> ResponseEntity.ok(InstallationDTO.fromEntity(i)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     // DELETE
@@ -54,14 +67,14 @@ public class InstallationController {
     public ResponseEntity<Void> deleteInstallation(@PathVariable Integer id) {
         if (service.existsById(id)) {
             service.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return ResponseEntity.noContent().build();
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return ResponseEntity.notFound().build();
     }
 
     // CHECK
     @GetMapping("/check")
     public ResponseEntity<String> check() {
-        return new ResponseEntity<>("Installation API is up and running!", HttpStatus.OK);
+        return ResponseEntity.ok("Installation API is up and running!");
     }
 }

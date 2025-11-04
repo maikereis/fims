@@ -1,5 +1,6 @@
 package com.mqped.fims.controller;
 
+import com.mqped.fims.model.dto.InstallationDTO;
 import com.mqped.fims.model.entity.Address;
 import com.mqped.fims.model.entity.Installation;
 import com.mqped.fims.service.InstallationService;
@@ -30,17 +31,21 @@ class InstallationControllerTest {
 
     private Installation installation1;
     private Installation installation2;
+    private Address address1;
+    private Address address2;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        Address address1 = new Address();
+        address1 = new Address();
+        address1.setId(1);
         address1.setAddressId("5642728");
         address1.setState("Pará");
         address1.setMunicipality("Marituba");
 
-        Address address2 = new Address();
+        address2 = new Address();
+        address2.setId(2);
         address2.setAddressId("4559429");
         address2.setState("Pará");
         address2.setMunicipality("Belém");
@@ -67,37 +72,60 @@ class InstallationControllerTest {
     }
 
     @Test
-    void testCreateInstallation_returnsCreatedInstallation() {
+    void testCreateInstallation_returnsCreatedInstallationDTO() {
         when(service.add(installation1)).thenReturn(installation1);
 
-        ResponseEntity<Installation> response = controller.createInstallation(installation1);
+        ResponseEntity<InstallationDTO> response = controller.createInstallation(installation1);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(installation1, response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(installation1.getId(), response.getBody().getId());
+        assertNotNull(response.getBody().getAddress());
+        assertEquals("Marituba", response.getBody().getAddress().getMunicipality());
         verify(service, times(1)).add(installation1);
     }
 
     @Test
-    void testGetAllInstallations_returnsAllInstallations() {
+    void testGetAllInstallations_returnsAllInstallationDTOs() {
         List<Installation> installations = Arrays.asList(installation1, installation2);
         when(service.findAll()).thenReturn(installations);
 
-        ResponseEntity<List<Installation>> response = controller.getAllInstallations();
+        ResponseEntity<List<InstallationDTO>> response = controller.getAllInstallations();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(2, response.getBody().size());
+        assertEquals("Marituba", response.getBody().get(0).getAddress().getMunicipality());
+        assertEquals("Belém", response.getBody().get(1).getAddress().getMunicipality());
         verify(service, times(1)).findAll();
     }
 
     @Test
-    void testGetInstallationById_returnsInstallationWhenFound() {
-        when(service.findById(1)).thenReturn(Optional.of(installation1));
+    void testGetAllInstallationsMinimal_returnsMinimalDTOs() {
+        List<Installation> installations = Arrays.asList(installation1, installation2);
+        when(service.findAll()).thenReturn(installations);
 
-        ResponseEntity<Installation> response = controller.getInstallationById(1);
+        ResponseEntity<List<InstallationDTO>> response = controller.getAllInstallationsMinimal();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(installation1, response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(2, response.getBody().size());
+        // Minimal version should have addressId but not full address object
+        assertEquals(1, response.getBody().get(0).getAddressId());
+        assertNull(response.getBody().get(0).getAddress());
+        verify(service, times(1)).findAll();
+    }
+
+    @Test
+    void testGetInstallationById_returnsInstallationDTOWhenFound() {
+        when(service.findById(1)).thenReturn(Optional.of(installation1));
+
+        ResponseEntity<InstallationDTO> response = controller.getInstallationById(1);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(installation1.getId(), response.getBody().getId());
+        assertNotNull(response.getBody().getAddress());
         verify(service, times(1)).findById(1);
     }
 
@@ -105,7 +133,7 @@ class InstallationControllerTest {
     void testGetInstallationById_returnsNotFoundWhenMissing() {
         when(service.findById(3)).thenReturn(Optional.empty());
 
-        ResponseEntity<Installation> response = controller.getInstallationById(3);
+        ResponseEntity<InstallationDTO> response = controller.getInstallationById(3);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
@@ -113,35 +141,36 @@ class InstallationControllerTest {
     }
 
     @Test
-    void testUpdateInstallation_returnsUpdatedInstallationWhenFound() {
+    void testUpdateInstallation_returnsUpdatedInstallationDTOWhenFound() {
         Installation updated = new Installation();
-        updated.setAddress(installation1.getAddress());
+        updated.setId(1);
+        updated.setAddress(address1);
         updated.setCreatedAt(installation1.getCreatedAt());
 
-        when(service.update(1, updated)).thenReturn(Optional.of(updated));
+        when(service.update(1, installation1)).thenReturn(Optional.of(updated));
 
-        ResponseEntity<Installation> response = controller.updateInstallation(1, updated);
+        ResponseEntity<InstallationDTO> response = controller.updateInstallation(1, installation1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(updated, response.getBody());
-        verify(service, times(1)).update(1, updated);
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().getId());
+        verify(service, times(1)).update(1, installation1);
     }
 
     @Test
     void testUpdateInstallation_returnsNotFoundWhenMissing() {
-        Installation updated = new Installation();
-        when(service.update(3, updated)).thenReturn(Optional.empty());
+        when(service.update(3, installation1)).thenReturn(Optional.empty());
 
-        ResponseEntity<Installation> response = controller.updateInstallation(3, updated);
+        ResponseEntity<InstallationDTO> response = controller.updateInstallation(3, installation1);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        verify(service, times(1)).update(3, updated);
+        assertNull(response.getBody());
+        verify(service, times(1)).update(3, installation1);
     }
 
     @Test
     void testDeleteInstallation_returnsNoContentWhenFound() {
         when(service.existsById(1)).thenReturn(true);
-        // JPA-style delete: doNothing()
         doNothing().when(service).deleteById(1);
 
         ResponseEntity<Void> response = controller.deleteInstallation(1);

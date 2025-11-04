@@ -158,7 +158,7 @@
                         "url": "{{baseUrl}}/api/addresses",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"addressId\": \"99999\",\n  \"state\": \"PA\",\n  \"municipality\": \"Belém\",\n  \"district\": \"Belém\",\n  \"neighborhood\": \"Cidade Nova\",\n  \"street\": \"Travessa WE 55\",\n  \"streetType\": \"Travessa\",\n  \"number\": \"250\",\n  \"zipCode\": \"66093-540\",\n  \"latitude\": -1.3894,\n  \"longitude\": -48.4587\n}"
+                            "raw": "{\n  \"addressId\": \"{{addressId}}\",\n  \"state\": \"PA\",\n  \"municipality\": \"Belém\",\n  \"district\": \"Belém\",\n  \"neighborhood\": \"Cidade Nova\",\n  \"street\": \"Travessa WE 55\",\n  \"streetType\": \"Travessa\",\n  \"number\": \"250\",\n  \"zipCode\": \"66093-540\",\n  \"latitude\": -1.3894,\n  \"longitude\": -48.4587\n}"
                         }
                     }
                 },
@@ -476,17 +476,190 @@
             ]
         },
         {
-            "name": "6. Target CRUD",
+            "name": "6. Target CRUD (FIXED)",
             "item": [
                 {
-                    "name": "Create Target",
+                    "name": "1. Setup - Create Address",
                     "event": [
                         {
                             "listen": "test",
                             "script": {
                                 "exec": [
-                                    "pm.test('Created', () => pm.response.to.have.status(201));",
-                                    "pm.collectionVariables.set('targetId', pm.response.json().id);"
+                                    "pm.test('Address Created', () => {",
+                                    "    pm.response.to.have.status(201);",
+                                    "    const response = pm.response.json();",
+                                    "    // CRÍTICO: Salvar o ID do banco (PK), não o addressId",
+                                    "    pm.collectionVariables.set('addressId', response.id);",
+                                    "    console.log('Address DB ID:', response.id);",
+                                    "    console.log('Address Domain ID:', response.addressId);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/addresses",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"addressId\": \"ADDR-{{$timestamp}}\",\n  \"state\": \"PA\",\n  \"municipality\": \"Belém\",\n  \"district\": \"Centro\",\n  \"neighborhood\": \"Cidade Nova\",\n  \"street\": \"Travessa WE 55\",\n  \"streetType\": \"Travessa\",\n  \"number\": \"250\",\n  \"zipCode\": \"66093-540\",\n  \"latitude\": -1.3894,\n  \"longitude\": -48.4587\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "2. Setup - Create Client",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Client Created', () => {",
+                                    "    pm.response.to.have.status(201);",
+                                    "    pm.collectionVariables.set('clientId', pm.response.json().id);",
+                                    "    console.log('Client ID:', pm.response.json().id);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/clients",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Maria Silva {{$timestamp}}\",\n  \"cpf\": \"123.456.789-00\",\n  \"birthDate\": \"1985-03-15T00:00:00\",\n  \"motherName\": \"Ana Santos\",\n  \"genre\": \"Feminino\",\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "3. Setup - Create Installation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Installation Created', () => {",
+                                    "    pm.response.to.have.status(201);",
+                                    "    pm.collectionVariables.set('installationId', pm.response.json().id);",
+                                    "    console.log('Installation ID:', pm.response.json().id);",
+                                    "    console.log('Address ID usado:', pm.collectionVariables.get('addressId'));",
+                                    "});"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Verificar se addressId está definido",
+                                    "const addressId = pm.collectionVariables.get('addressId');",
+                                    "if (!addressId) {",
+                                    "    console.error('ERRO: addressId não está definido!');",
+                                    "    console.log('Execute o request \"1. Setup - Create Address\" primeiro');",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/installations",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"address\": {\n    \"id\": {{addressId}}\n  },\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "4. Setup - Create ContractAccount",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Contract Created', () => {",
+                                    "    pm.response.to.have.status(201);",
+                                    "    pm.collectionVariables.set('contractId', pm.response.json().id);",
+                                    "    console.log('Contract ID:', pm.response.json().id);",
+                                    "});"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Validar dependências",
+                                    "const clientId = pm.collectionVariables.get('clientId');",
+                                    "const installationId = pm.collectionVariables.get('installationId');",
+                                    "",
+                                    "if (!clientId || !installationId) {",
+                                    "    console.error('ERRO: Dependências não criadas!');",
+                                    "    console.log('Client ID:', clientId);",
+                                    "    console.log('Installation ID:', installationId);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/contract-accounts",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"accountNumber\": \"ACC-{{$timestamp}}\",\n  \"client\": {\n    \"id\": {{clientId}}\n  },\n  \"installation\": {\n    \"id\": {{installationId}}\n  },\n  \"status\": \"ON\",\n  \"createdAt\": \"{{$isoTimestamp}}\",\n  \"statusStart\": \"{{$isoTimestamp}}\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "5. Create Target",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Target Created', () => {",
+                                    "    pm.response.to.have.status(201);",
+                                    "    pm.collectionVariables.set('targetId', pm.response.json().id);",
+                                    "    console.log('Target ID:', pm.response.json().id);",
+                                    "});"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Validar que contractId existe",
+                                    "const contractId = pm.collectionVariables.get('contractId');",
+                                    "if (!contractId) {",
+                                    "    console.error('ERRO: contractId não definido!');",
+                                    "    console.log('Execute todos os passos de Setup (1-4) primeiro');",
+                                    "}"
                                 ]
                             }
                         }
@@ -502,78 +675,26 @@
                         "url": "{{baseUrl}}/api/targets",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"contractAccount\": { \"id\": {{contractId}} },\n  \"type\": \"MACHINE_LEARNING\",\n  \"signature\": \"ML-{{$timestamp}}\",\n  \"score\": 0.85,\n  \"expectedCNR\": 1500.50,\n  \"expectedTicket\": 250.75,\n  \"distanceFromBase\": 5.2,\n  \"active\": true\n}"
+                            "raw": "{\n  \"contractAccount\": {\n    \"id\": {{contractId}}\n  },\n  \"type\": \"MACHINE_LEARNING\",\n  \"signature\": \"ML-{{$timestamp}}\",\n  \"score\": 0.85,\n  \"expectedCNR\": 1500.50,\n  \"expectedTicket\": 250.75,\n  \"distanceFromBase\": 5.2,\n  \"active\": true\n}"
                         }
                     }
                 },
                 {
-                    "name": "Get All Targets",
+                    "name": "6. Get All Targets",
                     "request": {
                         "method": "GET",
                         "url": "{{baseUrl}}/api/targets"
                     }
                 },
                 {
-                    "name": "Get Target by ID",
+                    "name": "7. Get Target by ID",
                     "request": {
                         "method": "GET",
                         "url": "{{baseUrl}}/api/targets/{{targetId}}"
                     }
                 },
                 {
-                    "name": "Get by Contract",
-                    "request": {
-                        "method": "GET",
-                        "url": "{{baseUrl}}/api/targets/contract/{{contractId}}"
-                    }
-                },
-                {
-                    "name": "Get by Type",
-                    "request": {
-                        "method": "GET",
-                        "url": "{{baseUrl}}/api/targets/type/MACHINE_LEARNING"
-                    }
-                },
-                {
-                    "name": "Get by Score Range",
-                    "request": {
-                        "method": "GET",
-                        "url": {
-                            "raw": "{{baseUrl}}/api/targets/score/between?min=0.5&max=1.0",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "targets",
-                                "score",
-                                "between"
-                            ],
-                            "query": [
-                                {
-                                    "key": "min",
-                                    "value": "0.5"
-                                },
-                                {
-                                    "key": "max",
-                                    "value": "1.0"
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Update Target",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test('Updated', () => pm.response.to.have.status(200));"
-                                ]
-                            }
-                        }
-                    ],
+                    "name": "8. Update Target",
                     "request": {
                         "method": "PUT",
                         "header": [
@@ -585,22 +706,12 @@
                         "url": "{{baseUrl}}/api/targets/{{targetId}}",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"contractAccount\": { \"id\": {{contractId}} },\n  \"type\": \"MACHINE_LEARNING\",\n  \"signature\": \"ML-UPDATED\",\n  \"score\": 0.95,\n  \"expectedCNR\": 2000.00,\n  \"expectedTicket\": 300.00,\n  \"distanceFromBase\": 4.8,\n  \"active\": false\n}"
+                            "raw": "{\n  \"contractAccount\": {\n    \"id\": {{contractId}}\n  },\n  \"type\": \"MACHINE_LEARNING\",\n  \"signature\": \"ML-UPDATED\",\n  \"score\": 0.95,\n  \"expectedCNR\": 2000.00,\n  \"expectedTicket\": 300.00,\n  \"distanceFromBase\": 4.8,\n  \"active\": false\n}"
                         }
                     }
                 },
                 {
-                    "name": "Delete Target",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test('Deleted', () => pm.response.to.have.status(200));"
-                                ]
-                            }
-                        }
-                    ],
+                    "name": "9. Delete Target",
                     "request": {
                         "method": "DELETE",
                         "url": "{{baseUrl}}/api/targets/{{targetId}}"

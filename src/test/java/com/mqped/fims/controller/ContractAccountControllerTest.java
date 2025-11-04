@@ -1,6 +1,9 @@
 package com.mqped.fims.controller;
 
+import com.mqped.fims.model.dto.ContractAccountDTO;
+import com.mqped.fims.model.entity.Client;
 import com.mqped.fims.model.entity.ContractAccount;
+import com.mqped.fims.model.entity.Installation;
 import com.mqped.fims.service.ContractAccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,19 +31,32 @@ class ContractAccountControllerTest {
 
     private ContractAccount account1;
     private ContractAccount account2;
+    private Client client1;
+    private Installation installation1;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
+        client1 = new Client();
+        client1.setId(1);
+        client1.setName("John Doe");
+
+        installation1 = new Installation();
+        installation1.setId(1);
+
         account1 = new ContractAccount();
         account1.setId(1);
         account1.setAccountNumber("ACC123");
+        account1.setClient(client1);
+        account1.setInstallation(installation1);
         account1.setCreatedAt(LocalDateTime.now());
 
         account2 = new ContractAccount();
         account2.setId(2);
         account2.setAccountNumber("ACC456");
+        account2.setClient(client1);
+        account2.setInstallation(installation1);
         account2.setCreatedAt(LocalDateTime.now());
     }
 
@@ -52,57 +68,87 @@ class ContractAccountControllerTest {
     }
 
     @Test
-    void testCreateContractAccount_returnsCreatedAccount() {
+    void testCreateContractAccount_returnsCreatedAccountDTO() {
         when(service.add(account1)).thenReturn(account1);
 
-        ResponseEntity<ContractAccount> response = controller.createContractAccount(account1);
+        ResponseEntity<ContractAccountDTO> response = controller.createContractAccount(account1);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(account1, response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(account1.getId(), response.getBody().getId());
+        assertEquals(account1.getAccountNumber(), response.getBody().getAccountNumber());
+        assertEquals("John Doe", response.getBody().getClientName());
         verify(service, times(1)).add(account1);
     }
 
     @Test
-    void testGetAllContractAccounts_returnsAllAccounts() {
+    void testGetAllContractAccounts_returnsAllAccountDTOs() {
         List<ContractAccount> accounts = Arrays.asList(account1, account2);
         when(service.findAll()).thenReturn(accounts);
 
-        ResponseEntity<List<ContractAccount>> response = controller.getAllContractAccounts();
+        ResponseEntity<List<ContractAccountDTO>> response = controller.getAllContractAccounts();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(2, response.getBody().size());
+        assertEquals("ACC123", response.getBody().get(0).getAccountNumber());
+        assertEquals("ACC456", response.getBody().get(1).getAccountNumber());
         verify(service, times(1)).findAll();
     }
 
     @Test
-    void testGetContractAccountById_returnsAccountWhenFound() {
-        when(service.findById(1)).thenReturn(Optional.of(account1));
+    void testGetAllContractAccountsMinimal_returnsMinimalDTOs() {
+        List<ContractAccount> accounts = Arrays.asList(account1, account2);
+        when(service.findAll()).thenReturn(accounts);
 
-        ResponseEntity<ContractAccount> response = controller.getContractAccountById(1);
+        ResponseEntity<List<ContractAccountDTO>> response = controller.getAllContractAccountsMinimal();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(account1, response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(2, response.getBody().size());
+        // Minimal version should have installationId but not full installation object
+        assertEquals(1, response.getBody().get(0).getInstallationId());
+        assertNull(response.getBody().get(0).getInstallation());
+        verify(service, times(1)).findAll();
+    }
+
+    @Test
+    void testGetContractAccountById_returnsAccountDTOWhenFound() {
+        when(service.findById(1)).thenReturn(Optional.of(account1));
+
+        ResponseEntity<ContractAccountDTO> response = controller.getContractAccountById(1);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(account1.getId(), response.getBody().getId());
+        assertEquals("John Doe", response.getBody().getClientName());
     }
 
     @Test
     void testGetContractAccountById_returnsNotFoundWhenMissing() {
         when(service.findById(3)).thenReturn(Optional.empty());
 
-        ResponseEntity<ContractAccount> response = controller.getContractAccountById(3);
+        ResponseEntity<ContractAccountDTO> response = controller.getContractAccountById(3);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
     }
 
     @Test
-    void testUpdateContractAccount_returnsUpdatedAccountWhenFound() {
-        when(service.update(1, account1)).thenReturn(Optional.of(account1));
+    void testUpdateContractAccount_returnsUpdatedAccountDTOWhenFound() {
+        ContractAccount updated = new ContractAccount();
+        updated.setId(1);
+        updated.setAccountNumber("ACC123-UPDATED");
+        updated.setClient(client1);
+        updated.setInstallation(installation1);
+        
+        when(service.update(1, account1)).thenReturn(Optional.of(updated));
 
-        ResponseEntity<ContractAccount> response = controller.updateContractAccount(1, account1);
+        ResponseEntity<ContractAccountDTO> response = controller.updateContractAccount(1, account1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(account1, response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals("ACC123-UPDATED", response.getBody().getAccountNumber());
         verify(service, times(1)).update(1, account1);
     }
 
@@ -110,7 +156,7 @@ class ContractAccountControllerTest {
     void testUpdateContractAccount_returnsNotFoundWhenMissing() {
         when(service.update(3, account1)).thenReturn(Optional.empty());
 
-        ResponseEntity<ContractAccount> response = controller.updateContractAccount(3, account1);
+        ResponseEntity<ContractAccountDTO> response = controller.updateContractAccount(3, account1);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
