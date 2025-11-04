@@ -3,8 +3,6 @@ package com.mqped.fims.model.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,7 +32,6 @@ public class Address {
     private Double longitude;
 
     @OneToMany(mappedBy = "address", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("address-installation")
     private List<Installation> installations = new ArrayList<>();
 
     public Integer getId() {

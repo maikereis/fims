@@ -3,9 +3,6 @@ package com.mqped.fims.model.entity;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,14 +23,12 @@ public class Installation {
 
     @ManyToOne(cascade = { CascadeType.MERGE })
     @JoinColumn(name = "address_id")
-    @JsonBackReference("address-installation")
     private Address address;
     private LocalDateTime createdAt;
     private LocalDateTime deletedAt;
 
     // Backward reference to ContractAccounts
     @OneToMany(mappedBy = "installation", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("installation-contractAccount")
     private List<ContractAccount> contractAccounts;
 
     public Integer getId() {

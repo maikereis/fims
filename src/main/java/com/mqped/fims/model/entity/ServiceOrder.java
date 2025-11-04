@@ -2,7 +2,6 @@ package com.mqped.fims.model.entity;
 
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.mqped.fims.model.enums.ServiceOrderStatus;
 import com.mqped.fims.model.enums.ServiceOrderType;
 
@@ -18,7 +17,6 @@ public class ServiceOrder {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_id", nullable = false)
-    @JsonBackReference("target-serviceOrder")
     private Target target;
 
     @Enumerated(EnumType.STRING)
