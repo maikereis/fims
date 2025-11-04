@@ -1,7 +1,7 @@
 package com.mqped.fims.controller;
 
-import com.mqped.fims.model.Address;
-import com.mqped.fims.model.Installation;
+import com.mqped.fims.model.entity.Address;
+import com.mqped.fims.model.entity.Installation;
 import com.mqped.fims.service.InstallationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

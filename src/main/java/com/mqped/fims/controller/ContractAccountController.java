@@ -1,6 +1,6 @@
 package com.mqped.fims.controller;
 
-import com.mqped.fims.model.ContractAccount;
+import com.mqped.fims.model.entity.ContractAccount;
 import com.mqped.fims.service.ContractAccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

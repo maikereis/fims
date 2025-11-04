@@ -1,4 +1,4 @@
-package com.mqped.fims.model;
+package com.mqped.fims.model.entity;
 
 import java.time.LocalDateTime;
 import java.util.List;

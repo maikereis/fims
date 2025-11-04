@@ -1,8 +1,9 @@
-package com.mqped.fims.model;
+package com.mqped.fims.model.entity;
 
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.mqped.fims.model.enums.StatusType;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;

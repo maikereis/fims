@@ -1,23 +1,9 @@
-package com.mqped.fims.model;
+package com.mqped.fims.model.dto;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import com.mqped.fims.model.entity.Client;
 import java.time.LocalDateTime;
-import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
-@Entity
-@Table(name = "clients")
-public class Client {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class ClientDTO {
     private Integer id;
     private String name;
     private String cpf;
@@ -26,10 +12,6 @@ public class Client {
     private String cnpj;
     private String genre;
     private LocalDateTime createdAt;
-
-    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("client-contractAccount")
-    private List<ContractAccount> contractAccounts;
 
     public Integer getId() {
         return id;
@@ -95,21 +77,16 @@ public class Client {
         this.createdAt = createdAt;
     }
 
-    public List<ContractAccount> getContractAccounts() {
-        return contractAccounts;
-    }
-
-    public void setContractAccounts(List<ContractAccount> contractAccounts) {
-        this.contractAccounts = contractAccounts;
-    }
-
-    @Override
-    public String toString() {
-        return "Client{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", birthDate=" + birthDate +
-                ", genre='" + genre + '\'' +
-                '}';
+    public static ClientDTO fromEntity(Client client) {
+        ClientDTO dto = new ClientDTO();
+        dto.setId(client.getId());
+        dto.setName(client.getName());
+        dto.setCpf(client.getCpf());
+        dto.setBirthDate(client.getBirthDate());
+        dto.setMotherName(client.getMotherName());
+        dto.setCnpj(client.getCnpj());
+        dto.setGenre(client.getGenre());
+        dto.setCreatedAt(client.getCreatedAt());
+        return dto;
     }
 }

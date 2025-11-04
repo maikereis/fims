@@ -13,12 +13,12 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-import com.mqped.fims.model.Client;
+import com.mqped.fims.model.entity.Client;
 import com.mqped.fims.service.ClientService;
 import com.mqped.fims.util.StringNormalizer;
 
 @Component
-@Order(3)
+@Order(2)
 public class ClientLoader implements ApplicationRunner {
 
     @Value("${client.csv.path}")

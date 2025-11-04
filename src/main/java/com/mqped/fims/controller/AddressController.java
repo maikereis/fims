@@ -1,6 +1,6 @@
 package com.mqped.fims.controller;
 
-import com.mqped.fims.model.Address;
+import com.mqped.fims.model.entity.Address;
 import com.mqped.fims.service.AddressService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

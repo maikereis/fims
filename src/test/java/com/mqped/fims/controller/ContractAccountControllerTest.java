@@ -1,6 +1,6 @@
 package com.mqped.fims.controller;
 
-import com.mqped.fims.model.ContractAccount;
+import com.mqped.fims.model.entity.ContractAccount;
 import com.mqped.fims.service.ContractAccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

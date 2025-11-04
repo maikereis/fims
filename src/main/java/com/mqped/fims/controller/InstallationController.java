@@ -1,6 +1,6 @@
 package com.mqped.fims.controller;
 
-import com.mqped.fims.model.Installation;
+import com.mqped.fims.model.entity.Installation;
 import com.mqped.fims.service.InstallationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,10 +1,10 @@
 package com.mqped.fims.service;
 
-import com.mqped.fims.model.Client;
-import com.mqped.fims.model.ContractAccount;
-import com.mqped.fims.model.Installation;
 import com.mqped.fims.exceptions.ResourceNotFoundException;
-import com.mqped.fims.model.Address;
+import com.mqped.fims.model.entity.Address;
+import com.mqped.fims.model.entity.Client;
+import com.mqped.fims.model.entity.ContractAccount;
+import com.mqped.fims.model.entity.Installation;
 import com.mqped.fims.repository.ClientRepository;
 import com.mqped.fims.repository.ContractAccountRepository;
 import com.mqped.fims.repository.InstallationRepository;

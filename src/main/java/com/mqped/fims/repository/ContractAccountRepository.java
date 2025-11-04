@@ -1,8 +1,9 @@
 package com.mqped.fims.repository;
 
-import com.mqped.fims.model.ContractAccount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import com.mqped.fims.model.entity.ContractAccount;
 
 @Repository
 public interface ContractAccountRepository extends JpaRepository<ContractAccount, Integer> {

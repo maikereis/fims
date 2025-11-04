@@ -2,8 +2,8 @@ package com.mqped.fims.service;
 
 import com.mqped.fims.exceptions.InvalidDataException;
 import com.mqped.fims.exceptions.ResourceNotFoundException;
-import com.mqped.fims.model.ServiceOrder;
-import com.mqped.fims.model.ServiceOrderStatus;
+import com.mqped.fims.model.entity.ServiceOrder;
+import com.mqped.fims.model.enums.ServiceOrderStatus;
 import com.mqped.fims.repository.ServiceOrderRepository;
 import org.springframework.stereotype.Service;
 

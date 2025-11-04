@@ -1,7 +1,7 @@
 package com.mqped.fims;
 
-import com.mqped.fims.model.Address;
-import com.mqped.fims.model.Installation;
+import com.mqped.fims.model.entity.Address;
+import com.mqped.fims.model.entity.Installation;
 import com.mqped.fims.service.AddressService;
 import com.mqped.fims.service.InstallationService;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 @Component
-@Order(2)
+@Order(3)
 public class InstallationLoader implements ApplicationRunner {
 
     @Value("${installation.csv.path}")

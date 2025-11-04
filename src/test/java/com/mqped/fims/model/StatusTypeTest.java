@@ -2,6 +2,8 @@ package com.mqped.fims.model;
 
 import org.junit.jupiter.api.Test;
 
+import com.mqped.fims.model.enums.StatusType;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class StatusTypeTest {

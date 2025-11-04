@@ -1,4 +1,4 @@
-package com.mqped.fims.model;
+package com.mqped.fims.model.enums;
 
 public enum ServiceOrderType {
     IS_ON,

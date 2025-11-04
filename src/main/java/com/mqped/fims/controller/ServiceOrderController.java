@@ -1,7 +1,7 @@
 package com.mqped.fims.controller;
 
-import com.mqped.fims.model.ServiceOrder;
-import com.mqped.fims.model.ServiceOrderStatus;
+import com.mqped.fims.model.entity.ServiceOrder;
+import com.mqped.fims.model.enums.ServiceOrderStatus;
 import com.mqped.fims.service.ServiceOrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -2,7 +2,7 @@ package com.mqped.fims.service;
 
 import com.mqped.fims.exceptions.InvalidDataException;
 import com.mqped.fims.exceptions.ResourceNotFoundException;
-import com.mqped.fims.model.ContractAccount;
+import com.mqped.fims.model.entity.ContractAccount;
 import com.mqped.fims.repository.ClientRepository;
 import com.mqped.fims.repository.ContractAccountRepository;
 import com.mqped.fims.repository.InstallationRepository;

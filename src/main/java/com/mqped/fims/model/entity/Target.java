@@ -1,13 +1,12 @@
-package com.mqped.fims.model;
+package com.mqped.fims.model.entity;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.mqped.fims.model.enums.TargetType;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Min;
-
 
 import jakarta.persistence.*;
 
@@ -19,7 +18,6 @@ public class Target {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // Qual contrato é o alvo
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contract_account_id", nullable = false)
     private ContractAccount contractAccount;
@@ -31,7 +29,7 @@ public class Target {
     private String signature;
 
     @NotNull
-    @Min(value = 0)     
+    @Min(value = 0)
     private Double score;
 
     @NotNull
@@ -56,12 +54,9 @@ public class Target {
         }
     }
 
-    // Back-reference para ServiceOrders geradas a partir deste Target
     @OneToMany(mappedBy = "target", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("target-serviceOrder")
     private List<ServiceOrder> serviceOrders;
 
-    // Getters e setters
     public Integer getId() {
         return id;
     }

@@ -1,23 +1,8 @@
-package com.mqped.fims.model;
+package com.mqped.fims.model.dto;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.mqped.fims.model.entity.Address;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-
-@Entity
-@Table(name = "addresses")
-public class Address {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class AddressDTO {
     private Integer id;
     private String addressId;
     private String state;
@@ -33,10 +18,6 @@ public class Address {
     private Double latitude;
     private Double longitude;
 
-    @OneToMany(mappedBy = "address", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("address-installation")
-    private List<Installation> installations = new ArrayList<>();
-
     public Integer getId() {
         return id;
     }
@@ -45,16 +26,16 @@ public class Address {
         this.id = id;
     }
 
-    public String getState() {
-        return state;
-    }
-
     public String getAddressId() {
         return addressId;
     }
 
     public void setAddressId(String addressId) {
         this.addressId = addressId;
+    }
+
+    public String getState() {
+        return state;
     }
 
     public void setState(String state) {
@@ -149,32 +130,22 @@ public class Address {
         this.longitude = longitude;
     }
 
-    public List<Installation> getInstallations() {
-        return installations;
+    public static AddressDTO fromEntity(Address address) {
+        AddressDTO dto = new AddressDTO();
+        dto.setId(address.getId());
+        dto.setAddressId(address.getAddressId());
+        dto.setState(address.getState());
+        dto.setMunicipality(address.getMunicipality());
+        dto.setDistrict(address.getDistrict());
+        dto.setSubdistrict(address.getSubdistrict());
+        dto.setNeighborhood(address.getNeighborhood());
+        dto.setStreet(address.getStreet());
+        dto.setStreetType(address.getStreetType());
+        dto.setNumber(address.getNumber());
+        dto.setComplement(address.getComplement());
+        dto.setZipCode(address.getZipCode());
+        dto.setLatitude(address.getLatitude());
+        dto.setLongitude(address.getLongitude());
+        return dto;
     }
-
-    public void setInstallations(List<Installation> installations) {
-        this.installations = installations;
-    }
-
-    @Override
-    public String toString() {
-        return "Address{" +
-                "id=" + id +
-                ", addressId='" + addressId + '\'' +
-                ", state='" + state + '\'' +
-                ", municipality='" + municipality + '\'' +
-                ", district='" + district + '\'' +
-                ", subdistrict='" + subdistrict + '\'' +
-                ", neighborhood='" + neighborhood + '\'' +
-                ", street='" + street + '\'' +
-                ", streetType='" + streetType + '\'' +
-                ", number='" + number + '\'' +
-                ", complement='" + complement + '\'' +
-                ", zipCode='" + zipCode + '\'' +
-                ", latitude=" + latitude +
-                ", longitude=" + longitude +
-                '}';
-    }
-
 }

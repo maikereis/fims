@@ -11,7 +11,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-import com.mqped.fims.model.Address;
+import com.mqped.fims.model.entity.Address;
 import com.mqped.fims.service.AddressService;
 
 @Component

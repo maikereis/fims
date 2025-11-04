@@ -1,7 +1,7 @@
 package com.mqped.fims.controller;
 
-import com.mqped.fims.model.Target;
-import com.mqped.fims.model.TargetType;
+import com.mqped.fims.model.entity.Target;
+import com.mqped.fims.model.enums.TargetType;
 import com.mqped.fims.service.TargetService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
