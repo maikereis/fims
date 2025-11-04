@@ -1,0 +1,1704 @@
+{
+	"info": {
+		"_postman_id": "dfd89636-d2a6-46e1-a626-0d8c9571dd38",
+		"name": "FIMS API Test Suite",
+		"description": "Field Installation Management System - Complete API Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23860051"
+	},
+	"item": [
+		{
+			"name": "1. Health Checks",
+			"item": [
+				{
+					"name": "Address API Health",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Address API is UP', () => pm.response.to.have.status(200));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/addresses/check",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"addresses",
+								"check"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Client API Health",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Client API is UP', () => pm.response.to.have.status(200));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/clients/check",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clients",
+								"check"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Installation API Health",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Installation API is UP', () => pm.response.to.have.status(200));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/installations/check",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"installations",
+								"check"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Target API Health",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Target API is UP', () => pm.response.to.have.status(200));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/targets/check",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"targets",
+								"check"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ServiceOrder API Health",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('ServiceOrder API is UP', () => pm.response.to.have.status(200));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/service-orders/check",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"service-orders",
+								"check"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Address CRUD",
+			"item": [
+				{
+					"name": "Create Address",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Created', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('addressId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"addressId\": \"{{addressId}}\",\n  \"state\": \"PA\",\n  \"municipality\": \"Belém\",\n  \"district\": \"Belém\",\n  \"neighborhood\": \"Cidade Nova\",\n  \"street\": \"Travessa WE 55\",\n  \"streetType\": \"Travessa\",\n  \"number\": \"250\",\n  \"zipCode\": \"66093-540\",\n  \"latitude\": -1.3894,\n  \"longitude\": -48.4587\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/addresses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"addresses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Addresses",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('OK', () => pm.response.to.have.status(200));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/addresses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"addresses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Address by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/addresses/{{addressId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"addresses",
+								"{{addressId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Address",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/addresses/{{addressId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"addresses",
+								"{{addressId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Client CRUD",
+			"item": [
+				{
+					"name": "Create Client",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Created', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('clientId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Maria Silva\",\n  \"cpf\": \"123.456.789-00\",\n  \"birthDate\": \"1985-03-15T00:00:00\",\n  \"motherName\": \"Ana Santos\",\n  \"genre\": \"Feminino\",\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/clients",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Clients",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/clients",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Client by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/clients/{{clientId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clients",
+								"{{clientId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Client",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/clients/{{clientId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clients",
+								"{{clientId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Installation CRUD",
+			"item": [
+				{
+					"name": "Create Address",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Address Created', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('addressId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"addressId\": \"ADDR-{{randomInt}}\",\n  \"state\": \"PA\",\n  \"municipality\": \"Belém\",\n  \"district\": \"\",\n  \"subdistrict\": \"\",\n  \"neighborhood\": \"\",\n  \"street\": \"Travessa WE 55\",\n  \"streetType\": \"Street\",\n  \"number\": \"123\",\n  \"complement\": \"\",\n  \"zipCode\": \"66000-000\",\n  \"latitude\": -1.455,\n  \"longitude\": -48.503\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/addresses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"addresses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Installation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Installation Created', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('installationId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"address\": { \"id\": {{addressId}} },\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/installations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"installations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Installations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/installations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"installations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Installation by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/installations/{{installationId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"installations",
+								"{{installationId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Installation",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"address\": { \"id\": {{addressId}} },\n  \"createdAt\": \"{{$isoTimestamp}}\",\n  \"deletedAt\": \"{{$isoTimestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/installations/{{installationId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"installations",
+								"{{installationId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Installation",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/installations/{{installationId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"installations",
+								"{{installationId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. ContractAccount CRUD",
+			"item": [
+				{
+					"name": "Create Client",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Created', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('clientId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Client {{$timestamp}}\",\n  \"email\": \"client{{$timestamp}}@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/clients",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Installation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Created', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('installationId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"address\": { \"id\": {{addressId}} },\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/installations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"installations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Contract",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Created', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('contractId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountNumber\": \"ACC-{{$timestamp}}\",\n  \"client\": { \"id\": {{clientId}} },\n  \"installation\": { \"id\": {{installationId}} },\n  \"status\": \"ON\",\n  \"createdAt\": \"{{$isoTimestamp}}\",\n  \"statusStart\": \"{{$isoTimestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contract-accounts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contract-accounts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Contracts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/contract-accounts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contract-accounts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Contract by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/contract-accounts/{{contractId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contract-accounts",
+								"{{contractId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Contract Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountNumber\": \"ACC-{{$timestamp}}\",\n  \"client\": { \"id\": {{clientId}} },\n  \"installation\": { \"id\": {{installationId}} },\n  \"status\": \"CUT\",\n  \"createdAt\": \"{{$isoTimestamp}}\",\n  \"statusStart\": \"{{$isoTimestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contract-accounts/{{contractId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contract-accounts",
+								"{{contractId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Contract",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/contract-accounts/{{contractId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contract-accounts",
+								"{{contractId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Target CRUD",
+			"item": [
+				{
+					"name": "Create Address",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Address Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    const response = pm.response.json();",
+									"    // CRÍTICO: Salvar o ID do banco (PK), não o addressId",
+									"    pm.collectionVariables.set('addressId', response.id);",
+									"    console.log('Address DB ID:', response.id);",
+									"    console.log('Address Domain ID:', response.addressId);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"addressId\": \"ADDR-{{$timestamp}}\",\n  \"state\": \"PA\",\n  \"municipality\": \"Belém\",\n  \"district\": \"Centro\",\n  \"neighborhood\": \"Cidade Nova\",\n  \"street\": \"Travessa WE 55\",\n  \"streetType\": \"Travessa\",\n  \"number\": \"250\",\n  \"zipCode\": \"66093-540\",\n  \"latitude\": -1.3894,\n  \"longitude\": -48.4587\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/addresses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"addresses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Client",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Client Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    pm.collectionVariables.set('clientId', pm.response.json().id);",
+									"    console.log('Client ID:', pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Maria Silva {{$timestamp}}\",\n  \"cpf\": \"123.456.789-00\",\n  \"birthDate\": \"1985-03-15T00:00:00\",\n  \"motherName\": \"Ana Santos\",\n  \"genre\": \"Feminino\",\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/clients",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Installation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Installation Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    pm.collectionVariables.set('installationId', pm.response.json().id);",
+									"    console.log('Installation ID:', pm.response.json().id);",
+									"    console.log('Address ID usado:', pm.collectionVariables.get('addressId'));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Verificar se addressId está definido",
+									"const addressId = pm.collectionVariables.get('addressId');",
+									"if (!addressId) {",
+									"    console.error('ERRO: addressId não está definido!');",
+									"    console.log('Execute o request \"1. Setup - Create Address\" primeiro');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"address\": {\n    \"id\": {{addressId}}\n  },\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/installations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"installations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create ContractAccount",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Contract Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    pm.collectionVariables.set('contractId', pm.response.json().id);",
+									"    console.log('Contract ID:', pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Validar dependências",
+									"const clientId = pm.collectionVariables.get('clientId');",
+									"const installationId = pm.collectionVariables.get('installationId');",
+									"",
+									"if (!clientId || !installationId) {",
+									"    console.error('ERRO: Dependências não criadas!');",
+									"    console.log('Client ID:', clientId);",
+									"    console.log('Installation ID:', installationId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountNumber\": \"ACC-{{$timestamp}}\",\n  \"client\": {\n    \"id\": {{clientId}}\n  },\n  \"installation\": {\n    \"id\": {{installationId}}\n  },\n  \"status\": \"ON\",\n  \"createdAt\": \"{{$isoTimestamp}}\",\n  \"statusStart\": \"{{$isoTimestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contract-accounts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contract-accounts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Target",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Target Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    pm.collectionVariables.set('targetId', pm.response.json().id);",
+									"    console.log('Target ID:', pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Validar que contractId existe",
+									"const contractId = pm.collectionVariables.get('contractId');",
+									"if (!contractId) {",
+									"    console.error('ERRO: contractId não definido!');",
+									"    console.log('Execute todos os passos de Setup (1-4) primeiro');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contractAccount\": {\n    \"id\": {{contractId}}\n  },\n  \"type\": \"MACHINE_LEARNING\",\n  \"signature\": \"ML-{{$timestamp}}\",\n  \"score\": 0.85,\n  \"expectedCNR\": 1500.50,\n  \"expectedTicket\": 250.75,\n  \"distanceFromBase\": 5.2,\n  \"active\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/targets",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"targets"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Targets",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/targets",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"targets"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Target by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/targets/{{targetId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"targets",
+								"{{targetId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Target",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contractAccount\": {\n    \"id\": {{contractId}}\n  },\n  \"type\": \"MACHINE_LEARNING\",\n  \"signature\": \"ML-UPDATED\",\n  \"score\": 0.95,\n  \"expectedCNR\": 2000.00,\n  \"expectedTicket\": 300.00,\n  \"distanceFromBase\": 4.8,\n  \"active\": false\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/targets/{{targetId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"targets",
+								"{{targetId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Target",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/targets/{{targetId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"targets",
+								"{{targetId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "7. ServiceOrder CRUD",
+			"item": [
+				{
+					"name": "Create Address",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Address Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    const response = pm.response.json();",
+									"    // CRÍTICO: Salvar o ID do banco (PK), não o addressId",
+									"    pm.collectionVariables.set('addressId', response.id);",
+									"    console.log('Address DB ID:', response.id);",
+									"    console.log('Address Domain ID:', response.addressId);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"addressId\": \"ADDR-{{$timestamp}}\",\n  \"state\": \"PA\",\n  \"municipality\": \"Belém\",\n  \"district\": \"Centro\",\n  \"neighborhood\": \"Cidade Nova\",\n  \"street\": \"Travessa WE 55\",\n  \"streetType\": \"Travessa\",\n  \"number\": \"250\",\n  \"zipCode\": \"66093-540\",\n  \"latitude\": -1.3894,\n  \"longitude\": -48.4587\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/addresses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"addresses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Client",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Client Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    pm.collectionVariables.set('clientId', pm.response.json().id);",
+									"    console.log('Client ID:', pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Maria Silva {{$timestamp}}\",\n  \"cpf\": \"123.456.789-00\",\n  \"birthDate\": \"1985-03-15T00:00:00\",\n  \"motherName\": \"Ana Santos\",\n  \"genre\": \"Feminino\",\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/clients",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Installation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Installation Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    pm.collectionVariables.set('installationId', pm.response.json().id);",
+									"    console.log('Installation ID:', pm.response.json().id);",
+									"    console.log('Address ID usado:', pm.collectionVariables.get('addressId'));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Verificar se addressId está definido",
+									"const addressId = pm.collectionVariables.get('addressId');",
+									"if (!addressId) {",
+									"    console.error('ERRO: addressId não está definido!');",
+									"    console.log('Execute o request \"1. Setup - Create Address\" primeiro');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"address\": {\n    \"id\": {{addressId}}\n  },\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/installations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"installations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create ContractAccount",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Contract Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    pm.collectionVariables.set('contractId', pm.response.json().id);",
+									"    console.log('Contract ID:', pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Validar dependências",
+									"const clientId = pm.collectionVariables.get('clientId');",
+									"const installationId = pm.collectionVariables.get('installationId');",
+									"",
+									"if (!clientId || !installationId) {",
+									"    console.error('ERRO: Dependências não criadas!');",
+									"    console.log('Client ID:', clientId);",
+									"    console.log('Installation ID:', installationId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountNumber\": \"ACC-{{$timestamp}}\",\n  \"client\": {\n    \"id\": {{clientId}}\n  },\n  \"installation\": {\n    \"id\": {{installationId}}\n  },\n  \"status\": \"ON\",\n  \"createdAt\": \"{{$isoTimestamp}}\",\n  \"statusStart\": \"{{$isoTimestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contract-accounts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contract-accounts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Target",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Target Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    pm.collectionVariables.set('targetId', pm.response.json().id);",
+									"    console.log('Target ID:', pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Validar que contractId existe",
+									"const contractId = pm.collectionVariables.get('contractId');",
+									"if (!contractId) {",
+									"    console.error('ERRO: contractId não definido!');",
+									"    console.log('Execute todos os passos de Setup (1-4) primeiro');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contractAccount\": {\n    \"id\": {{contractId}}\n  },\n  \"type\": \"MACHINE_LEARNING\",\n  \"signature\": \"ML-{{$timestamp}}\",\n  \"score\": 0.85,\n  \"expectedCNR\": 1500.50,\n  \"expectedTicket\": 250.75,\n  \"distanceFromBase\": 5.2,\n  \"active\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/targets",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"targets"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create ServiceOrder",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Created', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('serviceOrderId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"target\": { \"id\": {{targetId}} },\n  \"type\": \"IS_CUT\",\n  \"status\": \"CREATED\",\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/service-orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"service-orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/service-orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"service-orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/service-orders/{{serviceOrderId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"service-orders",
+								"{{serviceOrderId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get by Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/service-orders/status/CREATED",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"service-orders",
+								"status",
+								"CREATED"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get by Target",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/service-orders/target/{{targetId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"service-orders",
+								"target",
+								"{{targetId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update to EXECUTED",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"target\": { \"id\": {{targetId}} },\n  \"type\": \"IS_CUT\",\n  \"status\": \"EXECUTED\",\n  \"createdAt\": \"{{$isoTimestamp}}\",\n  \"executedAt\": \"{{$isoTimestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/service-orders/{{serviceOrderId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"service-orders",
+								"{{serviceOrderId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Order",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/service-orders/{{serviceOrderId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"service-orders",
+								"{{serviceOrderId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "8. Error Cases",
+			"item": [
+				{
+					"name": "404 - Not Found",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('404', () => pm.response.to.have.status(404));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/addresses/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"addresses",
+								"999999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "400 - Invalid CPF",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('400', () => pm.response.to.have.status(400));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"cpf\": \"invalid\",\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/clients",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "400 - Missing Required",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('400', () => pm.response.to.have.status(400));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"number\": \"100\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/addresses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"addresses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "400 - Negative Score",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('400', () => pm.response.to.have.status(400));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contractAccount\": { \"id\": 1 },\n  \"type\": \"RULES\",\n  \"score\": -0.5\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/targets",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"targets"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080"
+		},
+		{
+			"key": "addressId",
+			"value": ""
+		},
+		{
+			"key": "clientId",
+			"value": ""
+		},
+		{
+			"key": "installationId",
+			"value": ""
+		},
+		{
+			"key": "contractId",
+			"value": ""
+		},
+		{
+			"key": "targetId",
+			"value": ""
+		},
+		{
+			"key": "serviceOrderId",
+			"value": ""
+		}
+	]
+}

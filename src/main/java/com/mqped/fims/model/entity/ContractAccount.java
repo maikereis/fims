@@ -1,8 +1,8 @@
-package com.mqped.fims.model;
+package com.mqped.fims.model.entity;
 
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.mqped.fims.model.enums.StatusType;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -27,12 +27,10 @@ public class ContractAccount {
 
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
-    @JsonBackReference("client-contractAccount")
     private Client client;
 
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "installation_id", nullable = false)
-    @JsonBackReference("installation-contractAccount")
     private Installation installation;
     private LocalDateTime createdAt;
     private LocalDateTime deletedAt;

@@ -1,7 +1,8 @@
 package com.mqped.fims.controller;
 
-import com.mqped.fims.model.ServiceOrder;
-import com.mqped.fims.model.ServiceOrderStatus;
+import com.mqped.fims.model.dto.ServiceOrderDTO;
+import com.mqped.fims.model.entity.ServiceOrder;
+import com.mqped.fims.model.enums.ServiceOrderStatus;
 import com.mqped.fims.service.ServiceOrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,31 +24,34 @@ public class ServiceOrderController {
 
     // CREATE
     @PostMapping
-    public ResponseEntity<ServiceOrder> createServiceOrder(@RequestBody ServiceOrder order) {
+    public ResponseEntity<ServiceOrderDTO> createServiceOrder(@RequestBody ServiceOrder order) {
         ServiceOrder savedOrder = service.add(order);
-        return new ResponseEntity<>(savedOrder, HttpStatus.CREATED);
+        return new ResponseEntity<>(ServiceOrderDTO.fromEntity(savedOrder), HttpStatus.CREATED);
     }
 
     // READ ALL
     @GetMapping
-    public ResponseEntity<List<ServiceOrder>> getAll() {
-        return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
+    public ResponseEntity<List<ServiceOrderDTO>> getAll() {
+        List<ServiceOrderDTO> dtos = service.findAll().stream()
+                .map(ServiceOrderDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // READ ONE
     @GetMapping("/{id}")
-    public ResponseEntity<ServiceOrder> getById(@PathVariable Integer id) {
+    public ResponseEntity<ServiceOrderDTO> getById(@PathVariable Integer id) {
         Optional<ServiceOrder> order = service.findById(id);
-        return order.map(o -> new ResponseEntity<>(o, HttpStatus.OK))
-                    .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return order.map(o -> ResponseEntity.ok(ServiceOrderDTO.fromEntity(o)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     // UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<ServiceOrder> update(@PathVariable Integer id, @RequestBody ServiceOrder order) {
+    public ResponseEntity<ServiceOrderDTO> update(@PathVariable Integer id, @RequestBody ServiceOrder order) {
         Optional<ServiceOrder> updated = service.update(id, order);
-        return updated.map(o -> new ResponseEntity<>(o, HttpStatus.OK))
-                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return updated.map(o -> ResponseEntity.ok(ServiceOrderDTO.fromEntity(o)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     // DELETE
@@ -55,55 +59,75 @@ public class ServiceOrderController {
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         if (service.existsById(id)) {
             service.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.noContent().build();
         }
+        return ResponseEntity.notFound().build();
     }
 
     // FILTERS
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<ServiceOrder>> getByStatus(@PathVariable ServiceOrderStatus status) {
-        return new ResponseEntity<>(service.findByStatus(status), HttpStatus.OK);
+    public ResponseEntity<List<ServiceOrderDTO>> getByStatus(@PathVariable ServiceOrderStatus status) {
+        List<ServiceOrderDTO> dtos = service.findByStatus(status).stream()
+                .map(ServiceOrderDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/target/{targetId}")
-    public ResponseEntity<List<ServiceOrder>> getByTargetId(@PathVariable Integer targetId) {
-        return new ResponseEntity<>(service.findByTargetId(targetId), HttpStatus.OK);
+    public ResponseEntity<List<ServiceOrderDTO>> getByTargetId(@PathVariable Integer targetId) {
+        List<ServiceOrderDTO> dtos = service.findByTargetId(targetId).stream()
+                .map(ServiceOrderDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/target/distance")
-    public ResponseEntity<List<ServiceOrder>> getByTargetDistance(
+    public ResponseEntity<List<ServiceOrderDTO>> getByTargetDistance(
             @RequestParam Double min,
             @RequestParam Double max) {
-        return new ResponseEntity<>(service.findByTargetDistanceFromBaseBetween(min, max), HttpStatus.OK);
+        List<ServiceOrderDTO> dtos = service.findByTargetDistanceFromBaseBetween(min, max).stream()
+                .map(ServiceOrderDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/target/signature/{signature}")
-    public ResponseEntity<List<ServiceOrder>> getByTargetSignature(@PathVariable String signature) {
-        return new ResponseEntity<>(service.findByTargetSignature(signature), HttpStatus.OK);
+    public ResponseEntity<List<ServiceOrderDTO>> getByTargetSignature(@PathVariable String signature) {
+        List<ServiceOrderDTO> dtos = service.findByTargetSignature(signature).stream()
+                .map(ServiceOrderDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/target/signature/contains/{partial}")
-    public ResponseEntity<List<ServiceOrder>> getByTargetSignatureContaining(@PathVariable String partial) {
-        return new ResponseEntity<>(service.findByTargetSignatureContaining(partial), HttpStatus.OK);
+    public ResponseEntity<List<ServiceOrderDTO>> getByTargetSignatureContaining(@PathVariable String partial) {
+        List<ServiceOrderDTO> dtos = service.findByTargetSignatureContaining(partial).stream()
+                .map(ServiceOrderDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/older-than/{days}")
-    public ResponseEntity<List<ServiceOrder>> getOlderThanDays(@PathVariable long days) {
-        return new ResponseEntity<>(service.findOlderThanDays(days), HttpStatus.OK);
+    public ResponseEntity<List<ServiceOrderDTO>> getOlderThanDays(@PathVariable long days) {
+        List<ServiceOrderDTO> dtos = service.findOlderThanDays(days).stream()
+                .map(ServiceOrderDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/created-between")
-    public ResponseEntity<List<ServiceOrder>> getByCreatedAtBetween(
+    public ResponseEntity<List<ServiceOrderDTO>> getByCreatedAtBetween(
             @RequestParam LocalDateTime start,
             @RequestParam LocalDateTime end) {
-        return new ResponseEntity<>(service.findByCreatedAtBetween(start, end), HttpStatus.OK);
+        List<ServiceOrderDTO> dtos = service.findByCreatedAtBetween(start, end).stream()
+                .map(ServiceOrderDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // HEALTH CHECK
     @GetMapping("/check")
     public ResponseEntity<String> check() {
-        return new ResponseEntity<>("ServiceOrder API is up and running!", HttpStatus.OK);
+        return ResponseEntity.ok("ServiceOrder API is up and running!");
     }
 }

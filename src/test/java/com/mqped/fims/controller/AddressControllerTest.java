@@ -1,6 +1,7 @@
 package com.mqped.fims.controller;
 
-import com.mqped.fims.model.Address;
+import com.mqped.fims.model.dto.AddressDTO;
+import com.mqped.fims.model.entity.Address;
 import com.mqped.fims.service.AddressService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,10 +37,14 @@ class AddressControllerTest {
         address1 = new Address();
         address1.setId(1);
         address1.setStreet("Street 1");
+        address1.setState("São Paulo");
+        address1.setZipCode("01234-567");
 
         address2 = new Address();
         address2.setId(2);
         address2.setStreet("Street 2");
+        address2.setState("Rio de Janeiro");
+        address2.setZipCode("98765-432");
     }
 
     @Test
@@ -50,44 +55,76 @@ class AddressControllerTest {
     }
 
     @Test
-    void testCreateAddress_returnsCreatedAddress() {
+    void testCreateAddress_returnsCreatedAddressDTO() {
         when(service.add(address1)).thenReturn(address1);
 
-        ResponseEntity<Address> response = controller.createAddress(address1);
+        ResponseEntity<AddressDTO> response = controller.createAddress(address1);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(address1, response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(address1.getId(), response.getBody().getId());
+        assertEquals(address1.getStreet(), response.getBody().getStreet());
         verify(service, times(1)).add(address1);
     }
 
     @Test
-    void testGetAllAddresses_returnsAllAddresses() {
+    void testGetAllAddresses_returnsAllAddressDTOs() {
         List<Address> addresses = Arrays.asList(address1, address2);
         when(service.findAll()).thenReturn(addresses);
 
-        ResponseEntity<List<Address>> response = controller.getAllAddresses();
+        ResponseEntity<List<AddressDTO>> response = controller.getAllAddresses();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(2, response.getBody().size());
+        assertEquals("Street 1", response.getBody().get(0).getStreet());
+        assertEquals("Street 2", response.getBody().get(1).getStreet());
         verify(service, times(1)).findAll();
     }
 
     @Test
-    void testGetAddressById_returnsAddressWhenFound() {
+    void testGetAddressById_returnsAddressDTOWhenFound() {
         when(service.findById(1)).thenReturn(Optional.of(address1));
 
-        ResponseEntity<Address> response = controller.getAddressById(1);
+        ResponseEntity<AddressDTO> response = controller.getAddressById(1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(address1, response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(address1.getId(), response.getBody().getId());
+        assertEquals(address1.getStreet(), response.getBody().getStreet());
     }
 
     @Test
     void testGetAddressById_returnsNotFoundWhenMissing() {
         when(service.findById(3)).thenReturn(Optional.empty());
 
-        ResponseEntity<Address> response = controller.getAddressById(3);
+        ResponseEntity<AddressDTO> response = controller.getAddressById(3);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
+    }
+
+    @Test
+    void testUpdateAddress_returnsUpdatedAddressDTOWhenFound() {
+        Address updatedAddress = new Address();
+        updatedAddress.setId(1);
+        updatedAddress.setStreet("Updated Street");
+        
+        when(service.update(1, address1)).thenReturn(Optional.of(updatedAddress));
+
+        ResponseEntity<AddressDTO> response = controller.updateAddress(1, address1);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Updated Street", response.getBody().getStreet());
+        verify(service, times(1)).update(1, address1);
+    }
+
+    @Test
+    void testUpdateAddress_returnsNotFoundWhenMissing() {
+        when(service.update(3, address1)).thenReturn(Optional.empty());
+
+        ResponseEntity<AddressDTO> response = controller.updateAddress(3, address1);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
@@ -95,8 +132,7 @@ class AddressControllerTest {
 
     @Test
     void testDeleteAddress_returnsNoContentWhenFound() {
-        when(service.findById(1)).thenReturn(Optional.of(address1));
-        // Simulate deleteById without returning boolean
+        when(service.existsById(1)).thenReturn(true);
         doNothing().when(service).deleteById(1);
 
         ResponseEntity<Void> response = controller.deleteAddress(1);
@@ -107,7 +143,7 @@ class AddressControllerTest {
 
     @Test
     void testDeleteAddress_returnsNotFoundWhenMissing() {
-        when(service.findById(1)).thenReturn(Optional.empty());
+        when(service.existsById(1)).thenReturn(false);
 
         ResponseEntity<Void> response = controller.deleteAddress(1);
 

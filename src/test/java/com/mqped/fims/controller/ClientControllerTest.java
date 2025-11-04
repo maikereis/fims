@@ -1,6 +1,7 @@
 package com.mqped.fims.controller;
 
-import com.mqped.fims.model.Client;
+import com.mqped.fims.model.dto.ClientDTO;
+import com.mqped.fims.model.entity.Client;
 import com.mqped.fims.service.ClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,37 +57,44 @@ class ClientControllerTest {
     }
 
     @Test
-    void testCreateClient_returnsCreatedClient() {
+    void testCreateClient_returnsCreatedClientDTO() {
         when(service.add(client1)).thenReturn(client1);
 
-        ResponseEntity<Client> response = controller.createClient(client1);
+        ResponseEntity<ClientDTO> response = controller.createClient(client1);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(client1, response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(client1.getId(), response.getBody().getId());
+        assertEquals(client1.getName(), response.getBody().getName());
+        assertEquals(client1.getCpf(), response.getBody().getCpf());
         verify(service, times(1)).add(client1);
     }
 
     @Test
-    void testGetAllClients_returnsAllClients() {
+    void testGetAllClients_returnsAllClientDTOs() {
         List<Client> clients = Arrays.asList(client1, client2);
         when(service.findAll()).thenReturn(clients);
 
-        ResponseEntity<List<Client>> response = controller.getAllClients(); // fixed method call
+        ResponseEntity<List<ClientDTO>> response = controller.getAllClients();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(2, response.getBody().size());
+        assertEquals("Alice", response.getBody().get(0).getName());
+        assertEquals("Bob", response.getBody().get(1).getName());
         verify(service, times(1)).findAll();
     }
 
     @Test
-    void testGetClientById_returnsClientWhenFound() {
+    void testGetClientById_returnsClientDTOWhenFound() {
         when(service.findById(1)).thenReturn(Optional.of(client1));
 
-        ResponseEntity<Client> response = controller.getClientById(1);
+        ResponseEntity<ClientDTO> response = controller.getClientById(1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(client1, response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(client1.getId(), response.getBody().getId());
+        assertEquals(client1.getName(), response.getBody().getName());
         verify(service, times(1)).findById(1);
     }
 
@@ -94,7 +102,7 @@ class ClientControllerTest {
     void testGetClientById_returnsNotFoundWhenMissing() {
         when(service.findById(3)).thenReturn(Optional.empty());
 
-        ResponseEntity<Client> response = controller.getClientById(3);
+        ResponseEntity<ClientDTO> response = controller.getClientById(3);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
@@ -102,8 +110,35 @@ class ClientControllerTest {
     }
 
     @Test
+    void testUpdateClient_returnsUpdatedClientDTOWhenFound() {
+        Client updatedClient = new Client();
+        updatedClient.setId(1);
+        updatedClient.setName("Alice Updated");
+        updatedClient.setCpf(client1.getCpf());
+        
+        when(service.update(1, client1)).thenReturn(Optional.of(updatedClient));
+
+        ResponseEntity<ClientDTO> response = controller.updateClient(1, client1);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Alice Updated", response.getBody().getName());
+        verify(service, times(1)).update(1, client1);
+    }
+
+    @Test
+    void testUpdateClient_returnsNotFoundWhenMissing() {
+        when(service.update(3, client1)).thenReturn(Optional.empty());
+
+        ResponseEntity<ClientDTO> response = controller.updateClient(3, client1);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
+    }
+
+    @Test
     void testDeleteClient_returnsNoContentWhenFound() {
-        when(service.findById(1)).thenReturn(Optional.of(client1)); // <-- mock findById
+        when(service.existsById(1)).thenReturn(true);
         doNothing().when(service).deleteById(1);
 
         ResponseEntity<Void> response = controller.deleteClient(1);
@@ -114,12 +149,11 @@ class ClientControllerTest {
 
     @Test
     void testDeleteClient_returnsNotFoundWhenMissing() {
-        when(service.findById(3)).thenReturn(Optional.empty()); // <-- mock findById
+        when(service.existsById(3)).thenReturn(false);
 
         ResponseEntity<Void> response = controller.deleteClient(3);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(service, never()).deleteById(anyInt());
     }
-
 }

@@ -1,4 +1,4 @@
-package com.mqped.fims.model;
+package com.mqped.fims.model.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -9,8 +9,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "clients")
@@ -28,7 +26,6 @@ public class Client {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("client-contractAccount")
     private List<ContractAccount> contractAccounts;
 
     public Integer getId() {

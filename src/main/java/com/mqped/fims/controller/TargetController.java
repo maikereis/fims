@@ -1,7 +1,8 @@
 package com.mqped.fims.controller;
 
-import com.mqped.fims.model.Target;
-import com.mqped.fims.model.TargetType;
+import com.mqped.fims.model.dto.TargetDTO;
+import com.mqped.fims.model.entity.Target;
+import com.mqped.fims.model.enums.TargetType;
 import com.mqped.fims.service.TargetService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,32 +23,34 @@ public class TargetController {
 
     // CREATE
     @PostMapping
-    public ResponseEntity<Target> createTarget(@RequestBody Target target) {
+    public ResponseEntity<TargetDTO> createTarget(@RequestBody Target target) {
         Target savedTarget = service.add(target);
-        return new ResponseEntity<>(savedTarget, HttpStatus.CREATED);
+        return new ResponseEntity<>(TargetDTO.fromEntity(savedTarget), HttpStatus.CREATED);
     }
 
     // READ ALL
     @GetMapping
-    public ResponseEntity<List<Target>> getAllTargets() {
-        List<Target> targets = service.findAll();
-        return new ResponseEntity<>(targets, HttpStatus.OK);
+    public ResponseEntity<List<TargetDTO>> getAllTargets() {
+        List<TargetDTO> dtos = service.findAll().stream()
+                .map(TargetDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // READ ONE
     @GetMapping("/{id}")
-    public ResponseEntity<Target> getTargetById(@PathVariable Integer id) {
+    public ResponseEntity<TargetDTO> getTargetById(@PathVariable Integer id) {
         Optional<Target> target = service.findById(id);
-        return target.map(t -> new ResponseEntity<>(t, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return target.map(t -> ResponseEntity.ok(TargetDTO.fromEntity(t)))
+                     .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     // UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<Target> updateTarget(@PathVariable Integer id, @RequestBody Target target) {
+    public ResponseEntity<TargetDTO> updateTarget(@PathVariable Integer id, @RequestBody Target target) {
         Optional<Target> updated = service.update(id, target);
-        return updated.map(t -> new ResponseEntity<>(t, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return updated.map(t -> ResponseEntity.ok(TargetDTO.fromEntity(t)))
+                      .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     // DELETE
@@ -55,94 +58,106 @@ public class TargetController {
     public ResponseEntity<Void> deleteTarget(@PathVariable Integer id) {
         if (service.existsById(id)) {
             service.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.noContent().build();
         }
+        return ResponseEntity.notFound().build();
     }
 
     // READ BY CONTRACT ACCOUNT ID
     @GetMapping("/contract/{contractAccountId}")
-    public ResponseEntity<List<Target>> getTargetsByContractAccount(@PathVariable Integer contractAccountId) {
-        List<Target> targets = service.findByContractAccountId(contractAccountId);
-        return new ResponseEntity<>(targets, HttpStatus.OK);
+    public ResponseEntity<List<TargetDTO>> getTargetsByContractAccount(@PathVariable Integer contractAccountId) {
+        List<TargetDTO> dtos = service.findByContractAccountId(contractAccountId)
+                .stream().map(TargetDTO::fromEntity).toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // READ BY CLIENT ID
     @GetMapping("/client/{clientId}")
-    public ResponseEntity<List<Target>> getTargetsByClient(@PathVariable Integer clientId) {
-        List<Target> targets = service.findByClientId(clientId);
-        return new ResponseEntity<>(targets, HttpStatus.OK);
+    public ResponseEntity<List<TargetDTO>> getTargetsByClient(@PathVariable Integer clientId) {
+        List<TargetDTO> dtos = service.findByClientId(clientId)
+                .stream().map(TargetDTO::fromEntity).toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // READ BY TYPE
     @GetMapping("/type/{type}")
-    public ResponseEntity<List<Target>> getTargetsByType(@PathVariable TargetType type) {
-        List<Target> targets = service.findByType(type);
-        return new ResponseEntity<>(targets, HttpStatus.OK);
+    public ResponseEntity<List<TargetDTO>> getTargetsByType(@PathVariable TargetType type) {
+        List<TargetDTO> dtos = service.findByType(type)
+                .stream().map(TargetDTO::fromEntity).toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // SEARCH BY SIGNATURE
     @GetMapping("/signature/{signature}")
-    public ResponseEntity<List<Target>> getTargetsBySignature(@PathVariable String signature) {
-        List<Target> targets = service.findBySignature(signature);
-        return new ResponseEntity<>(targets, HttpStatus.OK);
+    public ResponseEntity<List<TargetDTO>> getTargetsBySignature(@PathVariable String signature) {
+        List<TargetDTO> dtos = service.findBySignature(signature)
+                .stream().map(TargetDTO::fromEntity).toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // SEARCH BY PARTIAL SIGNATURE
     @GetMapping("/signature/contains/{partial}")
-    public ResponseEntity<List<Target>> getTargetsBySignatureContaining(@PathVariable String partial) {
-        List<Target> targets = service.findBySignatureContaining(partial);
-        return new ResponseEntity<>(targets, HttpStatus.OK);
+    public ResponseEntity<List<TargetDTO>> getTargetsBySignatureContaining(@PathVariable String partial) {
+        List<TargetDTO> dtos = service.findBySignatureContaining(partial)
+                .stream().map(TargetDTO::fromEntity).toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // SEARCH BY SCORE GREATER THAN
     @GetMapping("/score/greater/{value}")
-    public ResponseEntity<List<Target>> getTargetsByScoreGreater(@PathVariable Double value) {
-        List<Target> targets = service.findByScoreGreater(value);
-        return new ResponseEntity<>(targets, HttpStatus.OK);
+    public ResponseEntity<List<TargetDTO>> getTargetsByScoreGreater(@PathVariable Double value) {
+        List<TargetDTO> dtos = service.findByScoreGreater(value)
+                .stream().map(TargetDTO::fromEntity).toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // SEARCH BY SCORE LESS THAN
     @GetMapping("/score/less/{value}")
-    public ResponseEntity<List<Target>> getTargetsByScoreLess(@PathVariable Double value) {
-        List<Target> targets = service.findByScoreLess(value);
-        return new ResponseEntity<>(targets, HttpStatus.OK);
+    public ResponseEntity<List<TargetDTO>> getTargetsByScoreLess(@PathVariable Double value) {
+        List<TargetDTO> dtos = service.findByScoreLess(value)
+                .stream().map(TargetDTO::fromEntity).toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // SEARCH BY SCORE BETWEEN
     @GetMapping("/score/between")
-    public ResponseEntity<List<Target>> getTargetsByScoreBetween(
+    public ResponseEntity<List<TargetDTO>> getTargetsByScoreBetween(
             @RequestParam Double min,
             @RequestParam Double max) {
-        List<Target> targets = service.findByScoreBetween(min, max);
-        return new ResponseEntity<>(targets, HttpStatus.OK);
+        List<TargetDTO> dtos = service.findByScoreBetween(min, max)
+                .stream().map(TargetDTO::fromEntity).toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // SEARCH BY DISTANCE GREATER THAN
     @GetMapping("/distance/greater/{min}")
-    public ResponseEntity<List<Target>> getByDistanceGreater(@PathVariable Double min) {
-        return ResponseEntity.ok(service.findByDistanceGreater(min));
+    public ResponseEntity<List<TargetDTO>> getByDistanceGreater(@PathVariable Double min) {
+        List<TargetDTO> dtos = service.findByDistanceGreater(min)
+                .stream().map(TargetDTO::fromEntity).toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // SEARCH BY DISTANCE LESS THAN
     @GetMapping("/distance/less/{max}")
-    public ResponseEntity<List<Target>> getByDistanceLess(@PathVariable Double max) {
-        return ResponseEntity.ok(service.findByDistanceLess(max));
+    public ResponseEntity<List<TargetDTO>> getByDistanceLess(@PathVariable Double max) {
+        List<TargetDTO> dtos = service.findByDistanceLess(max)
+                .stream().map(TargetDTO::fromEntity).toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // SEARCH BY DISTANCE BETWEEN
     @GetMapping("/distance/between")
-    public ResponseEntity<List<Target>> getByDistanceBetween(
+    public ResponseEntity<List<TargetDTO>> getByDistanceBetween(
             @RequestParam Double min,
             @RequestParam Double max) {
-        return ResponseEntity.ok(service.findByDistanceBetween(min, max));
+        List<TargetDTO> dtos = service.findByDistanceBetween(min, max)
+                .stream().map(TargetDTO::fromEntity).toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // HEALTH CHECK
     @GetMapping("/check")
     public ResponseEntity<String> check() {
-        return new ResponseEntity<>("Target API is up and running!", HttpStatus.OK);
+        return ResponseEntity.ok("Target API is up and running!");
     }
-
 }

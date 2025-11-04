@@ -1,10 +1,10 @@
 package com.mqped.fims;
 
-import com.mqped.fims.model.Address;
-import com.mqped.fims.model.Client;
-import com.mqped.fims.model.ContractAccount;
-import com.mqped.fims.model.Installation;
-import com.mqped.fims.model.StatusType;
+import com.mqped.fims.model.entity.Address;
+import com.mqped.fims.model.entity.Client;
+import com.mqped.fims.model.entity.ContractAccount;
+import com.mqped.fims.model.entity.Installation;
+import com.mqped.fims.model.enums.StatusType;
 import com.mqped.fims.service.AddressService;
 import com.mqped.fims.service.ClientService;
 import com.mqped.fims.service.ContractAccountService;

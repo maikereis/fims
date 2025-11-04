@@ -2,7 +2,7 @@ package com.mqped.fims.service;
 
 import com.mqped.fims.exceptions.InvalidDataException;
 import com.mqped.fims.exceptions.ResourceNotFoundException;
-import com.mqped.fims.model.Client;
+import com.mqped.fims.model.entity.Client;
 import com.mqped.fims.repository.ClientRepository;
 import org.springframework.stereotype.Service;
 

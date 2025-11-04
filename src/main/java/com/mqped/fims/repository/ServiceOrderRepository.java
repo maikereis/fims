@@ -1,7 +1,8 @@
 package com.mqped.fims.repository;
 
-import com.mqped.fims.model.ServiceOrder;
-import com.mqped.fims.model.ServiceOrderStatus;
+import com.mqped.fims.model.entity.ServiceOrder;
+import com.mqped.fims.model.enums.ServiceOrderStatus;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

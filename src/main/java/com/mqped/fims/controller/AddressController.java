@@ -1,6 +1,7 @@
 package com.mqped.fims.controller;
 
-import com.mqped.fims.model.Address;
+import com.mqped.fims.model.dto.AddressDTO;
+import com.mqped.fims.model.entity.Address;
 import com.mqped.fims.service.AddressService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,42 +22,49 @@ public class AddressController {
 
     // CREATE
     @PostMapping
-    public ResponseEntity<Address> createAddress(@RequestBody Address address) {
+    public ResponseEntity<AddressDTO> createAddress(@RequestBody Address address) {
         Address savedAddress = service.add(address);
-        return new ResponseEntity<>(savedAddress, HttpStatus.CREATED);
+        return new ResponseEntity<>(AddressDTO.fromEntity(savedAddress), HttpStatus.CREATED);
     }
 
     // READ ALL
     @GetMapping
-    public ResponseEntity<List<Address>> getAllAddresses() {
-        List<Address> addresses = service.findAll();
-        return new ResponseEntity<>(addresses, HttpStatus.OK);
+    public ResponseEntity<List<AddressDTO>> getAllAddresses() {
+        List<AddressDTO> dtos = service.findAll().stream()
+                .map(AddressDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // READ ONE
     @GetMapping("/{id}")
-    public ResponseEntity<Address> getAddressById(@PathVariable Integer id) {
+    public ResponseEntity<AddressDTO> getAddressById(@PathVariable Integer id) {
         Optional<Address> address = service.findById(id);
-        return address.map(a -> new ResponseEntity<>(a, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return address.map(a -> ResponseEntity.ok(AddressDTO.fromEntity(a)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    // UPDATE
+    @PutMapping("/{id}")
+    public ResponseEntity<AddressDTO> updateAddress(@PathVariable Integer id, @RequestBody Address address) {
+        Optional<Address> updated = service.update(id, address);
+        return updated.map(a -> ResponseEntity.ok(AddressDTO.fromEntity(a)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     // DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAddress(@PathVariable Integer id) {
-        Optional<Address> existingAddress = service.findById(id);
-        if (existingAddress.isPresent()) {
+        if (service.existsById(id)) {
             service.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.noContent().build();
         }
+        return ResponseEntity.notFound().build();
     }
 
     // CHECK
     @GetMapping("/check")
     public ResponseEntity<String> check() {
-        return new ResponseEntity<>("Address API is up and running!", HttpStatus.OK);
+        return ResponseEntity.ok("Address API is up and running!");
     }
-
 }

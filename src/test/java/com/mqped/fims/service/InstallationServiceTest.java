@@ -1,8 +1,8 @@
 package com.mqped.fims.service;
 
 import com.mqped.fims.exceptions.ResourceNotFoundException;
-import com.mqped.fims.model.Address;
-import com.mqped.fims.model.Installation;
+import com.mqped.fims.model.entity.Address;
+import com.mqped.fims.model.entity.Installation;
 import com.mqped.fims.repository.AddressRepository;
 import com.mqped.fims.repository.InstallationRepository;
 import org.junit.jupiter.api.BeforeEach;

@@ -2,8 +2,8 @@ package com.mqped.fims.service;
 
 import com.mqped.fims.exceptions.InvalidDataException;
 import com.mqped.fims.exceptions.ResourceNotFoundException;
-import com.mqped.fims.model.Target;
-import com.mqped.fims.model.TargetType;
+import com.mqped.fims.model.entity.Target;
+import com.mqped.fims.model.enums.TargetType;
 import com.mqped.fims.repository.ContractAccountRepository;
 import com.mqped.fims.repository.TargetRepository;
 import org.springframework.stereotype.Service;

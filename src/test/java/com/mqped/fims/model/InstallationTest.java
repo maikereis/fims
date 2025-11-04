@@ -3,6 +3,9 @@ package com.mqped.fims.model;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.mqped.fims.model.entity.Address;
+import com.mqped.fims.model.entity.Installation;
+
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
