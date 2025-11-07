@@ -12,6 +12,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 
 @Entity
 @Table(name = "installations")
@@ -22,8 +24,11 @@ public class Installation {
     private Integer id;
 
     @ManyToOne(cascade = { CascadeType.MERGE })
-    @JoinColumn(name = "address_id")
+    @JoinColumn(name = "address_id", nullable = false)
+    @NotNull(message = "Address is required.")
     private Address address;
+
+    @PastOrPresent(message = "Creation date cannot be in the future.")
     private LocalDateTime createdAt;
     private LocalDateTime deletedAt;
 
