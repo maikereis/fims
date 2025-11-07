@@ -9,6 +9,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,6 +37,8 @@ public class Client {
 
     private String cnpj;
     private String genre;
+
+    @PastOrPresent(message = "Creation date cannot be in the future.")
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
