@@ -62,10 +62,13 @@ class ContractAccountServiceTest {
         account.setClient(client);
 
         Address address = new Address();
-        address.setAddressId("ADDR-001");
+        address.setAddressId("ADDR-" + System.nanoTime());
         address.setState("PA");
         address.setMunicipality("Belém");
+        address.setNeighborhood("Centro");
         address.setStreet("Rua Teste");
+        address.setNumber("123");
+        address.setZipCode("66000-000");
         address = addressRepository.save(address);
 
         Installation installation = new Installation();

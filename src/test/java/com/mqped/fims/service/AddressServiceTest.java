@@ -29,11 +29,18 @@ class AddressServiceTest {
 
     private Address createValidAddress(String state, String municipality, String street) {
         Address address = new Address();
+        address.setAddressId("ADDR-" + System.nanoTime());
         address.setState(state);
         address.setMunicipality(municipality);
+        address.setNeighborhood("Centro");
         address.setStreet(street);
+        address.setNumber("123");
+        address.setZipCode("66000-000");
+        address.setLatitude(-1.455833);
+        address.setLongitude(-48.504444);
         return address;
     }
+
 
     @Test
     void testAdd_AssignsIdAndStoresAddress() {

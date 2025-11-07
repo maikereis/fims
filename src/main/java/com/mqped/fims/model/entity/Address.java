@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "addresses")
@@ -17,17 +18,34 @@ public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
     private String addressId;
+    
+    @NotBlank(message = "State is required.")
     private String state;
+
+    @NotBlank(message = "Municipality is required.")
     private String municipality;
+
     private String district;
     private String subdistrict;
+
+    @NotBlank(message = "Neighborhood is required.")
     private String neighborhood;
+
+    @NotBlank(message = "Street is required.")
     private String street;
+
     private String streetType;
+
+    @NotBlank(message = "Number is required.")
     private String number;
+
     private String complement;
+
+    @NotBlank(message = "ZIP code is required.")
     private String zipCode;
+    
     private Double latitude;
     private Double longitude;
 

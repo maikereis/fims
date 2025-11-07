@@ -156,7 +156,10 @@ class InstallationServiceTest {
         address.setAddressId("ADDR-TEST-" + System.nanoTime());
         address.setState("PA");
         address.setMunicipality("Belém");
+        address.setNeighborhood("Centro");
         address.setStreet("Rua das Flores");
+        address.setNumber("123");
+        address.setZipCode("66000-000");
         address = addressRepository.save(address);
 
         Installation installation = new Installation();
