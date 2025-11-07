@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import com.mqped.fims.util.StringNormalizer;
 
 @Component
 @Order(2)
+@Profile("!test")
 public class ClientLoader implements ApplicationRunner {
 
     @Value("${client.csv.path}")
@@ -38,9 +40,7 @@ public class ClientLoader implements ApplicationRunner {
             reader.readLine(); // skip the header
 
             String line;
-            int lineNumber = 1;
             while ((line = reader.readLine()) != null) {
-                lineNumber++;
                 String[] fields = line.split(",", -1);
 
                 Client client = new Client();

@@ -14,6 +14,7 @@ import com.mqped.fims.util.StringNormalizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,7 @@ import java.util.Map;
 
 @Component
 @Order(4)
+@Profile("!test")
 public class ContractAccountLoader implements ApplicationRunner {
 
     @Value("${contract.csv.path}")
