@@ -44,15 +44,17 @@ public class ClientLoader implements ApplicationRunner {
                 String[] fields = line.split(",", -1);
 
                 Client client = new Client();
-                    client.setName(StringNormalizer.normalize(fields[0]));
-                    client.setCpf(fields[1]);
-                    client.setBirthDate(fields[2].isEmpty() ? null : LocalDateTime.parse(fields[2]));
-                    client.setMotherName(StringNormalizer.normalize(fields[3]));
-                    client.setCnpj(fields[4]);
-                    client.setGenre(fields[5].isEmpty() ? "Desconhecido" : StringNormalizer.normalize(fields[5]));
-                    client.setCreatedAt(fields[6].isEmpty() ? LocalDateTime.now() : LocalDateTime.parse(fields[6]));
+                client.setName(StringNormalizer.normalize(fields[0]));
+                client.setCpf(fields[1]);
+                client.setBirthDate(fields[2].isEmpty()
+                        ? LocalDateTime.of(1900, 1, 1, 0, 0)
+                        : LocalDateTime.parse(fields[2]));
+                client.setMotherName(StringNormalizer.normalize(fields[3]));
+                client.setCnpj(fields[4]);
+                client.setGenre(fields[5].isEmpty() ? "Desconhecido" : StringNormalizer.normalize(fields[5]));
+                client.setCreatedAt(fields[6].isEmpty() ? LocalDateTime.now() : LocalDateTime.parse(fields[6]));
 
-                    clientService.add(client);
+                clientService.add(client);
             }
 
             // Collection<Client> clients = clientService.findAll();
