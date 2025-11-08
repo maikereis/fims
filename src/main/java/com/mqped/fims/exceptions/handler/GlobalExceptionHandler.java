@@ -2,6 +2,7 @@ package com.mqped.fims.exceptions.handler;
 
 import com.mqped.fims.exceptions.BusinessRuleException;
 import com.mqped.fims.exceptions.DuplicateResourceException;
+import com.mqped.fims.exceptions.ForbiddenException;
 import com.mqped.fims.exceptions.InvalidDataException;
 import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.exceptions.dto.ErrorResponse;
@@ -64,6 +65,18 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleForbidden(
+            ForbiddenException ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                "Forbidden",
+                ex.getMessage(),
+                request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
     @ExceptionHandler(ResponseStatusException.class)
