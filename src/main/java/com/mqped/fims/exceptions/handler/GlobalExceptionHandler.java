@@ -10,6 +10,8 @@ import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.exceptions.dto.ErrorResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -152,6 +154,40 @@ public class GlobalExceptionHandler {
         error.setPath(request.getRequestURI());
         error.setValidationErrors(validationErrors);
 
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(
+            ConstraintViolationException ex,
+            HttpServletRequest request) {
+
+        Map<String, String> validationErrors = new HashMap<>();
+        for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
+            String fieldName = violation.getPropertyPath().toString();
+            String errorMessage = violation.getMessage();
+            validationErrors.put(fieldName, errorMessage);
+        }
+
+        ErrorResponse error = new ErrorResponse();
+        error.setStatus(HttpStatus.BAD_REQUEST.value());
+        error.setError("Constraint Violation");
+        error.setMessage("One or more constraints were violated");
+        error.setPath(request.getRequestURI());
+        error.setValidationErrors(validationErrors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(
+            IllegalArgumentException ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Invalid Argument",
+                ex.getMessage(),
+                request.getRequestURI());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
