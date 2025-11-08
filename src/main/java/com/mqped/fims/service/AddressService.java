@@ -9,7 +9,6 @@ import com.mqped.fims.repository.AddressRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AddressService implements CrudService<Address, Integer> {
@@ -34,35 +33,38 @@ public class AddressService implements CrudService<Address, Integer> {
         return repository.save(address);
     }
 
+    @Override
     public List<Address> findAll() {
         return repository.findAll();
     }
 
-    public Optional<Address> findById(Integer id) {
-        return repository.findById(id);
+    @Override
+    public Address findById(Integer id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Address with id " + id + " not found"));
     }
 
     @Override
-    public Optional<Address> update(Integer id, Address address) {
+    public Address update(Integer id, Address address) {
         validate(address);
 
-        return repository.findById(id).map(existing -> {
-            existing.setAddressId(address.getAddressId());
-            existing.setState(address.getState());
-            existing.setMunicipality(address.getMunicipality());
-            existing.setDistrict(address.getDistrict());
-            existing.setSubdistrict(address.getSubdistrict());
-            existing.setNeighborhood(address.getNeighborhood());
-            existing.setStreet(address.getStreet());
-            existing.setStreetType(address.getStreetType());
-            existing.setNumber(address.getNumber());
-            existing.setComplement(address.getComplement());
-            existing.setZipCode(address.getZipCode());
-            existing.setLatitude(address.getLatitude());
-            existing.setLongitude(address.getLongitude());
+        Address existing = findById(id); // throws if not found
+        
+        existing.setAddressId(address.getAddressId());
+        existing.setState(address.getState());
+        existing.setMunicipality(address.getMunicipality());
+        existing.setDistrict(address.getDistrict());
+        existing.setSubdistrict(address.getSubdistrict());
+        existing.setNeighborhood(address.getNeighborhood());
+        existing.setStreet(address.getStreet());
+        existing.setStreetType(address.getStreetType());
+        existing.setNumber(address.getNumber());
+        existing.setComplement(address.getComplement());
+        existing.setZipCode(address.getZipCode());
+        existing.setLatitude(address.getLatitude());
+        existing.setLongitude(address.getLongitude());
 
-            return repository.save(existing);
-        });
+        return repository.save(existing);
     }
 
     @Override
@@ -73,21 +75,25 @@ public class AddressService implements CrudService<Address, Integer> {
         repository.deleteById(id);
     }
 
+    @Override
     public boolean existsById(Integer id) {
         return repository.existsById(id);
     }
 
+    @Override
     public long count() {
         return repository.count();
     }
 
-    public Optional<Address> findByAddressId(String addressId) {
-        return repository.findByAddressId(addressId);
+    public Address findByAddressId(String addressId) {
+        return repository.findByAddressId(addressId)
+                .orElseThrow(() -> new ResourceNotFoundException("Address with addressId " + addressId + " not found"));
     }
 
-    public void validate(Address address) {
-        if (address == null)
+    private void validate(Address address) {
+        if (address == null) {
             throw new InvalidDataException("Address cannot be null");
+        }
         if (address.getState() == null || address.getState().isBlank()) {
             throw new InvalidDataException("State is required");
         }

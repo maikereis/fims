@@ -7,7 +7,6 @@ import com.mqped.fims.repository.ClientRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ClientService implements CrudService<Client, Integer> {
@@ -30,26 +29,26 @@ public class ClientService implements CrudService<Client, Integer> {
     }
 
     @Override
-    public Optional<Client> findById(Integer id) {
-        return repository.findById(id);
+    public Client findById(Integer id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Client with id " + id + " not found"));
     }
 
     @Override
-    public Optional<Client> update(Integer id, Client client) {
+    public Client update(Integer id, Client client) {
         validate(client);
 
-        return repository.findById(id).map(existing -> {
-            existing.setName(client.getName());
-            existing.setCpf(client.getCpf());
-            existing.setBirthDate(client.getBirthDate());
-            existing.setMotherName(client.getMotherName());
-            existing.setCnpj(client.getCnpj());
-            existing.setGenre(client.getGenre());
-            existing.setCreatedAt(client.getCreatedAt()); // optional, depends if you want to allow updating creation
-                                                          // timestamp
+        Client existing = findById(id); // throws if not found
+        
+        existing.setName(client.getName());
+        existing.setCpf(client.getCpf());
+        existing.setBirthDate(client.getBirthDate());
+        existing.setMotherName(client.getMotherName());
+        existing.setCnpj(client.getCnpj());
+        existing.setGenre(client.getGenre());
+        existing.setCreatedAt(client.getCreatedAt());
 
-            return repository.save(existing);
-        });
+        return repository.save(existing);
     }
 
     @Override
@@ -85,8 +84,7 @@ public class ClientService implements CrudService<Client, Integer> {
     }
 
     private boolean isValidCpf(String cpf) {
-        if (cpf == null)
-            return false;
+        if (cpf == null) return false;
         return cpf.matches("\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}");
     }
 }

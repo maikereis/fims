@@ -7,7 +7,6 @@ import com.mqped.fims.repository.InstallationRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class InstallationService implements CrudService<Installation, Integer> {
@@ -30,22 +29,22 @@ public class InstallationService implements CrudService<Installation, Integer> {
     }
 
     @Override
-    public Optional<Installation> findById(Integer id) {
-        return repository.findById(id);
+    public Installation findById(Integer id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Installation with id " + id + " not found"));
     }
 
     @Override
-    public Optional<Installation> update(Integer id, Installation installation) {
+    public Installation update(Integer id, Installation installation) {
         validate(installation);
 
-        return repository.findById(id).map(existing -> {
-            existing.setAddress(installation.getAddress());
-            existing.setCreatedAt(installation.getCreatedAt());
-            existing.setDeletedAt(installation.getDeletedAt());
-            // Add more fields if your Installation model expands
+        Installation existing = findById(id); // throws if not found
+        
+        existing.setAddress(installation.getAddress());
+        existing.setCreatedAt(installation.getCreatedAt());
+        existing.setDeletedAt(installation.getDeletedAt());
 
-            return repository.save(existing);
-        });
+        return repository.save(existing);
     }
 
     @Override
