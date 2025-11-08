@@ -28,13 +28,19 @@ class ClientServiceTest {
         repository.deleteAll();
     }
 
+    private Client createValidClient(String name, String cpf) {
+        Client client = new Client();
+        client.setName(name);
+        client.setCpf(cpf);
+        client.setGenre("F");
+        client.setBirthDate(LocalDateTime.now().minusYears(25));
+        client.setCreatedAt(LocalDateTime.now());
+        return client;
+    }
+
     @Test
     void testAdd_AssignsIdAndStoresClient() {
-        Client client = new Client();
-        client.setName("Ana Clara");
-        client.setCpf("123.456.789-00");
-        client.setGenre("F");
-        client.setCreatedAt(LocalDateTime.now());
+        Client client = createValidClient("Ana Clara", "123.456.789-00");
 
         Client result = service.add(client);
 
@@ -45,10 +51,7 @@ class ClientServiceTest {
 
     @Test
     void testFindById_ExistingClient() {
-        Client c = new Client();
-        c.setName("Carlos Eduardo");
-        c.setCpf("987.654.321-00");
-        Client saved = service.add(c);
+        Client saved = service.add(createValidClient("Carlos Eduardo", "987.654.321-00"));
 
         Optional<Client> result = service.findById(saved.getId());
 
@@ -65,15 +68,11 @@ class ClientServiceTest {
 
     @Test
     void testFindAll_MultipleClients() {
-        Client c1 = new Client();
-        c1.setName("Ana Clara");
-        Client c2 = new Client();
-        c2.setName("Carlos Eduardo");
-
-        service.add(c1);
-        service.add(c2);
+        service.add(createValidClient("Ana Clara", "111.111.111-11"));
+        service.add(createValidClient("Carlos Eduardo", "222.222.222-22"));
 
         List<Client> result = service.findAll();
+
         assertEquals(2, result.size());
         assertTrue(result.stream().anyMatch(c -> c.getName().equals("Ana Clara")));
         assertTrue(result.stream().anyMatch(c -> c.getName().equals("Carlos Eduardo")));
@@ -81,15 +80,9 @@ class ClientServiceTest {
 
     @Test
     void testUpdate_ExistingClient() {
-        Client original = new Client();
-        original.setName("João Silva");
-        original.setCpf("111.111.111-11");
-        Client saved = service.add(original);
+        Client saved = service.add(createValidClient("João Silva", "111.111.111-11"));
 
-        Client updated = new Client();
-        updated.setName("Mariana Souza");
-        updated.setCpf("222.222.222-22");
-        updated.setGenre("F");
+        Client updated = createValidClient("Mariana Souza", "222.222.222-22");
         updated.setMotherName("Clara Souza");
 
         Optional<Client> result = service.update(saved.getId(), updated);
@@ -104,19 +97,13 @@ class ClientServiceTest {
 
     @Test
     void testUpdate_NonExistingClient() {
-        Client client = new Client();
-        client.setName("Pedro Alves");
-
-        Optional<Client> result = service.update(999, client);
-
+        Optional<Client> result = service.update(999, createValidClient("Pedro Alves", "333.333.333-33"));
         assertFalse(result.isPresent());
     }
 
     @Test
     void testDeleteById_ExistingClient() {
-        Client client = new Client();
-        client.setName("Lucas Ferreira");
-        Client saved = service.add(client);
+        Client saved = service.add(createValidClient("Lucas Ferreira", "444.444.444-44"));
 
         service.deleteById(saved.getId());
         assertFalse(service.existsById(saved.getId()));
@@ -131,9 +118,7 @@ class ClientServiceTest {
 
     @Test
     void testExistsById() {
-        Client client = new Client();
-        client.setName("Gabriela Martins");
-        Client saved = service.add(client);
+        Client saved = service.add(createValidClient("Gabriela Martins", "555.555.555-55"));
 
         assertTrue(service.existsById(saved.getId()));
         assertFalse(service.existsById(999));
@@ -143,13 +128,9 @@ class ClientServiceTest {
     void testCount() {
         assertEquals(0, service.count());
 
-        Client c1 = new Client();
-        c1.setName("Rafael Lima");
-        Client c2 = new Client();
-        c2.setName("Fernanda Rocha");
+        service.add(createValidClient("Rafael Lima", "666.666.666-66"));
+        service.add(createValidClient("Fernanda Rocha", "777.777.777-77"));
 
-        service.add(c1);
-        service.add(c2);
         assertEquals(2, service.count());
     }
 }

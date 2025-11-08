@@ -53,28 +53,35 @@ class ContractAccountServiceTest {
     }
 
     private ContractAccount createValidContractAccount() {
-        ContractAccount account = new ContractAccount();
-        account.setAccountNumber("DEFAULT-ACC");
 
         Client client = new Client();
         client.setName("Test Client");
+        client.setCpf("111.111.111-11");
+        client.setBirthDate(LocalDateTime.now().minusYears(18));
         client = clientRepository.save(client);
-        account.setClient(client);
 
         Address address = new Address();
         address.setAddressId("ADDR-001");
         address.setState("PA");
         address.setMunicipality("Belém");
+        address.setNeighborhood("Icoaraci");
         address.setStreet("Rua Teste");
+        address.setZipCode("66810-000");
+        address.setNumber("0");
         address = addressRepository.save(address);
 
         Installation installation = new Installation();
         installation.setAddress(address);
         installation.setCreatedAt(LocalDateTime.now());
         installation = installationRepository.save(installation);
+
+        ContractAccount account = new ContractAccount();
+        account.setAccountNumber("DEFAULT-ACC");
         account.setInstallation(installation);
+        account.setClient(client);
 
         account.setCreatedAt(LocalDateTime.now());
+
         return account;
     }
 

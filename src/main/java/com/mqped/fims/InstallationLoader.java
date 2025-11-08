@@ -7,6 +7,7 @@ import com.mqped.fims.service.InstallationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 
 @Component
 @Order(3)
+@Profile("!test")
 public class InstallationLoader implements ApplicationRunner {
 
     @Value("${installation.csv.path}")

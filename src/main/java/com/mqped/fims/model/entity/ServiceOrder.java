@@ -4,11 +4,15 @@ import java.time.LocalDateTime;
 
 import com.mqped.fims.model.enums.ServiceOrderStatus;
 import com.mqped.fims.model.enums.ServiceOrderType;
+import com.mqped.fims.validation.annotation.ChronologicalDates;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 
 @Entity
 @Table(name = "service_orders")
+@ChronologicalDates(start = "createdAt", end = "executedAt", allowEqual = false, message = "Execution date must be after creation date.")
 public class ServiceOrder {
 
     @Id
@@ -17,16 +21,21 @@ public class ServiceOrder {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_id", nullable = false)
+    @NotNull(message = "Target is required.")
     private Target target;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @NotNull(message = "Status is required.")
     private ServiceOrderStatus status = ServiceOrderStatus.CREATED;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @NotNull(message = "Service order type is required.")
     private ServiceOrderType type;
 
+    @NotNull(message = "Creation date is required.")
+    @PastOrPresent(message = "Creation date cannot be in the future.")
     private LocalDateTime createdAt;
     private LocalDateTime executedAt;
 

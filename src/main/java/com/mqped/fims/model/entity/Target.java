@@ -6,8 +6,9 @@ import java.util.List;
 import com.mqped.fims.model.enums.TargetType;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Min;
-
+import jakarta.validation.constraints.NotBlank;
 import jakarta.persistence.*;
 
 @Entity
@@ -20,30 +21,34 @@ public class Target {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contract_account_id", nullable = false)
+    @NotNull(message = "Contract account is required.")
     private ContractAccount contractAccount;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @NotNull(message = "Target type is required.")
     private TargetType type;
 
+    @NotBlank(message = "Signature is required.")
     private String signature;
 
-    @NotNull
     @Min(value = 0)
     private Double score;
 
-    @NotNull
+    @NotNull(message = "Expected CNR is required.")
     @Min(value = 0)
     private Double expectedCNR;
 
-    @NotNull
+    @NotNull(message = "Expected ticket is required.")
     @Min(value = 0)
     private Double expectedTicket;
 
-    @NotNull
+    @NotNull(message = "Distance from base is required.")
     @Min(value = 0)
     private Double distanceFromBase;
 
+    @NotNull(message = "Creation date is required.")
+    @PastOrPresent(message = "Creation date cannot be in the future.")
     private LocalDateTime createdAt;
     private Boolean active = true;
 

@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import com.mqped.fims.util.StringNormalizer;
 
 @Component
 @Order(2)
+@Profile("!test")
 public class ClientLoader implements ApplicationRunner {
 
     @Value("${client.csv.path}")
@@ -38,21 +40,21 @@ public class ClientLoader implements ApplicationRunner {
             reader.readLine(); // skip the header
 
             String line;
-            int lineNumber = 1;
             while ((line = reader.readLine()) != null) {
-                lineNumber++;
                 String[] fields = line.split(",", -1);
 
                 Client client = new Client();
-                    client.setName(StringNormalizer.normalize(fields[0]));
-                    client.setCpf(fields[1]);
-                    client.setBirthDate(fields[2].isEmpty() ? null : LocalDateTime.parse(fields[2]));
-                    client.setMotherName(StringNormalizer.normalize(fields[3]));
-                    client.setCnpj(fields[4]);
-                    client.setGenre(fields[5].isEmpty() ? "Desconhecido" : StringNormalizer.normalize(fields[5]));
-                    client.setCreatedAt(fields[6].isEmpty() ? LocalDateTime.now() : LocalDateTime.parse(fields[6]));
+                client.setName(StringNormalizer.normalize(fields[0]));
+                client.setCpf(fields[1]);
+                client.setBirthDate(fields[2].isEmpty()
+                        ? LocalDateTime.of(1900, 1, 1, 0, 0)
+                        : LocalDateTime.parse(fields[2]));
+                client.setMotherName(StringNormalizer.normalize(fields[3]));
+                client.setCnpj(fields[4]);
+                client.setGenre(fields[5].isEmpty() ? "Desconhecido" : StringNormalizer.normalize(fields[5]));
+                client.setCreatedAt(fields[6].isEmpty() ? LocalDateTime.now() : LocalDateTime.parse(fields[6]));
 
-                    clientService.add(client);
+                clientService.add(client);
             }
 
             // Collection<Client> clients = clientService.findAll();
