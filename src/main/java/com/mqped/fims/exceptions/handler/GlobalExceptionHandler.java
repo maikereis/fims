@@ -11,8 +11,12 @@ import com.mqped.fims.exceptions.dto.ErrorResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.HashMap;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.ResponseStatusException;
@@ -42,7 +46,6 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-
     }
 
     @ExceptionHandler(DuplicateResourceException.class)
@@ -128,4 +131,27 @@ public class GlobalExceptionHandler {
                 request.getRequestURI());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
+
+        Map<String, String> validationErrors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            validationErrors.put(fieldName, errorMessage);
+        });
+
+        ErrorResponse error = new ErrorResponse();
+        error.setStatus(HttpStatus.BAD_REQUEST.value());
+        error.setError("Validation Error");
+        error.setMessage("One or more fields have validation errors");
+        error.setPath(request.getRequestURI());
+        error.setValidationErrors(validationErrors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
 }
