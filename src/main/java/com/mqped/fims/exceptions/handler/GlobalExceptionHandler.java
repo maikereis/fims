@@ -1,6 +1,7 @@
 package com.mqped.fims.exceptions.handler;
 
 import com.mqped.fims.exceptions.BusinessRuleException;
+import com.mqped.fims.exceptions.DatabaseException;
 import com.mqped.fims.exceptions.DuplicateResourceException;
 import com.mqped.fims.exceptions.ExternalServiceException;
 import com.mqped.fims.exceptions.ForbiddenException;
@@ -90,6 +91,18 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI());
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(error);
+    }
+
+    @ExceptionHandler(DatabaseException.class)
+    public ResponseEntity<ErrorResponse> handleDatabase(
+            DatabaseException ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Database Error",
+                ex.getMessage(),
+                request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
     @ExceptionHandler(ResponseStatusException.class)
