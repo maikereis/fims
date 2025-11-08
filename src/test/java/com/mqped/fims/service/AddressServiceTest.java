@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,7 +40,6 @@ class AddressServiceTest {
         return address;
     }
 
-
     @Test
     void testAdd_AssignsIdAndStoresAddress() {
         Address address = createValidAddress("PA", "Belém", "Rua dos Mundurucus");
@@ -59,15 +57,15 @@ class AddressServiceTest {
         Address address = createValidAddress("PA", "Belém", "Rua do Comércio");
         Address saved = service.add(address);
 
-        Optional<Address> result = service.findById(saved.getId());
-        assertTrue(result.isPresent());
-        assertEquals("Rua do Comércio", result.get().getStreet());
+        Address result = service.findById(saved.getId());
+        
+        assertNotNull(result);
+        assertEquals("Rua do Comércio", result.getStreet());
     }
 
     @Test
-    void testFindById_NonExistingAddress() {
-        Optional<Address> result = service.findById(999);
-        assertFalse(result.isPresent());
+    void testFindById_NonExistingAddress_ThrowsException() {
+        assertThrows(ResourceNotFoundException.class, () -> service.findById(999));
     }
 
     @Test
@@ -90,22 +88,21 @@ class AddressServiceTest {
         Address saved = service.add(original);
 
         Address updated = createValidAddress("PA", "Belém", "Rua Princesa Isabel");
-        updated.setNumber("123");
+        updated.setNumber("456");
 
-        Optional<Address> result = service.update(saved.getId(), updated);
+        Address result = service.update(saved.getId(), updated);
 
-        assertTrue(result.isPresent());
-        assertEquals(saved.getId(), result.get().getId());
-        assertEquals("Rua Princesa Isabel", result.get().getStreet());
-        assertEquals("123", result.get().getNumber());
+        assertNotNull(result);
+        assertEquals(saved.getId(), result.getId());
+        assertEquals("Rua Princesa Isabel", result.getStreet());
+        assertEquals("456", result.getNumber());
     }
 
     @Test
-    void testUpdate_NonExistingAddress() {
+    void testUpdate_NonExistingAddress_ThrowsException() {
         Address address = createValidAddress("PA", "Belém", "Rua Quinze de Novembro");
 
-        Optional<Address> result = service.update(999, address);
-        assertFalse(result.isPresent());
+        assertThrows(ResourceNotFoundException.class, () -> service.update(999, address));
     }
 
     @Test
@@ -118,7 +115,7 @@ class AddressServiceTest {
     }
 
     @Test
-    void testDeleteById_NonExistingAddress() {
+    void testDeleteById_NonExistingAddress_ThrowsException() {
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> service.deleteById(999));
         assertEquals("Address with id 999 not found", exception.getMessage());
@@ -139,5 +136,24 @@ class AddressServiceTest {
         service.add(createValidAddress("PA", "Belém", "Rua A"));
         service.add(createValidAddress("PA", "Belém", "Rua B"));
         assertEquals(2, service.count());
+    }
+
+    @Test
+    void testFindByAddressId_ExistingAddress() {
+        Address address = createValidAddress("PA", "Belém", "Rua Teste");
+        String addressId = "TEST-ADDR-123";
+        address.setAddressId(addressId);
+        service.add(address);
+
+        Address result = service.findByAddressId(addressId);
+        
+        assertNotNull(result);
+        assertEquals(addressId, result.getAddressId());
+        assertEquals("Rua Teste", result.getStreet());
+    }
+
+    @Test
+    void testFindByAddressId_NonExistingAddress_ThrowsException() {
+        assertThrows(ResourceNotFoundException.class, () -> service.findByAddressId("NON-EXISTENT"));
     }
 }

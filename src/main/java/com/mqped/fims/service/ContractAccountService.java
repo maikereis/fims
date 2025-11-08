@@ -10,7 +10,6 @@ import com.mqped.fims.repository.InstallationRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ContractAccountService implements CrudService<ContractAccount, Integer> {
@@ -19,7 +18,9 @@ public class ContractAccountService implements CrudService<ContractAccount, Inte
     private final ClientRepository clientRepository;
     private final InstallationRepository installationRepository;
 
-    public ContractAccountService(ContractAccountRepository repository, ClientRepository clientRepository,
+    public ContractAccountService(
+            ContractAccountRepository repository,
+            ClientRepository clientRepository,
             InstallationRepository installationRepository) {
         this.repository = repository;
         this.clientRepository = clientRepository;
@@ -28,13 +29,18 @@ public class ContractAccountService implements CrudService<ContractAccount, Inte
 
     @Override
     public ContractAccount add(ContractAccount contractAccount) {
-        if (contractAccount.getClient() == null || !clientRepository.existsById(contractAccount.getClient().getId())) {
-            throw new InvalidDataException("Client does not exist");
+        validate(contractAccount);
+        
+        if (!clientRepository.existsById(contractAccount.getClient().getId())) {
+            throw new ResourceNotFoundException(
+                "Client with id " + contractAccount.getClient().getId() + " not found");
         }
-        if (contractAccount.getInstallation() == null
-                || !installationRepository.existsById(contractAccount.getInstallation().getId())) {
-            throw new InvalidDataException("Installation does not exist");
+        
+        if (!installationRepository.existsById(contractAccount.getInstallation().getId())) {
+            throw new ResourceNotFoundException(
+                "Installation with id " + contractAccount.getInstallation().getId() + " not found");
         }
+        
         return repository.save(contractAccount);
     }
 
@@ -44,26 +50,37 @@ public class ContractAccountService implements CrudService<ContractAccount, Inte
     }
 
     @Override
-    public Optional<ContractAccount> findById(Integer id) {
-        return repository.findById(id);
+    public ContractAccount findById(Integer id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ContractAccount with id " + id + " not found"));
     }
 
     @Override
-    public Optional<ContractAccount> update(Integer id, ContractAccount contractAccount) {
+    public ContractAccount update(Integer id, ContractAccount contractAccount) {
         validate(contractAccount);
 
-        return repository.findById(id).map(existing -> {
-            existing.setAccountNumber(contractAccount.getAccountNumber());
-            existing.setClient(contractAccount.getClient());
-            existing.setInstallation(contractAccount.getInstallation());
-            existing.setCreatedAt(contractAccount.getCreatedAt());
-            existing.setDeletedAt(contractAccount.getDeletedAt());
-            existing.setStatus(contractAccount.getStatus());
-            existing.setStatusStart(contractAccount.getStatusStart());
-            existing.setStatusEnd(contractAccount.getStatusEnd());
+        ContractAccount existing = findById(id); // throws if not found
+        
+        if (!clientRepository.existsById(contractAccount.getClient().getId())) {
+            throw new ResourceNotFoundException(
+                "Client with id " + contractAccount.getClient().getId() + " not found");
+        }
+        
+        if (!installationRepository.existsById(contractAccount.getInstallation().getId())) {
+            throw new ResourceNotFoundException(
+                "Installation with id " + contractAccount.getInstallation().getId() + " not found");
+        }
+        
+        existing.setAccountNumber(contractAccount.getAccountNumber());
+        existing.setClient(contractAccount.getClient());
+        existing.setInstallation(contractAccount.getInstallation());
+        existing.setCreatedAt(contractAccount.getCreatedAt());
+        existing.setDeletedAt(contractAccount.getDeletedAt());
+        existing.setStatus(contractAccount.getStatus());
+        existing.setStatusStart(contractAccount.getStatusStart());
+        existing.setStatusEnd(contractAccount.getStatusEnd());
 
-            return repository.save(existing);
-        });
+        return repository.save(existing);
     }
 
     @Override

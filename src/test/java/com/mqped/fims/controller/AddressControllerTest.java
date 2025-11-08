@@ -1,5 +1,6 @@
 package com.mqped.fims.controller;
 
+import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.model.dto.AddressDTO;
 import com.mqped.fims.model.entity.Address;
 import com.mqped.fims.service.AddressService;
@@ -13,10 +14,8 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 class AddressControllerTest {
@@ -38,12 +37,18 @@ class AddressControllerTest {
         address1.setId(1);
         address1.setStreet("Street 1");
         address1.setState("São Paulo");
+        address1.setMunicipality("São Paulo");
+        address1.setNeighborhood("Centro");
+        address1.setNumber("123");
         address1.setZipCode("01234-567");
 
         address2 = new Address();
         address2.setId(2);
         address2.setStreet("Street 2");
         address2.setState("Rio de Janeiro");
+        address2.setMunicipality("Rio de Janeiro");
+        address2.setNeighborhood("Copacabana");
+        address2.setNumber("456");
         address2.setZipCode("98765-432");
     }
 
@@ -84,7 +89,7 @@ class AddressControllerTest {
 
     @Test
     void testGetAddressById_returnsAddressDTOWhenFound() {
-        when(service.findById(1)).thenReturn(Optional.of(address1));
+        when(service.findById(1)).thenReturn(address1);
 
         ResponseEntity<AddressDTO> response = controller.getAddressById(1);
 
@@ -92,16 +97,15 @@ class AddressControllerTest {
         assertNotNull(response.getBody());
         assertEquals(address1.getId(), response.getBody().getId());
         assertEquals(address1.getStreet(), response.getBody().getStreet());
+        verify(service, times(1)).findById(1);
     }
 
     @Test
-    void testGetAddressById_returnsNotFoundWhenMissing() {
-        when(service.findById(3)).thenReturn(Optional.empty());
+    void testGetAddressById_throwsExceptionWhenNotFound() {
+        when(service.findById(3)).thenThrow(new ResourceNotFoundException("Address with id 3 not found"));
 
-        ResponseEntity<AddressDTO> response = controller.getAddressById(3);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
+        assertThrows(ResourceNotFoundException.class, () -> controller.getAddressById(3));
+        verify(service, times(1)).findById(3);
     }
 
     @Test
@@ -109,8 +113,12 @@ class AddressControllerTest {
         Address updatedAddress = new Address();
         updatedAddress.setId(1);
         updatedAddress.setStreet("Updated Street");
+        updatedAddress.setState("São Paulo");
+        updatedAddress.setMunicipality("São Paulo");
+        updatedAddress.setNeighborhood("Centro");
+        updatedAddress.setNumber("123");
         
-        when(service.update(1, address1)).thenReturn(Optional.of(updatedAddress));
+        when(service.update(1, address1)).thenReturn(updatedAddress);
 
         ResponseEntity<AddressDTO> response = controller.updateAddress(1, address1);
 
@@ -121,18 +129,15 @@ class AddressControllerTest {
     }
 
     @Test
-    void testUpdateAddress_returnsNotFoundWhenMissing() {
-        when(service.update(3, address1)).thenReturn(Optional.empty());
+    void testUpdateAddress_throwsExceptionWhenNotFound() {
+        when(service.update(3, address1)).thenThrow(new ResourceNotFoundException("Address with id 3 not found"));
 
-        ResponseEntity<AddressDTO> response = controller.updateAddress(3, address1);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
+        assertThrows(ResourceNotFoundException.class, () -> controller.updateAddress(3, address1));
+        verify(service, times(1)).update(3, address1);
     }
 
     @Test
     void testDeleteAddress_returnsNoContentWhenFound() {
-        when(service.existsById(1)).thenReturn(true);
         doNothing().when(service).deleteById(1);
 
         ResponseEntity<Void> response = controller.deleteAddress(1);
@@ -142,12 +147,11 @@ class AddressControllerTest {
     }
 
     @Test
-    void testDeleteAddress_returnsNotFoundWhenMissing() {
-        when(service.existsById(1)).thenReturn(false);
+    void testDeleteAddress_throwsExceptionWhenNotFound() {
+        doThrow(new ResourceNotFoundException("Address with id 3 not found"))
+            .when(service).deleteById(3);
 
-        ResponseEntity<Void> response = controller.deleteAddress(1);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        verify(service, never()).deleteById(anyInt());
+        assertThrows(ResourceNotFoundException.class, () -> controller.deleteAddress(3));
+        verify(service, times(1)).deleteById(3);
     }
 }

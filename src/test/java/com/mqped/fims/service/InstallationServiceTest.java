@@ -12,7 +12,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,6 +31,23 @@ class InstallationServiceTest {
         service = new InstallationService(repository);
         repository.deleteAll();
         addressRepository.deleteAll();
+    }
+
+    private Installation createValidInstallation() {
+        Address address = new Address();
+        address.setAddressId("ADDR-TEST-" + System.nanoTime());
+        address.setState("PA");
+        address.setMunicipality("Belém");
+        address.setNeighborhood("Centro");
+        address.setStreet("Rua das Flores");
+        address.setNumber("123");
+        address.setZipCode("66000-000");
+        address = addressRepository.save(address);
+
+        Installation installation = new Installation();
+        installation.setAddress(address);
+        installation.setCreatedAt(LocalDateTime.now());
+        return installation;
     }
 
     @Test
@@ -63,16 +79,15 @@ class InstallationServiceTest {
         installation.getAddress().setStreet("Avenida Paulista");
 
         Installation saved = service.add(installation);
-        Optional<Installation> result = service.findById(saved.getId());
+        Installation result = service.findById(saved.getId());
 
-        assertTrue(result.isPresent());
-        assertEquals("Avenida Paulista", result.get().getAddress().getStreet());
+        assertNotNull(result);
+        assertEquals("Avenida Paulista", result.getAddress().getStreet());
     }
 
     @Test
-    void testFindById_NonExistingInstallation() {
-        Optional<Installation> result = service.findById(999);
-        assertFalse(result.isPresent());
+    void testFindById_NonExistingInstallation_ThrowsException() {
+        assertThrows(ResourceNotFoundException.class, () -> service.findById(999));
     }
 
     @Test
@@ -103,19 +118,19 @@ class InstallationServiceTest {
         updated.getAddress().setStreet("New Street");
         updated.setDeletedAt(LocalDateTime.now().plusDays(1));
 
-        Optional<Installation> result = service.update(saved.getId(), updated);
+        Installation result = service.update(saved.getId(), updated);
 
-        assertTrue(result.isPresent());
-        assertEquals(saved.getId(), result.get().getId());
-        assertEquals("New Street", result.get().getAddress().getStreet());
-        assertNotNull(result.get().getDeletedAt());
+        assertNotNull(result);
+        assertEquals(saved.getId(), result.getId());
+        assertEquals("New Street", result.getAddress().getStreet());
+        assertNotNull(result.getDeletedAt());
     }
 
     @Test
-    void testUpdate_NonExistingInstallation() {
+    void testUpdate_NonExistingInstallation_ThrowsException() {
         Installation installation = createValidInstallation();
-        Optional<Installation> result = service.update(999, installation);
-        assertFalse(result.isPresent());
+        
+        assertThrows(ResourceNotFoundException.class, () -> service.update(999, installation));
     }
 
     @Test
@@ -128,7 +143,7 @@ class InstallationServiceTest {
     }
 
     @Test
-    void testDeleteById_NonExistingInstallation() {
+    void testDeleteById_NonExistingInstallation_ThrowsException() {
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> service.deleteById(999));
         assertEquals("Installation with id 999 not found", exception.getMessage());
@@ -151,20 +166,31 @@ class InstallationServiceTest {
         assertEquals(2, service.count());
     }
 
-    private Installation createValidInstallation() {
-        Address address = new Address();
-        address.setAddressId("ADDR-TEST-" + System.nanoTime());
-        address.setState("PA");
-        address.setMunicipality("Belém");
-        address.setNeighborhood("Centro");
-        address.setStreet("Rua das Flores");
-        address.setNumber("123");
-        address.setZipCode("66000-000");
-        address = addressRepository.save(address);
+    @Test
+    void testFindByAddressId_ExistingInstallations() {
+        Installation installation = createValidInstallation();
+        String addressId = "TEST-ADDR-" + System.nanoTime();
+        installation.getAddress().setAddressId(addressId);
+        addressRepository.save(installation.getAddress());
+        service.add(installation);
 
-        Installation installation = new Installation();
-        installation.setAddress(address);
-        installation.setCreatedAt(LocalDateTime.now());
-        return installation;
+        List<Installation> result = service.findByAddressId(addressId);
+        
+        assertFalse(result.isEmpty());
+        assertEquals(addressId, result.get(0).getAddress().getAddressId());
+    }
+
+    @Test
+    void testFindByAddressIdWithContracts() {
+        Installation installation = createValidInstallation();
+        String addressId = "TEST-ADDR-CONTRACTS-" + System.nanoTime();
+        installation.getAddress().setAddressId(addressId);
+        addressRepository.save(installation.getAddress());
+        service.add(installation);
+
+        List<Installation> result = service.findByAddressIdWithContracts(addressId);
+        
+        assertFalse(result.isEmpty());
+        assertEquals(addressId, result.get(0).getAddress().getAddressId());
     }
 }

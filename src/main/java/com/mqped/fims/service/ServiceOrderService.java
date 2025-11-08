@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ServiceOrderService implements CrudService<ServiceOrder, Integer> {
@@ -27,25 +26,29 @@ public class ServiceOrderService implements CrudService<ServiceOrder, Integer> {
         return repository.save(order);
     }
 
+    @Override
     public List<ServiceOrder> findAll() {
         return repository.findAll();
     }
 
-    public Optional<ServiceOrder> findById(Integer id) {
-        return repository.findById(id);
+    @Override
+    public ServiceOrder findById(Integer id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ServiceOrder with id " + id + " not found"));
     }
 
     @Override
-    public Optional<ServiceOrder> update(Integer id, ServiceOrder order) {
+    public ServiceOrder update(Integer id, ServiceOrder order) {
         validate(order);
 
-        return repository.findById(id).map(existing -> {
-            existing.setTarget(order.getTarget());
-            existing.setType(order.getType());
-            existing.setStatus(order.getStatus());
-            existing.setExecutedAt(order.getExecutedAt());
-            return repository.save(existing);
-        });
+        ServiceOrder existing = findById(id); // throws if not found
+        
+        existing.setTarget(order.getTarget());
+        existing.setType(order.getType());
+        existing.setStatus(order.getStatus());
+        existing.setExecutedAt(order.getExecutedAt());
+        
+        return repository.save(existing);
     }
 
     @Override
@@ -56,10 +59,12 @@ public class ServiceOrderService implements CrudService<ServiceOrder, Integer> {
         repository.deleteById(id);
     }
 
+    @Override
     public boolean existsById(Integer id) {
         return repository.existsById(id);
     }
 
+    @Override
     public long count() {
         return repository.count();
     }
@@ -93,7 +98,7 @@ public class ServiceOrderService implements CrudService<ServiceOrder, Integer> {
         return repository.findByCreatedAtBetween(start, end);
     }
 
-    public void validate(ServiceOrder order) {
+    private void validate(ServiceOrder order) {
         if (order == null) {
             throw new InvalidDataException("ServiceOrder cannot be null");
         }

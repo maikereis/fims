@@ -1,5 +1,6 @@
 package com.mqped.fims.controller;
 
+import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.model.dto.ContractAccountDTO;
 import com.mqped.fims.model.entity.Client;
 import com.mqped.fims.model.entity.ContractAccount;
@@ -16,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -114,7 +114,7 @@ class ContractAccountControllerTest {
 
     @Test
     void testGetContractAccountById_returnsAccountDTOWhenFound() {
-        when(service.findById(1)).thenReturn(Optional.of(account1));
+        when(service.findById(1)).thenReturn(account1);
 
         ResponseEntity<ContractAccountDTO> response = controller.getContractAccountById(1);
 
@@ -122,16 +122,15 @@ class ContractAccountControllerTest {
         assertNotNull(response.getBody());
         assertEquals(account1.getId(), response.getBody().getId());
         assertEquals("John Doe", response.getBody().getClientName());
+        verify(service, times(1)).findById(1);
     }
 
     @Test
-    void testGetContractAccountById_returnsNotFoundWhenMissing() {
-        when(service.findById(3)).thenReturn(Optional.empty());
+    void testGetContractAccountById_throwsExceptionWhenNotFound() {
+        when(service.findById(3)).thenThrow(new ResourceNotFoundException("ContractAccount with id 3 not found"));
 
-        ResponseEntity<ContractAccountDTO> response = controller.getContractAccountById(3);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
+        assertThrows(ResourceNotFoundException.class, () -> controller.getContractAccountById(3));
+        verify(service, times(1)).findById(3);
     }
 
     @Test
@@ -141,8 +140,9 @@ class ContractAccountControllerTest {
         updated.setAccountNumber("ACC123-UPDATED");
         updated.setClient(client1);
         updated.setInstallation(installation1);
+        updated.setCreatedAt(account1.getCreatedAt());
         
-        when(service.update(1, account1)).thenReturn(Optional.of(updated));
+        when(service.update(1, account1)).thenReturn(updated);
 
         ResponseEntity<ContractAccountDTO> response = controller.updateContractAccount(1, account1);
 
@@ -153,18 +153,15 @@ class ContractAccountControllerTest {
     }
 
     @Test
-    void testUpdateContractAccount_returnsNotFoundWhenMissing() {
-        when(service.update(3, account1)).thenReturn(Optional.empty());
+    void testUpdateContractAccount_throwsExceptionWhenNotFound() {
+        when(service.update(3, account1)).thenThrow(new ResourceNotFoundException("ContractAccount with id 3 not found"));
 
-        ResponseEntity<ContractAccountDTO> response = controller.updateContractAccount(3, account1);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
+        assertThrows(ResourceNotFoundException.class, () -> controller.updateContractAccount(3, account1));
+        verify(service, times(1)).update(3, account1);
     }
 
     @Test
     void testDeleteContractAccount_returnsNoContentWhenFound() {
-        when(service.existsById(1)).thenReturn(true);
         doNothing().when(service).deleteById(1);
 
         ResponseEntity<Void> response = controller.deleteContractAccount(1);
@@ -174,12 +171,11 @@ class ContractAccountControllerTest {
     }
 
     @Test
-    void testDeleteContractAccount_returnsNotFoundWhenMissing() {
-        when(service.existsById(3)).thenReturn(false);
+    void testDeleteContractAccount_throwsExceptionWhenNotFound() {
+        doThrow(new ResourceNotFoundException("ContractAccount with id 3 not found"))
+            .when(service).deleteById(3);
 
-        ResponseEntity<Void> response = controller.deleteContractAccount(3);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        verify(service, never()).deleteById(anyInt());
+        assertThrows(ResourceNotFoundException.class, () -> controller.deleteContractAccount(3));
+        verify(service, times(1)).deleteById(3);
     }
 }

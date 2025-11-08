@@ -17,7 +17,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -53,11 +52,11 @@ class ContractAccountServiceTest {
     }
 
     private ContractAccount createValidContractAccount() {
-
         Client client = new Client();
         client.setName("Test Client");
         client.setCpf("111.111.111-11");
         client.setBirthDate(LocalDateTime.now().minusYears(18));
+        client.setCreatedAt(LocalDateTime.now());
         client = clientRepository.save(client);
 
         Address address = new Address();
@@ -79,7 +78,6 @@ class ContractAccountServiceTest {
         account.setAccountNumber("DEFAULT-ACC");
         account.setInstallation(installation);
         account.setClient(client);
-
         account.setCreatedAt(LocalDateTime.now());
 
         return account;
@@ -117,15 +115,15 @@ class ContractAccountServiceTest {
         account.setAccountNumber("ACC-123");
         ContractAccount saved = service.add(account);
 
-        Optional<ContractAccount> result = service.findById(saved.getId());
-        assertTrue(result.isPresent());
-        assertEquals("ACC-123", result.get().getAccountNumber());
+        ContractAccount result = service.findById(saved.getId());
+        
+        assertNotNull(result);
+        assertEquals("ACC-123", result.getAccountNumber());
     }
 
     @Test
-    void testFindById_NonExistingAccount() {
-        Optional<ContractAccount> result = service.findById(999);
-        assertFalse(result.isPresent());
+    void testFindById_NonExistingAccount_ThrowsException() {
+        assertThrows(ResourceNotFoundException.class, () -> service.findById(999));
     }
 
     @Test
@@ -154,21 +152,20 @@ class ContractAccountServiceTest {
         updated.setAccountNumber("NEW-ACC");
         updated.setDeletedAt(LocalDateTime.now().plusDays(1));
 
-        Optional<ContractAccount> result = service.update(saved.getId(), updated);
+        ContractAccount result = service.update(saved.getId(), updated);
 
-        assertTrue(result.isPresent());
-        assertEquals(saved.getId(), result.get().getId());
-        assertEquals("NEW-ACC", result.get().getAccountNumber());
-        assertNotNull(result.get().getDeletedAt());
+        assertNotNull(result);
+        assertEquals(saved.getId(), result.getId());
+        assertEquals("NEW-ACC", result.getAccountNumber());
+        assertNotNull(result.getDeletedAt());
     }
 
     @Test
-    void testUpdate_NonExistingAccount() {
+    void testUpdate_NonExistingAccount_ThrowsException() {
         ContractAccount account = createValidContractAccount();
         account.setAccountNumber("GHOST");
 
-        Optional<ContractAccount> result = service.update(999, account);
-        assertFalse(result.isPresent());
+        assertThrows(ResourceNotFoundException.class, () -> service.update(999, account));
     }
 
     @Test
@@ -182,7 +179,7 @@ class ContractAccountServiceTest {
     }
 
     @Test
-    void testDeleteById_NonExistingAccount() {
+    void testDeleteById_NonExistingAccount_ThrowsException() {
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> service.deleteById(999));
         assertEquals("ContractAccount with id 999 not found", exception.getMessage());

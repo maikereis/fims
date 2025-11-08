@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/addresses")
@@ -20,14 +19,12 @@ public class AddressController {
         this.service = service;
     }
 
-    // CREATE
     @PostMapping
     public ResponseEntity<AddressDTO> createAddress(@RequestBody Address address) {
         Address savedAddress = service.add(address);
         return new ResponseEntity<>(AddressDTO.fromEntity(savedAddress), HttpStatus.CREATED);
     }
 
-    // READ ALL
     @GetMapping
     public ResponseEntity<List<AddressDTO>> getAllAddresses() {
         List<AddressDTO> dtos = service.findAll().stream()
@@ -36,33 +33,24 @@ public class AddressController {
         return ResponseEntity.ok(dtos);
     }
 
-    // READ ONE
     @GetMapping("/{id}")
     public ResponseEntity<AddressDTO> getAddressById(@PathVariable Integer id) {
-        Optional<Address> address = service.findById(id);
-        return address.map(a -> ResponseEntity.ok(AddressDTO.fromEntity(a)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        Address address = service.findById(id);
+        return ResponseEntity.ok(AddressDTO.fromEntity(address));
     }
 
-    // UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<AddressDTO> updateAddress(@PathVariable Integer id, @RequestBody Address address) {
-        Optional<Address> updated = service.update(id, address);
-        return updated.map(a -> ResponseEntity.ok(AddressDTO.fromEntity(a)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        Address updated = service.update(id, address);
+        return ResponseEntity.ok(AddressDTO.fromEntity(updated));
     }
 
-    // DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAddress(@PathVariable Integer id) {
-        if (service.existsById(id)) {
-            service.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        service.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
-    // CHECK
     @GetMapping("/check")
     public ResponseEntity<String> check() {
         return ResponseEntity.ok("Address API is up and running!");

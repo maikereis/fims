@@ -1,5 +1,6 @@
 package com.mqped.fims.controller;
 
+import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.model.dto.InstallationDTO;
 import com.mqped.fims.model.entity.Address;
 import com.mqped.fims.model.entity.Installation;
@@ -15,10 +16,8 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 class InstallationControllerTest {
@@ -43,12 +42,18 @@ class InstallationControllerTest {
         address1.setAddressId("5642728");
         address1.setState("Pará");
         address1.setMunicipality("Marituba");
+        address1.setNeighborhood("Centro");
+        address1.setStreet("Rua Principal");
+        address1.setNumber("100");
 
         address2 = new Address();
         address2.setId(2);
         address2.setAddressId("4559429");
         address2.setState("Pará");
         address2.setMunicipality("Belém");
+        address2.setNeighborhood("Nazaré");
+        address2.setStreet("Avenida Central");
+        address2.setNumber("200");
 
         installation1 = new Installation();
         installation1.setId(1);
@@ -118,7 +123,7 @@ class InstallationControllerTest {
 
     @Test
     void testGetInstallationById_returnsInstallationDTOWhenFound() {
-        when(service.findById(1)).thenReturn(Optional.of(installation1));
+        when(service.findById(1)).thenReturn(installation1);
 
         ResponseEntity<InstallationDTO> response = controller.getInstallationById(1);
 
@@ -130,13 +135,10 @@ class InstallationControllerTest {
     }
 
     @Test
-    void testGetInstallationById_returnsNotFoundWhenMissing() {
-        when(service.findById(3)).thenReturn(Optional.empty());
+    void testGetInstallationById_throwsExceptionWhenNotFound() {
+        when(service.findById(3)).thenThrow(new ResourceNotFoundException("Installation with id 3 not found"));
 
-        ResponseEntity<InstallationDTO> response = controller.getInstallationById(3);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
+        assertThrows(ResourceNotFoundException.class, () -> controller.getInstallationById(3));
         verify(service, times(1)).findById(3);
     }
 
@@ -147,7 +149,7 @@ class InstallationControllerTest {
         updated.setAddress(address1);
         updated.setCreatedAt(installation1.getCreatedAt());
 
-        when(service.update(1, installation1)).thenReturn(Optional.of(updated));
+        when(service.update(1, installation1)).thenReturn(updated);
 
         ResponseEntity<InstallationDTO> response = controller.updateInstallation(1, installation1);
 
@@ -158,19 +160,15 @@ class InstallationControllerTest {
     }
 
     @Test
-    void testUpdateInstallation_returnsNotFoundWhenMissing() {
-        when(service.update(3, installation1)).thenReturn(Optional.empty());
+    void testUpdateInstallation_throwsExceptionWhenNotFound() {
+        when(service.update(3, installation1)).thenThrow(new ResourceNotFoundException("Installation with id 3 not found"));
 
-        ResponseEntity<InstallationDTO> response = controller.updateInstallation(3, installation1);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
+        assertThrows(ResourceNotFoundException.class, () -> controller.updateInstallation(3, installation1));
         verify(service, times(1)).update(3, installation1);
     }
 
     @Test
     void testDeleteInstallation_returnsNoContentWhenFound() {
-        when(service.existsById(1)).thenReturn(true);
         doNothing().when(service).deleteById(1);
 
         ResponseEntity<Void> response = controller.deleteInstallation(1);
@@ -180,12 +178,11 @@ class InstallationControllerTest {
     }
 
     @Test
-    void testDeleteInstallation_returnsNotFoundWhenMissing() {
-        when(service.existsById(3)).thenReturn(false);
+    void testDeleteInstallation_throwsExceptionWhenNotFound() {
+        doThrow(new ResourceNotFoundException("Installation with id 3 not found"))
+            .when(service).deleteById(3);
 
-        ResponseEntity<Void> response = controller.deleteInstallation(3);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        verify(service, never()).deleteById(anyInt());
+        assertThrows(ResourceNotFoundException.class, () -> controller.deleteInstallation(3));
+        verify(service, times(1)).deleteById(3);
     }
 }
