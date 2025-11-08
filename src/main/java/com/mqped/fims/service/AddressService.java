@@ -49,7 +49,7 @@ public class AddressService implements CrudService<Address, Integer> {
         validate(address);
 
         Address existing = findById(id); // throws if not found
-        
+
         existing.setAddressId(address.getAddressId());
         existing.setState(address.getState());
         existing.setMunicipality(address.getMunicipality());
