@@ -1,5 +1,6 @@
 package com.mqped.fims.exceptions.handler;
 
+import com.mqped.fims.exceptions.DuplicateResourceException;
 import com.mqped.fims.exceptions.InvalidDataException;
 import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.exceptions.dto.ErrorResponse;
@@ -37,6 +38,19 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+
+    }
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateResource(
+            DuplicateResourceException ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Duplicate Resource",
+                ex.getMessage(),
+                request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     @ExceptionHandler(ResponseStatusException.class)
