@@ -14,11 +14,13 @@ import jakarta.validation.constraints.PastOrPresent;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.mqped.fims.validation.annotation.ChronologicalDates;
 import com.mqped.fims.validation.annotation.CpfOrCnpjRequired;
 
 @Entity
 @CpfOrCnpjRequired
 @Table(name = "clients")
+@ChronologicalDates(start = "birthDate", end = "createdAt", allowEqual = false, message = "Creation date must be after birth date.")
 public class Client {
 
     @Id

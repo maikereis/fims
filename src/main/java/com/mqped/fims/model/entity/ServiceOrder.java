@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import com.mqped.fims.model.enums.ServiceOrderStatus;
 import com.mqped.fims.model.enums.ServiceOrderType;
+import com.mqped.fims.validation.annotation.ChronologicalDates;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -11,6 +12,7 @@ import jakarta.validation.constraints.PastOrPresent;
 
 @Entity
 @Table(name = "service_orders")
+@ChronologicalDates(start = "createdAt", end = "executedAt", allowEqual = false, message = "Execution date must be after creation date.")
 public class ServiceOrder {
 
     @Id

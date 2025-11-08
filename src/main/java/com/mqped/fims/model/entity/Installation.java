@@ -3,6 +3,8 @@ package com.mqped.fims.model.entity;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.mqped.fims.validation.annotation.ChronologicalDates;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,6 +19,7 @@ import jakarta.validation.constraints.PastOrPresent;
 
 @Entity
 @Table(name = "installations")
+@ChronologicalDates(start = "createdAt", end = "deletedAt", allowEqual = true, message = "Deleted date must be after creation date.")
 public class Installation {
 
     @Id

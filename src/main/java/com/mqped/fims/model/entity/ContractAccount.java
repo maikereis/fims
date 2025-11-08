@@ -3,6 +3,7 @@ package com.mqped.fims.model.entity;
 import java.time.LocalDateTime;
 
 import com.mqped.fims.model.enums.StatusType;
+import com.mqped.fims.validation.annotation.ChronologicalDates;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -20,6 +21,9 @@ import jakarta.validation.constraints.PastOrPresent;
 
 @Entity
 @Table(name = "contract_accounts")
+@ChronologicalDates(start = "createdAt", end = "deletedAt", allowEqual = true, message = "Deleted date must be after creation date.")
+@ChronologicalDates(start = "statusStart", end = "statusEnd", allowEqual = true, message = "Status end date must be after status start date.")
+@ChronologicalDates(start = "createdAt", end = "statusStart", allowEqual = true, message = "Status start date must be after creation date.")
 public class ContractAccount {
 
     @Id
