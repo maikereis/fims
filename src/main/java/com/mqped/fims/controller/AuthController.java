@@ -1,5 +1,6 @@
 package com.mqped.fims.controller;
 
+import com.mqped.fims.exceptions.UnauthorizedException;
 import com.mqped.fims.model.dto.JwtResponseDTO;
 import com.mqped.fims.model.dto.LoginRequestDTO;
 import com.mqped.fims.model.dto.MessageResponseDTO;
@@ -175,8 +176,7 @@ public class AuthController {
         @GetMapping("/me")
         public ResponseEntity<JwtResponseDTO> getCurrentUser(Authentication authentication) {
                 if (authentication == null || !authentication.isAuthenticated()) {
-                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                        .body(new JwtResponseDTO(null, null, null, null, Set.of()));
+                        throw new UnauthorizedException("You must be authenticated to access this resource");
                 }
 
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
