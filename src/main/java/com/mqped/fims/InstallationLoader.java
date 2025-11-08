@@ -1,5 +1,6 @@
 package com.mqped.fims;
 
+import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.model.entity.Address;
 import com.mqped.fims.model.entity.Installation;
 import com.mqped.fims.service.AddressService;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 @Component
 @Order(3)
@@ -36,40 +38,77 @@ public class InstallationLoader implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        int successCount = 0;
+        int errorCount = 0;
+
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(csvResource.getInputStream(), StandardCharsets.UTF_8))) {
 
             reader.readLine(); // skip header
 
             String line;
+            int lineNumber = 1; // track line number for better error messages
+            
             while ((line = reader.readLine()) != null) {
-                String[] fields = line.split(",", -1);
-                if (fields.length < 15) {
-                    System.err.println("Skipping malformed line: " + line);
-                    continue;
+                lineNumber++;
+                
+                try {
+                    String[] fields = line.split(",", -1);
+                    if (fields.length < 15) {
+                        System.err.println("Line " + lineNumber + ": Skipping malformed line (expected 15 fields, got " + fields.length + "): " + line);
+                        errorCount++;
+                        continue;
+                    }
+
+                    // --- Fetch existing Address ---
+                    String addressId = fields[0];
+                    Address address;
+                    
+                    try {
+                        address = addressService.findByAddressId(addressId);
+                    } catch (ResourceNotFoundException e) {
+                        System.err.println("Line " + lineNumber + ": Address not found for addressId: " + addressId);
+                        errorCount++;
+                        continue;
+                    }
+
+                    // --- Build Installation ---
+                    Installation installation = new Installation();
+                    installation.setAddress(address);
+                    
+                    try {
+                        installation.setCreatedAt(parseDate(fields[13]));
+                        installation.setDeletedAt(parseDate(fields[14]));
+                    } catch (DateTimeParseException e) {
+                        System.err.println("Line " + lineNumber + ": Invalid date format - " + e.getMessage());
+                        errorCount++;
+                        continue;
+                    }
+
+                    installationService.add(installation);
+                    successCount++;
+                    
+                } catch (Exception e) {
+                    System.err.println("Line " + lineNumber + ": Unexpected error - " + e.getMessage());
+                    errorCount++;
                 }
-
-                // --- Fetch existing Address ---
-                String addressId = fields[0];
-                Address address = addressService.findByAddressId(addressId)
-                        .orElseThrow(() -> new IllegalArgumentException(
-                                "Address not found for addressId: " + addressId));
-
-                // --- Build Installation ---
-                Installation installation = new Installation();
-                installation.setAddress(address);
-                installation.setCreatedAt(parseDate(fields[13]));
-                installation.setDeletedAt(parseDate(fields[14]));
-
-                installationService.add(installation);
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error reading CSV file: " + e.getMessage());
+            throw e; // rethrow to indicate critical failure
         }
+
+        // Summary log
+        System.out.println("Installation loading completed:");
+        System.out.println("  - Successfully loaded: " + successCount);
+        System.out.println("  - Errors encountered: " + errorCount);
     }
 
-    private static LocalDateTime parseDate(String value) {
-        return (value == null || value.isEmpty()) ? null : LocalDateTime.parse(value);
+    private static LocalDateTime parseDate(String value) throws DateTimeParseException {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        return LocalDateTime.parse(value.trim());
     }
 }
