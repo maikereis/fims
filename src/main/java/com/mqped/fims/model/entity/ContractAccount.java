@@ -15,6 +15,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 
 @Entity
 @Table(name = "contract_accounts")
@@ -27,11 +29,15 @@ public class ContractAccount {
 
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
+    @NotNull(message = "Client is required.")
     private Client client;
 
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "installation_id", nullable = false)
+    @NotNull(message = "Installation is required.")
     private Installation installation;
+
+    @PastOrPresent(message = "Creation date cannot be in the future.")
     private LocalDateTime createdAt;
     private LocalDateTime deletedAt;
 
