@@ -2,6 +2,10 @@ package com.mqped.fims.exceptions.handler;
 
 import com.mqped.fims.exceptions.InvalidDataException;
 import com.mqped.fims.exceptions.ResourceNotFoundException;
+import com.mqped.fims.exceptions.dto.ErrorResponse;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,23 +16,50 @@ import org.springframework.web.server.ResponseStatusException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<String> handleResourceNotFound(ResourceNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    public ResponseEntity<ErrorResponse> handleResourceNotFound(
+            ResourceNotFoundException ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Resource Not Found",
+                ex.getMessage(),
+                request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
     @ExceptionHandler(InvalidDataException.class)
-    public ResponseEntity<String> handleInvalidData(InvalidDataException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    public ResponseEntity<ErrorResponse> handleInvalidData(
+            InvalidDataException ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Invalid Data",
+                ex.getMessage(),
+                request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<String> handleResponseStatus(ResponseStatusException ex) {
-        return ResponseEntity.status(ex.getStatusCode()).body(ex.getReason());
+    public ResponseEntity<ErrorResponse> handleResponseStatus(
+            ResponseStatusException ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                ex.getStatusCode().value(),
+                ex.getStatusCode().toString(),
+                ex.getReason() != null ? ex.getReason() : "An error occurred",
+                request.getRequestURI());
+        return ResponseEntity.status(ex.getStatusCode()).body(error);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Internal server error: " + ex.getMessage());
+    public ResponseEntity<ErrorResponse> handleGenericException(
+            Exception ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Internal Server Error",
+                "An unexpected error occurred: " + ex.getMessage(),
+                request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 }
