@@ -10,7 +10,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -53,17 +52,16 @@ class ClientServiceTest {
     void testFindById_ExistingClient() {
         Client saved = service.add(createValidClient("Carlos Eduardo", "987.654.321-00"));
 
-        Optional<Client> result = service.findById(saved.getId());
+        Client result = service.findById(saved.getId());
 
-        assertTrue(result.isPresent());
-        assertEquals("Carlos Eduardo", result.get().getName());
-        assertEquals("987.654.321-00", result.get().getCpf());
+        assertNotNull(result);
+        assertEquals("Carlos Eduardo", result.getName());
+        assertEquals("987.654.321-00", result.getCpf());
     }
 
     @Test
-    void testFindById_NonExistingClient() {
-        Optional<Client> result = service.findById(999);
-        assertFalse(result.isPresent());
+    void testFindById_NonExistingClient_ThrowsException() {
+        assertThrows(ResourceNotFoundException.class, () -> service.findById(999));
     }
 
     @Test
@@ -85,20 +83,21 @@ class ClientServiceTest {
         Client updated = createValidClient("Mariana Souza", "222.222.222-22");
         updated.setMotherName("Clara Souza");
 
-        Optional<Client> result = service.update(saved.getId(), updated);
+        Client result = service.update(saved.getId(), updated);
 
-        assertTrue(result.isPresent());
-        assertEquals(saved.getId(), result.get().getId());
-        assertEquals("Mariana Souza", result.get().getName());
-        assertEquals("222.222.222-22", result.get().getCpf());
-        assertEquals("F", result.get().getGenre());
-        assertEquals("Clara Souza", result.get().getMotherName());
+        assertNotNull(result);
+        assertEquals(saved.getId(), result.getId());
+        assertEquals("Mariana Souza", result.getName());
+        assertEquals("222.222.222-22", result.getCpf());
+        assertEquals("F", result.getGenre());
+        assertEquals("Clara Souza", result.getMotherName());
     }
 
     @Test
-    void testUpdate_NonExistingClient() {
-        Optional<Client> result = service.update(999, createValidClient("Pedro Alves", "333.333.333-33"));
-        assertFalse(result.isPresent());
+    void testUpdate_NonExistingClient_ThrowsException() {
+        Client client = createValidClient("Pedro Alves", "333.333.333-33");
+        
+        assertThrows(ResourceNotFoundException.class, () -> service.update(999, client));
     }
 
     @Test
@@ -110,7 +109,7 @@ class ClientServiceTest {
     }
 
     @Test
-    void testDeleteById_NonExistingClient() {
+    void testDeleteById_NonExistingClient_ThrowsException() {
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> service.deleteById(999));
         assertEquals("Client with id 999 not found", exception.getMessage());

@@ -1,5 +1,6 @@
 package com.mqped.fims.controller;
 
+import com.mqped.fims.exceptions.ResourceNotFoundException;
 import com.mqped.fims.model.dto.ClientDTO;
 import com.mqped.fims.model.entity.Client;
 import com.mqped.fims.service.ClientService;
@@ -14,10 +15,8 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 class ClientControllerTest {
@@ -40,12 +39,14 @@ class ClientControllerTest {
         client1.setName("Alice");
         client1.setCpf("111.111.111-11");
         client1.setBirthDate(LocalDateTime.now().minusYears(30));
+        client1.setCreatedAt(LocalDateTime.now());
 
         client2 = new Client();
         client2.setId(2);
         client2.setName("Bob");
         client2.setCpf("222.222.222-22");
         client2.setBirthDate(LocalDateTime.now().minusYears(25));
+        client2.setCreatedAt(LocalDateTime.now());
     }
 
     @Test
@@ -87,7 +88,7 @@ class ClientControllerTest {
 
     @Test
     void testGetClientById_returnsClientDTOWhenFound() {
-        when(service.findById(1)).thenReturn(Optional.of(client1));
+        when(service.findById(1)).thenReturn(client1);
 
         ResponseEntity<ClientDTO> response = controller.getClientById(1);
 
@@ -99,13 +100,10 @@ class ClientControllerTest {
     }
 
     @Test
-    void testGetClientById_returnsNotFoundWhenMissing() {
-        when(service.findById(3)).thenReturn(Optional.empty());
+    void testGetClientById_throwsExceptionWhenNotFound() {
+        when(service.findById(3)).thenThrow(new ResourceNotFoundException("Client with id 3 not found"));
 
-        ResponseEntity<ClientDTO> response = controller.getClientById(3);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
+        assertThrows(ResourceNotFoundException.class, () -> controller.getClientById(3));
         verify(service, times(1)).findById(3);
     }
 
@@ -115,8 +113,10 @@ class ClientControllerTest {
         updatedClient.setId(1);
         updatedClient.setName("Alice Updated");
         updatedClient.setCpf(client1.getCpf());
+        updatedClient.setBirthDate(client1.getBirthDate());
+        updatedClient.setCreatedAt(client1.getCreatedAt());
         
-        when(service.update(1, client1)).thenReturn(Optional.of(updatedClient));
+        when(service.update(1, client1)).thenReturn(updatedClient);
 
         ResponseEntity<ClientDTO> response = controller.updateClient(1, client1);
 
@@ -127,18 +127,15 @@ class ClientControllerTest {
     }
 
     @Test
-    void testUpdateClient_returnsNotFoundWhenMissing() {
-        when(service.update(3, client1)).thenReturn(Optional.empty());
+    void testUpdateClient_throwsExceptionWhenNotFound() {
+        when(service.update(3, client1)).thenThrow(new ResourceNotFoundException("Client with id 3 not found"));
 
-        ResponseEntity<ClientDTO> response = controller.updateClient(3, client1);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
+        assertThrows(ResourceNotFoundException.class, () -> controller.updateClient(3, client1));
+        verify(service, times(1)).update(3, client1);
     }
 
     @Test
     void testDeleteClient_returnsNoContentWhenFound() {
-        when(service.existsById(1)).thenReturn(true);
         doNothing().when(service).deleteById(1);
 
         ResponseEntity<Void> response = controller.deleteClient(1);
@@ -148,12 +145,11 @@ class ClientControllerTest {
     }
 
     @Test
-    void testDeleteClient_returnsNotFoundWhenMissing() {
-        when(service.existsById(3)).thenReturn(false);
+    void testDeleteClient_throwsExceptionWhenNotFound() {
+        doThrow(new ResourceNotFoundException("Client with id 3 not found"))
+            .when(service).deleteById(3);
 
-        ResponseEntity<Void> response = controller.deleteClient(3);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        verify(service, never()).deleteById(anyInt());
+        assertThrows(ResourceNotFoundException.class, () -> controller.deleteClient(3));
+        verify(service, times(1)).deleteById(3);
     }
 }
