@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/clients")
@@ -20,14 +19,12 @@ public class ClientController {
         this.service = service;
     }
 
-    // CREATE
     @PostMapping
     public ResponseEntity<ClientDTO> createClient(@RequestBody Client client) {
         Client savedClient = service.add(client);
         return new ResponseEntity<>(ClientDTO.fromEntity(savedClient), HttpStatus.CREATED);
     }
 
-    // READ ALL
     @GetMapping
     public ResponseEntity<List<ClientDTO>> getAllClients() {
         List<ClientDTO> dtos = service.findAll().stream()
@@ -36,33 +33,24 @@ public class ClientController {
         return ResponseEntity.ok(dtos);
     }
 
-    // READ ONE
     @GetMapping("/{id}")
     public ResponseEntity<ClientDTO> getClientById(@PathVariable Integer id) {
-        Optional<Client> client = service.findById(id);
-        return client.map(c -> ResponseEntity.ok(ClientDTO.fromEntity(c)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        Client client = service.findById(id);
+        return ResponseEntity.ok(ClientDTO.fromEntity(client));
     }
 
-    // UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<ClientDTO> updateClient(@PathVariable Integer id, @RequestBody Client client) {
-        Optional<Client> updated = service.update(id, client);
-        return updated.map(c -> ResponseEntity.ok(ClientDTO.fromEntity(c)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        Client updated = service.update(id, client);
+        return ResponseEntity.ok(ClientDTO.fromEntity(updated));
     }
 
-    // DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteClient(@PathVariable Integer id) {
-        if (service.existsById(id)) {
-            service.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        service.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
-    // CHECK
     @GetMapping("/check")
     public ResponseEntity<String> check() {
         return ResponseEntity.ok("Client API is up and running!");

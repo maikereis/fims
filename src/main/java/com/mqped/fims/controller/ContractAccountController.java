@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/contract-accounts")
@@ -20,14 +19,12 @@ public class ContractAccountController {
         this.service = service;
     }
 
-    // CREATE
     @PostMapping
     public ResponseEntity<ContractAccountDTO> createContractAccount(@RequestBody ContractAccount contractAccount) {
         ContractAccount saved = service.add(contractAccount);
         return new ResponseEntity<>(ContractAccountDTO.fromEntity(saved), HttpStatus.CREATED);
     }
 
-    // READ ALL
     @GetMapping
     public ResponseEntity<List<ContractAccountDTO>> getAllContractAccounts() {
         List<ContractAccountDTO> dtos = service.findAll().stream()
@@ -36,7 +33,6 @@ public class ContractAccountController {
         return ResponseEntity.ok(dtos);
     }
 
-    // READ ALL (WITHOUT INSTALLATION DETAILS)
     @GetMapping("/minimal")
     public ResponseEntity<List<ContractAccountDTO>> getAllContractAccountsMinimal() {
         List<ContractAccountDTO> dtos = service.findAll().stream()
@@ -45,34 +41,25 @@ public class ContractAccountController {
         return ResponseEntity.ok(dtos);
     }
 
-    // READ ONE
     @GetMapping("/{id}")
     public ResponseEntity<ContractAccountDTO> getContractAccountById(@PathVariable Integer id) {
-        Optional<ContractAccount> account = service.findById(id);
-        return account.map(a -> ResponseEntity.ok(ContractAccountDTO.fromEntity(a)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        ContractAccount account = service.findById(id);
+        return ResponseEntity.ok(ContractAccountDTO.fromEntity(account));
     }
 
-    // UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<ContractAccountDTO> updateContractAccount(@PathVariable Integer id,
                                                                      @RequestBody ContractAccount contractAccount) {
-        Optional<ContractAccount> updated = service.update(id, contractAccount);
-        return updated.map(a -> ResponseEntity.ok(ContractAccountDTO.fromEntity(a)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        ContractAccount updated = service.update(id, contractAccount);
+        return ResponseEntity.ok(ContractAccountDTO.fromEntity(updated));
     }
 
-    // DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContractAccount(@PathVariable Integer id) {
-        if (service.existsById(id)) {
-            service.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        service.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
-    // HEALTH CHECK
     @GetMapping("/check")
     public ResponseEntity<String> check() {
         return ResponseEntity.ok("ContractAccount API is up and running!");

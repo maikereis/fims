@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/service-orders")
@@ -22,14 +21,12 @@ public class ServiceOrderController {
         this.service = service;
     }
 
-    // CREATE
     @PostMapping
     public ResponseEntity<ServiceOrderDTO> createServiceOrder(@RequestBody ServiceOrder order) {
         ServiceOrder savedOrder = service.add(order);
         return new ResponseEntity<>(ServiceOrderDTO.fromEntity(savedOrder), HttpStatus.CREATED);
     }
 
-    // READ ALL
     @GetMapping
     public ResponseEntity<List<ServiceOrderDTO>> getAll() {
         List<ServiceOrderDTO> dtos = service.findAll().stream()
@@ -38,33 +35,24 @@ public class ServiceOrderController {
         return ResponseEntity.ok(dtos);
     }
 
-    // READ ONE
     @GetMapping("/{id}")
     public ResponseEntity<ServiceOrderDTO> getById(@PathVariable Integer id) {
-        Optional<ServiceOrder> order = service.findById(id);
-        return order.map(o -> ResponseEntity.ok(ServiceOrderDTO.fromEntity(o)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        ServiceOrder order = service.findById(id);
+        return ResponseEntity.ok(ServiceOrderDTO.fromEntity(order));
     }
 
-    // UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<ServiceOrderDTO> update(@PathVariable Integer id, @RequestBody ServiceOrder order) {
-        Optional<ServiceOrder> updated = service.update(id, order);
-        return updated.map(o -> ResponseEntity.ok(ServiceOrderDTO.fromEntity(o)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        ServiceOrder updated = service.update(id, order);
+        return ResponseEntity.ok(ServiceOrderDTO.fromEntity(updated));
     }
 
-    // DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        if (service.existsById(id)) {
-            service.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        service.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
-    // FILTERS
     @GetMapping("/status/{status}")
     public ResponseEntity<List<ServiceOrderDTO>> getByStatus(@PathVariable ServiceOrderStatus status) {
         List<ServiceOrderDTO> dtos = service.findByStatus(status).stream()
@@ -125,7 +113,6 @@ public class ServiceOrderController {
         return ResponseEntity.ok(dtos);
     }
 
-    // HEALTH CHECK
     @GetMapping("/check")
     public ResponseEntity<String> check() {
         return ResponseEntity.ok("ServiceOrder API is up and running!");
