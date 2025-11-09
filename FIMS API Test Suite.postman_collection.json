@@ -1,12 +1,251 @@
 {
 	"info": {
-		"_postman_id": "dfd89636-d2a6-46e1-a626-0d8c9571dd38",
-		"name": "FIMS API Test Suite",
-		"description": "Field Installation Management System - Complete API Tests",
+		"_postman_id": "14ce2058-88f8-45ec-92cf-23ad3516fe38",
+		"name": "FIMS API Test Suite - Complete",
+		"description": "Field Installation Management System - Complete API Tests with Authentication",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "23860051"
 	},
 	"item": [
+		{
+			"name": "0. Authentication",
+			"item": [
+				{
+					"name": "Login as Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Login Successful', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.token).to.exist;",
+									"    pm.expect(response.username).to.eql('administrator');",
+									"    ",
+									"    // Store token for subsequent requests",
+									"    pm.collectionVariables.set('authToken', response.token);",
+									"    pm.collectionVariables.set('userId', response.id);",
+									"    ",
+									"    console.log('Authentication successful');",
+									"    console.log('User ID:', response.id);",
+									"    console.log('Username:', response.username);",
+									"    console.log('Roles:', response.roles);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"administrator\",\n  \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with default admin credentials"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User Info",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get Current User Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.username).to.eql('administrator');",
+									"    pm.expect(response.roles).to.include('ROLE_ADMIN');",
+									"    console.log('Current user verified');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Get information about the currently authenticated user"
+					},
+					"response": []
+				},
+				{
+					"name": "Signup New User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('User Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.message).to.include('registered successfully');",
+									"    console.log('New user created successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser{{$timestamp}}\",\n  \"email\": \"testuser{{$timestamp}}@example.com\",\n  \"password\": \"password123\",\n  \"roles\": [\"USER\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Register a new user (no authentication required)"
+					},
+					"response": []
+				},
+				{
+					"name": "Login Invalid Credentials",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Login Failed', () => {",
+									"    pm.response.to.have.status(401);",
+									"    console.log('Invalid credentials rejected correctly');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"administrator\",\n  \"password\": \"wrongpassword\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Test authentication failure with invalid credentials"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Logout Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    console.log('Logout successful');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logout (clears security context)"
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints - Login, Signup, and Token management"
+		},
 		{
 			"name": "1. Health Checks",
 			"item": [
@@ -17,7 +256,10 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('Address API is UP', () => pm.response.to.have.status(200));"
+									"pm.test('Address API is UP', () => {",
+									"    pm.response.to.have.status(200);",
+									"    console.log('Address API operational');",
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -36,7 +278,8 @@
 								"addresses",
 								"check"
 							]
-						}
+						},
+						"description": "Check if Address API is running (no auth required)"
 					},
 					"response": []
 				},
@@ -47,7 +290,10 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('Client API is UP', () => pm.response.to.have.status(200));"
+									"pm.test('Client API is UP', () => {",
+									"    pm.response.to.have.status(200);",
+									"    console.log('Client API operational');",
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -66,7 +312,8 @@
 								"clients",
 								"check"
 							]
-						}
+						},
+						"description": "Check if Client API is running (no auth required)"
 					},
 					"response": []
 				},
@@ -77,7 +324,10 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('Installation API is UP', () => pm.response.to.have.status(200));"
+									"pm.test('Installation API is UP', () => {",
+									"    pm.response.to.have.status(200);",
+									"    console.log('Installation API operational');",
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -96,7 +346,8 @@
 								"installations",
 								"check"
 							]
-						}
+						},
+						"description": "Check if Installation API is running (no auth required)"
 					},
 					"response": []
 				},
@@ -107,7 +358,10 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('Target API is UP', () => pm.response.to.have.status(200));"
+									"pm.test('Target API is UP', () => {",
+									"    pm.response.to.have.status(200);",
+									"    console.log('Target API operational');",
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -126,7 +380,8 @@
 								"targets",
 								"check"
 							]
-						}
+						},
+						"description": "Check if Target API is running (no auth required)"
 					},
 					"response": []
 				},
@@ -137,7 +392,10 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('ServiceOrder API is UP', () => pm.response.to.have.status(200));"
+									"pm.test('ServiceOrder API is UP', () => {",
+									"    pm.response.to.have.status(200);",
+									"    console.log('ServiceOrder API operational');",
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -156,11 +414,47 @@
 								"service-orders",
 								"check"
 							]
+						},
+						"description": "Check if ServiceOrder API is running (no auth required)"
+					},
+					"response": []
+				},
+				{
+					"name": "ContractAccount API Health",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('ContractAccount API is UP', () => {",
+									"    pm.response.to.have.status(200);",
+									"    console.log('ContractAccount API operational');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
 						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/contract-accounts/check",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contract-accounts",
+								"check"
+							]
+						},
+						"description": "Check if ContractAccount API is running (no auth required)"
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Health check endpoints for all APIs (publicly accessible)"
 		},
 		{
 			"name": "2. Address CRUD",
@@ -172,14 +466,34 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('Created', () => pm.response.to.have.status(201));",
-									"pm.collectionVariables.set('addressId', pm.response.json().id);"
+									"pm.test('Address Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.id).to.exist;",
+									"    ",
+									"    // Store the database ID (not addressId)",
+									"    pm.collectionVariables.set('addressId', response.id);",
+									"    ",
+									"    console.log('Address created successfully');",
+									"    console.log('Database ID:', response.id);",
+									"    console.log('Address ID:', response.addressId);",
+									"});"
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -189,7 +503,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"addressId\": \"{{addressId}}\",\n  \"state\": \"PA\",\n  \"municipality\": \"Belém\",\n  \"district\": \"Belém\",\n  \"neighborhood\": \"Cidade Nova\",\n  \"street\": \"Travessa WE 55\",\n  \"streetType\": \"Travessa\",\n  \"number\": \"250\",\n  \"zipCode\": \"66093-540\",\n  \"latitude\": -1.3894,\n  \"longitude\": -48.4587\n}"
+							"raw": "{\n  \"addressId\": \"{{addressId}}\",\n  \"state\": \"PA\",\n  \"municipality\": \"Belém\",\n  \"district\": \"Centro\",\n  \"neighborhood\": \"Cidade Nova\",\n  \"street\": \"Travessa WE 55\",\n  \"streetType\": \"Travessa\",\n  \"number\": \"250\",\n  \"zipCode\": \"66093-540\",\n  \"latitude\": -1.3894,\n  \"longitude\": -48.4587\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/addresses",
@@ -200,7 +514,8 @@
 								"api",
 								"addresses"
 							]
-						}
+						},
+						"description": "Create a new address"
 					},
 					"response": []
 				},
@@ -211,13 +526,28 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('OK', () => pm.response.to.have.status(200));"
+									"pm.test('Get All Addresses Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"    console.log(`Found ${response.length} addresses`);",
+									"});"
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -229,13 +559,40 @@
 								"api",
 								"addresses"
 							]
-						}
+						},
+						"description": "Retrieve all addresses"
 					},
 					"response": []
 				},
 				{
 					"name": "Get Address by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get Address By ID Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.id).to.exist;",
+									"    console.log('Retrieved address:', response.addressId);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -248,13 +605,93 @@
 								"addresses",
 								"{{addressId}}"
 							]
+						},
+						"description": "Get address by database ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Address",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Address Updated', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.number).to.eql('300');",
+									"    console.log('Address updated successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
 						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"addressId\": \"ADDR-UPDATED\",\n  \"state\": \"PA\",\n  \"municipality\": \"Belém\",\n  \"district\": \"Centro\",\n  \"neighborhood\": \"Cidade Nova\",\n  \"street\": \"Travessa WE 55\",\n  \"streetType\": \"Travessa\",\n  \"number\": \"300\",\n  \"complement\": \"Updated\",\n  \"zipCode\": \"66093-540\",\n  \"latitude\": -1.3894,\n  \"longitude\": -48.4587\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/addresses/{{addressId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"addresses",
+								"{{addressId}}"
+							]
+						},
+						"description": "Update an existing address"
 					},
 					"response": []
 				},
 				{
 					"name": "Delete Address",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Address Deleted', () => {",
+									"    pm.response.to.have.status(204);",
+									"    console.log('Address deleted successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
@@ -267,11 +704,13 @@
 								"addresses",
 								"{{addressId}}"
 							]
-						}
+						},
+						"description": "Delete an address by ID"
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "CRUD operations for Address entities"
 		},
 		{
 			"name": "3. Client CRUD",
@@ -280,17 +719,47 @@
 					"name": "Create Client",
 					"event": [
 						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate GMT-3 timestamp without milliseconds",
+									"const now = new Date();",
+									"now.setUTCHours(now.getUTCHours() - 3);",
+									"const formatted = now.toISOString().split('.')[0];",
+									"pm.collectionVariables.set('createdAtLocal', formatted);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('Created', () => pm.response.to.have.status(201));",
-									"pm.collectionVariables.set('clientId', pm.response.json().id);"
+									"pm.test('Client Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.id).to.exist;",
+									"    pm.expect(response.name).to.exist;",
+									"    ",
+									"    pm.collectionVariables.set('clientId', response.id);",
+									"    console.log('Client created - ID:', response.id);",
+									"});"
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -300,7 +769,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Maria Silva\",\n  \"cpf\": \"123.456.789-00\",\n  \"birthDate\": \"1985-03-15T00:00:00\",\n  \"motherName\": \"Ana Santos\",\n  \"genre\": \"Feminino\",\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+							"raw": "{\n  \"name\": \"Maria Silva\",\n  \"cpf\": \"123.456.789-00\",\n  \"birthDate\": \"1985-03-15T00:00:00\",\n  \"motherName\": \"Ana Santos\",\n  \"genre\": \"Feminino\",\n  \"createdAt\": \"{{createdAtLocal}}\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/clients",
@@ -317,7 +786,33 @@
 				},
 				{
 					"name": "Get All Clients",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get All Clients Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"    console.log(`Found ${response.length} clients`);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -335,7 +830,33 @@
 				},
 				{
 					"name": "Get Client by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get Client By ID Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.id).to.exist;",
+									"    console.log('Retrieved client:', response.name);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -353,8 +874,99 @@
 					"response": []
 				},
 				{
-					"name": "Delete Client",
+					"name": "Update Client",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate GMT-3 timestamp for update",
+									"const now = new Date();",
+									"now.setUTCHours(now.getUTCHours() - 3);",
+									"const formatted = now.toISOString().split('.')[0];",
+									"pm.collectionVariables.set('createdAtLocal', formatted);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Client Updated', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.name).to.include('Updated');",
+									"    console.log('Client updated successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Maria Silva Updated\",\n  \"cpf\": \"123.456.789-00\",\n  \"birthDate\": \"1985-03-15T00:00:00\",\n  \"motherName\": \"Ana Santos Silva\",\n  \"genre\": \"Feminino\",\n  \"createdAt\": \"{{createdAtLocal}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/clients/{{clientId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clients",
+								"{{clientId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Client",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Client Deleted', () => {",
+									"    pm.response.to.have.status(204);",
+									"    console.log('Client deleted successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
@@ -377,20 +989,34 @@
 			"name": "4. Installation CRUD",
 			"item": [
 				{
-					"name": "Create Address",
+					"name": "Setup - Create Address",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('Address Created', () => pm.response.to.have.status(201));",
-									"pm.collectionVariables.set('addressId', pm.response.json().id);"
+									"pm.test('Address Created for Installation', () => {",
+									"    pm.response.to.have.status(201);",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('addressId', response.id);",
+									"    console.log('Address created - DB ID:', response.id);",
+									"});"
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -400,7 +1026,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"addressId\": \"ADDR-{{randomInt}}\",\n  \"state\": \"PA\",\n  \"municipality\": \"Belém\",\n  \"district\": \"\",\n  \"subdistrict\": \"\",\n  \"neighborhood\": \"\",\n  \"street\": \"Travessa WE 55\",\n  \"streetType\": \"Street\",\n  \"number\": \"123\",\n  \"complement\": \"\",\n  \"zipCode\": \"66000-000\",\n  \"latitude\": -1.455,\n  \"longitude\": -48.503\n}"
+							"raw": "{\n  \"addressId\": \"ADDR-INST-{{$timestamp}}\",\n  \"state\": \"PA\",\n  \"municipality\": \"Belém\",\n  \"district\": \"Centro\",\n  \"neighborhood\": \"Cidade Nova\",\n  \"street\": \"Travessa WE 55\",\n  \"streetType\": \"Travessa\",\n  \"number\": \"123\",\n  \"zipCode\": \"66093-540\",\n  \"latitude\": -1.455,\n  \"longitude\": -48.503\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/addresses",
@@ -419,17 +1045,51 @@
 					"name": "Create Installation",
 					"event": [
 						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Verify addressId exists",
+									"const addressId = pm.collectionVariables.get('addressId');",
+									"if (!addressId) {",
+									"    throw new Error('addressId not set - run Setup first');",
+									"}",
+									"",
+									"// Generate GMT-3 timestamp",
+									"const now = new Date();",
+									"now.setUTCHours(now.getUTCHours() - 3);",
+									"const formatted = now.toISOString().split('.')[0];",
+									"pm.collectionVariables.set('createdAtLocal', formatted);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('Installation Created', () => pm.response.to.have.status(201));",
-									"pm.collectionVariables.set('installationId', pm.response.json().id);"
+									"pm.test('Installation Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.id).to.exist;",
+									"    pm.collectionVariables.set('installationId', response.id);",
+									"    console.log('Installation created - ID:', response.id);",
+									"});"
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -439,7 +1099,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"address\": { \"id\": {{addressId}} },\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+							"raw": "{\n  \"address\": {\n    \"id\": {{addressId}}\n  },\n  \"createdAt\": \"{{createdAtLocal}}\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/installations",
@@ -456,7 +1116,33 @@
 				},
 				{
 					"name": "Get All Installations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get All Installations Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"    console.log(`Found ${response.length} installations`);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -474,7 +1160,33 @@
 				},
 				{
 					"name": "Get Installation by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get Installation By ID Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.id).to.exist;",
+									"    console.log('Retrieved installation ID:', response.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -493,7 +1205,49 @@
 				},
 				{
 					"name": "Update Installation",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const now = new Date();",
+									"now.setUTCHours(now.getUTCHours() - 3); // shift to GMT-3",
+									"const formattedNow = now.toISOString().split('.')[0];",
+									"pm.collectionVariables.set('deletedAtLocal', formattedNow);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Installation Updated', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.deletedAt).to.exist;",
+									"    console.log('Installation updated (soft deleted)');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
 						"header": [
 							{
@@ -503,7 +1257,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"address\": { \"id\": {{addressId}} },\n  \"createdAt\": \"{{$isoTimestamp}}\",\n  \"deletedAt\": \"{{$isoTimestamp}}\"\n}"
+							"raw": "{\n  \"address\": {\n    \"id\": {{addressId}}\n  },\n  \"deletedAt\": \"{{deletedAtLocal}}\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/installations/{{installationId}}",
@@ -521,7 +1275,31 @@
 				},
 				{
 					"name": "Delete Installation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Installation Deleted', () => {",
+									"    pm.response.to.have.status(204);",
+									"    console.log('Installation deleted successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
@@ -544,20 +1322,45 @@
 			"name": "5. ContractAccount CRUD",
 			"item": [
 				{
-					"name": "Create Client",
+					"name": "Setup - Create Client",
 					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const now = new Date();",
+									"now.setUTCHours(now.getUTCHours() - 3);",
+									"const formatted = now.toISOString().split('.')[0];",
+									"pm.collectionVariables.set('createdAtLocal', formatted);"
+								],
+								"type": "text/javascript"
+							}
+						},
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('Created', () => pm.response.to.have.status(201));",
-									"pm.collectionVariables.set('clientId', pm.response.json().id);"
+									"pm.test('Client Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    pm.collectionVariables.set('clientId', pm.response.json().id);",
+									"    console.log('Client ID:', pm.response.json().id);",
+									"});"
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -567,7 +1370,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Test Client {{$timestamp}}\",\n  \"email\": \"client{{$timestamp}}@example.com\"\n}"
+							"raw": "{\n  \"name\": \"Contract Client {{$timestamp}}\",\n  \"cpf\": \"987.654.321-00\",\n  \"birthDate\": \"1990-05-20T00:00:00\",\n  \"motherName\": \"Maria Santos\",\n  \"genre\": \"Masculino\",\n  \"createdAt\": \"{{createdAtLocal}}\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/clients",
@@ -583,20 +1386,50 @@
 					"response": []
 				},
 				{
-					"name": "Create Installation",
+					"name": "Setup - Create Installation",
 					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const addressId = pm.collectionVariables.get('addressId');",
+									"if (!addressId) {",
+									"    throw new Error('addressId not set - create Address first');",
+									"}",
+									"",
+									"const now = new Date();",
+									"now.setUTCHours(now.getUTCHours() - 3);",
+									"const formatted = now.toISOString().split('.')[0];",
+									"pm.collectionVariables.set('createdAtLocal', formatted);"
+								],
+								"type": "text/javascript"
+							}
+						},
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('Created', () => pm.response.to.have.status(201));",
-									"pm.collectionVariables.set('installationId', pm.response.json().id);"
+									"pm.test('Installation Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    pm.collectionVariables.set('installationId', pm.response.json().id);",
+									"    console.log('Installation ID:', pm.response.json().id);",
+									"});"
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -606,7 +1439,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"address\": { \"id\": {{addressId}} },\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+							"raw": "{\n  \"address\": {\n    \"id\": {{addressId}}\n  },\n  \"createdAt\": \"{{createdAtLocal}}\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/installations",
@@ -625,17 +1458,49 @@
 					"name": "Create Contract",
 					"event": [
 						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const clientId = pm.collectionVariables.get('clientId');",
+									"const installationId = pm.collectionVariables.get('installationId');",
+									"if (!clientId || !installationId) {",
+									"    throw new Error('Run Setup steps first');",
+									"}",
+									"",
+									"const now = new Date();",
+									"now.setUTCHours(now.getUTCHours() - 3);",
+									"const formatted = now.toISOString().split('.')[0];",
+									"pm.collectionVariables.set('createdAtLocal', formatted);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('Created', () => pm.response.to.have.status(201));",
-									"pm.collectionVariables.set('contractId', pm.response.json().id);"
+									"pm.test('Contract Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('contractId', response.id);",
+									"    console.log('Contract ID:', response.id);",
+									"});"
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -645,7 +1510,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"accountNumber\": \"ACC-{{$timestamp}}\",\n  \"client\": { \"id\": {{clientId}} },\n  \"installation\": { \"id\": {{installationId}} },\n  \"status\": \"ON\",\n  \"createdAt\": \"{{$isoTimestamp}}\",\n  \"statusStart\": \"{{$isoTimestamp}}\"\n}"
+							"raw": "{\n  \"accountNumber\": \"ACC-{{$timestamp}}\",\n  \"client\": {\n    \"id\": {{clientId}}\n  },\n  \"installation\": {\n    \"id\": {{installationId}}\n  },\n  \"status\": \"ON\",\n  \"createdAt\": \"{{createdAtLocal}}\",\n  \"statusStart\": \"{{createdAtLocal}}\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/contract-accounts",
@@ -662,7 +1527,33 @@
 				},
 				{
 					"name": "Get All Contracts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get All Contracts Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"    console.log(`Found ${response.length} contracts`);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -680,7 +1571,33 @@
 				},
 				{
 					"name": "Get Contract by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get Contract By ID Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.id).to.exist;",
+									"    console.log('Contract:', response.accountNumber);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -699,7 +1616,54 @@
 				},
 				{
 					"name": "Update Contract Status",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Get current contract to preserve createdAt",
+									"const contractId = pm.collectionVariables.get('contractId');",
+									"if (!contractId) throw new Error('contractId not set');",
+									"",
+									"// Generate new statusStart (must be >= original createdAt)",
+									"const now = new Date();",
+									"now.setUTCHours(now.getUTCHours() - 3);",
+									"const statusStart = now.toISOString().split('.')[0];",
+									"pm.collectionVariables.set('statusStartLocal', statusStart);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Contract Updated', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.status).to.eql('CUT');",
+									"    console.log('Contract status updated to CUT');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
 						"header": [
 							{
@@ -709,7 +1673,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"accountNumber\": \"ACC-{{$timestamp}}\",\n  \"client\": { \"id\": {{clientId}} },\n  \"installation\": { \"id\": {{installationId}} },\n  \"status\": \"CUT\",\n  \"createdAt\": \"{{$isoTimestamp}}\",\n  \"statusStart\": \"{{$isoTimestamp}}\"\n}"
+							"raw": "{\n  \"accountNumber\": \"ACC-UPDATED-{{$timestamp}}\",\n  \"client\": {\n    \"id\": {{clientId}}\n  },\n  \"installation\": {\n    \"id\": {{installationId}}\n  },\n  \"status\": \"CUT\",\n  \"statusStart\": \"{{statusStartLocal}}\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/contract-accounts/{{contractId}}",
@@ -727,7 +1691,31 @@
 				},
 				{
 					"name": "Delete Contract",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Contract Deleted', () => {",
+									"    pm.response.to.have.status(204);",
+									"    console.log('Contract deleted successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
@@ -750,7 +1738,7 @@
 			"name": "6. Target CRUD",
 			"item": [
 				{
-					"name": "Create Address",
+					"name": "Setup - Create Address",
 					"event": [
 						{
 							"listen": "test",
@@ -758,11 +1746,8 @@
 								"exec": [
 									"pm.test('Address Created', () => {",
 									"    pm.response.to.have.status(201);",
-									"    const response = pm.response.json();",
-									"    // CRÍTICO: Salvar o ID do banco (PK), não o addressId",
-									"    pm.collectionVariables.set('addressId', response.id);",
-									"    console.log('Address DB ID:', response.id);",
-									"    console.log('Address Domain ID:', response.addressId);",
+									"    pm.collectionVariables.set('addressId', pm.response.json().id);",
+									"    console.log('Address DB ID:', pm.response.json().id);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -770,6 +1755,16 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -795,8 +1790,20 @@
 					"response": []
 				},
 				{
-					"name": "Create Client",
+					"name": "Setup - Create Client",
 					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const now = new Date();",
+									"now.setUTCHours(now.getUTCHours() - 3);",
+									"const formatted = now.toISOString().split('.')[0];",
+									"pm.collectionVariables.set('createdAtLocal', formatted);"
+								],
+								"type": "text/javascript"
+							}
+						},
 						{
 							"listen": "test",
 							"script": {
@@ -812,6 +1819,16 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -821,7 +1838,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Maria Silva {{$timestamp}}\",\n  \"cpf\": \"123.456.789-00\",\n  \"birthDate\": \"1985-03-15T00:00:00\",\n  \"motherName\": \"Ana Santos\",\n  \"genre\": \"Feminino\",\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+							"raw": "{\n  \"name\": \"Maria Silva {{$timestamp}}\",\n  \"cpf\": \"123.456.789-00\",\n  \"birthDate\": \"1985-03-15T00:00:00\",\n  \"motherName\": \"Ana Santos\",\n  \"genre\": \"Feminino\",\n  \"createdAt\": \"{{createdAtLocal}}\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/clients",
@@ -837,8 +1854,23 @@
 					"response": []
 				},
 				{
-					"name": "Create Installation",
+					"name": "Setup - Create Installation",
 					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const addressId = pm.collectionVariables.get('addressId');",
+									"if (!addressId) throw new Error('Run Setup - Create Address first');",
+									"",
+									"const now = new Date();",
+									"now.setUTCHours(now.getUTCHours() - 3);",
+									"const formatted = now.toISOString().split('.')[0];",
+									"pm.collectionVariables.set('createdAtLocal', formatted);"
+								],
+								"type": "text/javascript"
+							}
+						},
 						{
 							"listen": "test",
 							"script": {
@@ -847,28 +1879,23 @@
 									"    pm.response.to.have.status(201);",
 									"    pm.collectionVariables.set('installationId', pm.response.json().id);",
 									"    console.log('Installation ID:', pm.response.json().id);",
-									"    console.log('Address ID usado:', pm.collectionVariables.get('addressId'));",
 									"});"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"// Verificar se addressId está definido",
-									"const addressId = pm.collectionVariables.get('addressId');",
-									"if (!addressId) {",
-									"    console.error('ERRO: addressId não está definido!');",
-									"    console.log('Execute o request \"1. Setup - Create Address\" primeiro');",
-									"}"
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -878,7 +1905,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"address\": {\n    \"id\": {{addressId}}\n  },\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+							"raw": "{\n  \"address\": {\n    \"id\": {{addressId}}\n  },\n  \"createdAt\": \"{{createdAtLocal}}\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/installations",
@@ -894,8 +1921,24 @@
 					"response": []
 				},
 				{
-					"name": "Create ContractAccount",
+					"name": "Setup - Create ContractAccount",
 					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const clientId = pm.collectionVariables.get('clientId');",
+									"const installationId = pm.collectionVariables.get('installationId');",
+									"if (!clientId || !installationId) throw new Error('Run all Setup steps first');",
+									"",
+									"const now = new Date();",
+									"now.setUTCHours(now.getUTCHours() - 3);",
+									"const formatted = now.toISOString().split('.')[0];",
+									"pm.collectionVariables.set('createdAtLocal', formatted);"
+								],
+								"type": "text/javascript"
+							}
+						},
 						{
 							"listen": "test",
 							"script": {
@@ -908,26 +1951,19 @@
 								],
 								"type": "text/javascript"
 							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"// Validar dependências",
-									"const clientId = pm.collectionVariables.get('clientId');",
-									"const installationId = pm.collectionVariables.get('installationId');",
-									"",
-									"if (!clientId || !installationId) {",
-									"    console.error('ERRO: Dependências não criadas!');",
-									"    console.log('Client ID:', clientId);",
-									"    console.log('Installation ID:', installationId);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -937,7 +1973,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"accountNumber\": \"ACC-{{$timestamp}}\",\n  \"client\": {\n    \"id\": {{clientId}}\n  },\n  \"installation\": {\n    \"id\": {{installationId}}\n  },\n  \"status\": \"ON\",\n  \"createdAt\": \"{{$isoTimestamp}}\",\n  \"statusStart\": \"{{$isoTimestamp}}\"\n}"
+							"raw": "{\n  \"accountNumber\": \"ACC-{{$timestamp}}\",\n  \"client\": {\n    \"id\": {{clientId}}\n  },\n  \"installation\": {\n    \"id\": {{installationId}}\n  },\n  \"status\": \"ON\",\n  \"createdAt\": \"{{createdAtLocal}}\",\n  \"statusStart\": \"{{createdAtLocal}}\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/contract-accounts",
@@ -956,6 +1992,16 @@
 					"name": "Create Target",
 					"event": [
 						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const contractId = pm.collectionVariables.get('contractId');",
+									"if (!contractId) throw new Error('Run all Setup steps (1-4) first');"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
 							"listen": "test",
 							"script": {
 								"exec": [
@@ -967,23 +2013,19 @@
 								],
 								"type": "text/javascript"
 							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"// Validar que contractId existe",
-									"const contractId = pm.collectionVariables.get('contractId');",
-									"if (!contractId) {",
-									"    console.error('ERRO: contractId não definido!');",
-									"    console.log('Execute todos os passos de Setup (1-4) primeiro');",
-									"}"
-								],
-								"type": "text/javascript"
-							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -1010,7 +2052,33 @@
 				},
 				{
 					"name": "Get All Targets",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get All Targets Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"    console.log(`Found ${response.length} targets`);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -1028,7 +2096,33 @@
 				},
 				{
 					"name": "Get Target by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get Target By ID Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.id).to.exist;",
+									"    console.log('Target:', response.signature);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -1047,7 +2141,34 @@
 				},
 				{
 					"name": "Update Target",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Target Updated', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.signature).to.eql('ML-UPDATED');",
+									"    pm.expect(response.active).to.be.false;",
+									"    console.log('Target updated successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
 						"header": [
 							{
@@ -1075,7 +2196,31 @@
 				},
 				{
 					"name": "Delete Target",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Target Deleted', () => {",
+									"    pm.response.to.have.status(204);",
+									"    console.log('Target deleted successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
@@ -1098,7 +2243,7 @@
 			"name": "7. ServiceOrder CRUD",
 			"item": [
 				{
-					"name": "Create Address",
+					"name": "Setup - Create Address",
 					"event": [
 						{
 							"listen": "test",
@@ -1106,11 +2251,8 @@
 								"exec": [
 									"pm.test('Address Created', () => {",
 									"    pm.response.to.have.status(201);",
-									"    const response = pm.response.json();",
-									"    // CRÍTICO: Salvar o ID do banco (PK), não o addressId",
-									"    pm.collectionVariables.set('addressId', response.id);",
-									"    console.log('Address DB ID:', response.id);",
-									"    console.log('Address Domain ID:', response.addressId);",
+									"    pm.collectionVariables.set('addressId', pm.response.json().id);",
+									"    console.log('Address DB ID:', pm.response.json().id);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1118,6 +2260,16 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -1127,7 +2279,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"addressId\": \"ADDR-{{$timestamp}}\",\n  \"state\": \"PA\",\n  \"municipality\": \"Belém\",\n  \"district\": \"Centro\",\n  \"neighborhood\": \"Cidade Nova\",\n  \"street\": \"Travessa WE 55\",\n  \"streetType\": \"Travessa\",\n  \"number\": \"250\",\n  \"zipCode\": \"66093-540\",\n  \"latitude\": -1.3894,\n  \"longitude\": -48.4587\n}"
+							"raw": "{\n  \"addressId\": \"ADDR-SO-{{$timestamp}}\",\n  \"state\": \"PA\",\n  \"municipality\": \"Belém\",\n  \"district\": \"Centro\",\n  \"neighborhood\": \"Cidade Nova\",\n  \"street\": \"Travessa WE 55\",\n  \"streetType\": \"Travessa\",\n  \"number\": \"500\",\n  \"zipCode\": \"66093-540\",\n  \"latitude\": -1.3894,\n  \"longitude\": -48.4587\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/addresses",
@@ -1143,8 +2295,20 @@
 					"response": []
 				},
 				{
-					"name": "Create Client",
+					"name": "Setup - Create Client",
 					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const now = new Date();",
+									"now.setUTCHours(now.getUTCHours() - 3);",
+									"const formatted = now.toISOString().split('.')[0];",
+									"pm.collectionVariables.set('createdAtLocal', formatted);"
+								],
+								"type": "text/javascript"
+							}
+						},
 						{
 							"listen": "test",
 							"script": {
@@ -1160,6 +2324,16 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -1169,7 +2343,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Maria Silva {{$timestamp}}\",\n  \"cpf\": \"123.456.789-00\",\n  \"birthDate\": \"1985-03-15T00:00:00\",\n  \"motherName\": \"Ana Santos\",\n  \"genre\": \"Feminino\",\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+							"raw": "{\n  \"name\": \"ServiceOrder Client {{$timestamp}}\",\n  \"cpf\": \"111.222.333-44\",\n  \"birthDate\": \"1988-08-15T00:00:00\",\n  \"motherName\": \"Julia Santos\",\n  \"genre\": \"Masculino\",\n  \"createdAt\": \"{{createdAtLocal}}\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/clients",
@@ -1185,8 +2359,23 @@
 					"response": []
 				},
 				{
-					"name": "Create Installation",
+					"name": "Setup - Create Installation",
 					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const addressId = pm.collectionVariables.get('addressId');",
+									"if (!addressId) throw new Error('Run Setup - Create Address first');",
+									"",
+									"const now = new Date();",
+									"now.setUTCHours(now.getUTCHours() - 3);",
+									"const formatted = now.toISOString().split('.')[0];",
+									"pm.collectionVariables.set('createdAtLocal', formatted);"
+								],
+								"type": "text/javascript"
+							}
+						},
 						{
 							"listen": "test",
 							"script": {
@@ -1195,28 +2384,23 @@
 									"    pm.response.to.have.status(201);",
 									"    pm.collectionVariables.set('installationId', pm.response.json().id);",
 									"    console.log('Installation ID:', pm.response.json().id);",
-									"    console.log('Address ID usado:', pm.collectionVariables.get('addressId'));",
 									"});"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"// Verificar se addressId está definido",
-									"const addressId = pm.collectionVariables.get('addressId');",
-									"if (!addressId) {",
-									"    console.error('ERRO: addressId não está definido!');",
-									"    console.log('Execute o request \"1. Setup - Create Address\" primeiro');",
-									"}"
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -1226,7 +2410,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"address\": {\n    \"id\": {{addressId}}\n  },\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+							"raw": "{\n  \"address\": {\n    \"id\": {{addressId}}\n  },\n  \"createdAt\": \"{{createdAtLocal}}\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/installations",
@@ -1242,8 +2426,24 @@
 					"response": []
 				},
 				{
-					"name": "Create ContractAccount",
+					"name": "Setup - Create ContractAccount",
 					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const clientId = pm.collectionVariables.get('clientId');",
+									"const installationId = pm.collectionVariables.get('installationId');",
+									"if (!clientId || !installationId) throw new Error('Run all Setup steps first');",
+									"",
+									"const now = new Date();",
+									"now.setUTCHours(now.getUTCHours() - 3);",
+									"const formatted = now.toISOString().split('.')[0];",
+									"pm.collectionVariables.set('createdAtLocal', formatted);"
+								],
+								"type": "text/javascript"
+							}
+						},
 						{
 							"listen": "test",
 							"script": {
@@ -1256,26 +2456,19 @@
 								],
 								"type": "text/javascript"
 							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"// Validar dependências",
-									"const clientId = pm.collectionVariables.get('clientId');",
-									"const installationId = pm.collectionVariables.get('installationId');",
-									"",
-									"if (!clientId || !installationId) {",
-									"    console.error('ERRO: Dependências não criadas!');",
-									"    console.log('Client ID:', clientId);",
-									"    console.log('Installation ID:', installationId);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -1285,7 +2478,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"accountNumber\": \"ACC-{{$timestamp}}\",\n  \"client\": {\n    \"id\": {{clientId}}\n  },\n  \"installation\": {\n    \"id\": {{installationId}}\n  },\n  \"status\": \"ON\",\n  \"createdAt\": \"{{$isoTimestamp}}\",\n  \"statusStart\": \"{{$isoTimestamp}}\"\n}"
+							"raw": "{\n  \"accountNumber\": \"ACC-SO-{{$timestamp}}\",\n  \"client\": {\n    \"id\": {{clientId}}\n  },\n  \"installation\": {\n    \"id\": {{installationId}}\n  },\n  \"status\": \"ON\",\n  \"createdAt\": \"{{createdAtLocal}}\",\n  \"statusStart\": \"{{createdAtLocal}}\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/contract-accounts",
@@ -1301,8 +2494,18 @@
 					"response": []
 				},
 				{
-					"name": "Create Target",
+					"name": "Setup - Create Target",
 					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const contractId = pm.collectionVariables.get('contractId');",
+									"if (!contractId) throw new Error('Run all Setup steps (1-4) first');"
+								],
+								"type": "text/javascript"
+							}
+						},
 						{
 							"listen": "test",
 							"script": {
@@ -1315,23 +2518,19 @@
 								],
 								"type": "text/javascript"
 							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"// Validar que contractId existe",
-									"const contractId = pm.collectionVariables.get('contractId');",
-									"if (!contractId) {",
-									"    console.error('ERRO: contractId não definido!');",
-									"    console.log('Execute todos os passos de Setup (1-4) primeiro');",
-									"}"
-								],
-								"type": "text/javascript"
-							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -1341,7 +2540,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"contractAccount\": {\n    \"id\": {{contractId}}\n  },\n  \"type\": \"MACHINE_LEARNING\",\n  \"signature\": \"ML-{{$timestamp}}\",\n  \"score\": 0.85,\n  \"expectedCNR\": 1500.50,\n  \"expectedTicket\": 250.75,\n  \"distanceFromBase\": 5.2,\n  \"active\": true\n}"
+							"raw": "{\n  \"contractAccount\": {\n    \"id\": {{contractId}}\n  },\n  \"type\": \"MACHINE_LEARNING\",\n  \"signature\": \"SO-ML-{{$timestamp}}\",\n  \"score\": 0.92,\n  \"expectedCNR\": 2500.00,\n  \"expectedTicket\": 350.00,\n  \"distanceFromBase\": 3.5,\n  \"active\": true\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/targets",
@@ -1360,17 +2559,48 @@
 					"name": "Create ServiceOrder",
 					"event": [
 						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const targetId = pm.collectionVariables.get('targetId');",
+									"if (!targetId) throw new Error('Run all Setup steps (1-5) first');",
+									"",
+									"const now = new Date();",
+									"now.setUTCHours(now.getUTCHours() - 3);",
+									"const formatted = now.toISOString().split('.')[0];",
+									"pm.collectionVariables.set('createdAtLocal', formatted);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('Created', () => pm.response.to.have.status(201));",
-									"pm.collectionVariables.set('serviceOrderId', pm.response.json().id);"
+									"pm.test('ServiceOrder Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.id).to.exist;",
+									"    pm.expect(response.status).to.eql('CREATED');",
+									"    pm.collectionVariables.set('serviceOrderId', response.id);",
+									"    console.log('ServiceOrder ID:', response.id);",
+									"});"
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -1380,7 +2610,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"target\": { \"id\": {{targetId}} },\n  \"type\": \"IS_CUT\",\n  \"status\": \"CREATED\",\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+							"raw": "{\n  \"target\": {\n    \"id\": {{targetId}}\n  },\n  \"type\": \"IS_ON\",\n  \"status\": \"CREATED\",\n  \"createdAt\": \"{{createdAtLocal}}\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/service-orders",
@@ -1391,13 +2621,40 @@
 								"api",
 								"service-orders"
 							]
-						}
+						},
+						"description": "Create a new service order"
 					},
 					"response": []
 				},
 				{
-					"name": "Get All Orders",
+					"name": "Get All ServiceOrders",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get All ServiceOrders Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"    console.log(`Found ${response.length} service orders`);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -1409,13 +2666,40 @@
 								"api",
 								"service-orders"
 							]
-						}
+						},
+						"description": "Retrieve all service orders"
 					},
 					"response": []
 				},
 				{
-					"name": "Get Order by ID",
+					"name": "Get ServiceOrder by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get ServiceOrder By ID Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.id).to.exist;",
+									"    console.log('ServiceOrder:', response.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -1428,13 +2712,40 @@
 								"service-orders",
 								"{{serviceOrderId}}"
 							]
-						}
+						},
+						"description": "Get service order by ID"
 					},
 					"response": []
 				},
 				{
-					"name": "Get by Status",
+					"name": "Get ServiceOrders by Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get ServiceOrders By Status Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"    console.log(`Found ${response.length} service orders with CREATED status`);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -1448,13 +2759,40 @@
 								"status",
 								"CREATED"
 							]
-						}
+						},
+						"description": "Get service orders by status (CREATED, IN_EXECUTION, EXECUTED, CANCELED)"
 					},
 					"response": []
 				},
 				{
-					"name": "Get by Target",
+					"name": "Get ServiceOrders by Target ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get ServiceOrders By Target Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"    console.log(`Found ${response.length} service orders for target`);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -1468,13 +2806,58 @@
 								"target",
 								"{{targetId}}"
 							]
-						}
+						},
+						"description": "Get service orders for a specific target"
 					},
 					"response": []
 				},
 				{
-					"name": "Update to EXECUTED",
+					"name": "Update ServiceOrder Status",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const now = new Date();",
+									"now.setUTCHours(now.getUTCHours() - 3);",
+									"const createdAt = now.toISOString().split('.')[0];",
+									"pm.collectionVariables.set('createdAtLocal', createdAt);",
+									"",
+									"// Set executedAt to be after createdAt",
+									"now.setHours(now.getHours() + 2);",
+									"const executedAt = now.toISOString().split('.')[0];",
+									"pm.collectionVariables.set('executedAtLocal', executedAt);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('ServiceOrder Updated', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.status).to.eql('EXECUTED');",
+									"    pm.expect(response.executedAt).to.exist;",
+									"    console.log('ServiceOrder status updated to EXECUTED');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
 						"header": [
 							{
@@ -1484,7 +2867,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"target\": { \"id\": {{targetId}} },\n  \"type\": \"IS_CUT\",\n  \"status\": \"EXECUTED\",\n  \"createdAt\": \"{{$isoTimestamp}}\",\n  \"executedAt\": \"{{$isoTimestamp}}\"\n}"
+							"raw": "{\n  \"target\": {\n    \"id\": {{targetId}}\n  },\n  \"type\": \"IS_ON\",\n  \"status\": \"EXECUTED\",\n  \"createdAt\": \"{{createdAtLocal}}\",\n  \"executedAt\": \"{{executedAtLocal}}\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/service-orders/{{serviceOrderId}}",
@@ -1496,13 +2879,85 @@
 								"service-orders",
 								"{{serviceOrderId}}"
 							]
-						}
+						},
+						"description": "Update service order status to EXECUTED"
 					},
 					"response": []
 				},
 				{
-					"name": "Delete Order",
+					"name": "Get ServiceOrders Older Than Days",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get Old ServiceOrders Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"    console.log(`Found ${response.length} service orders older than 30 days`);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/service-orders/older-than/30",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"service-orders",
+								"older-than",
+								"30"
+							]
+						},
+						"description": "Get service orders older than specified days"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete ServiceOrder",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('ServiceOrder Deleted', () => {",
+									"    pm.response.to.have.status(204);",
+									"    console.log('ServiceOrder deleted successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
@@ -1515,53 +2970,30 @@
 								"service-orders",
 								"{{serviceOrderId}}"
 							]
-						}
+						},
+						"description": "Delete a service order by ID"
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "CRUD operations and queries for ServiceOrder entities"
 		},
 		{
-			"name": "8. Error Cases",
+			"name": "8. User & Role Management",
 			"item": [
 				{
-					"name": "404 - Not Found",
+					"name": "Create User with Default Role",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('404', () => pm.response.to.have.status(404));"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/addresses/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"addresses",
-								"999999"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "400 - Invalid CPF",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('400', () => pm.response.to.have.status(400));"
+									"pm.test('User Created with Default Role', () => {",
+									"    pm.response.to.have.status(201);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.message).to.include('registered successfully');",
+									"    console.log('User created with default USER role');",
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -1577,8 +3009,758 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Test\",\n  \"cpf\": \"invalid\",\n  \"createdAt\": \"{{$isoTimestamp}}\"\n}"
+							"raw": "{\n  \"username\": \"defaultuser{{$timestamp}}\",\n  \"email\": \"defaultuser{{$timestamp}}@example.com\",\n  \"password\": \"password123\"\n}"
 						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Create user without specifying roles (defaults to ROLE_USER)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create User with ADMIN Role",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Admin User Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.message).to.include('registered successfully');",
+									"    console.log('Admin user created successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"adminuser{{$timestamp}}\",\n  \"email\": \"adminuser{{$timestamp}}@example.com\",\n  \"password\": \"admin123456\",\n  \"roles\": [\"ADMIN\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Create user with ADMIN role"
+					},
+					"response": []
+				},
+				{
+					"name": "Create User with MODERATOR Role",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Moderator User Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.message).to.include('registered successfully');",
+									"    console.log('Moderator user created successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"moderator{{$timestamp}}\",\n  \"email\": \"moderator{{$timestamp}}@example.com\",\n  \"password\": \"mod123456\",\n  \"roles\": [\"MODERATOR\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Create user with MODERATOR role"
+					},
+					"response": []
+				},
+				{
+					"name": "Create User with Multiple Roles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Multi-Role User Created', () => {",
+									"    pm.response.to.have.status(201);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.message).to.include('registered successfully');",
+									"    console.log('User with multiple roles created');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"multiuser{{$timestamp}}\",\n  \"email\": \"multiuser{{$timestamp}}@example.com\",\n  \"password\": \"multi123456\",\n  \"roles\": [\"USER\", \"MODERATOR\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Create user with multiple roles (USER and MODERATOR)"
+					},
+					"response": []
+				},
+				{
+					"name": "Fail - Duplicate Username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Duplicate Username Rejected', () => {",
+									"    pm.response.to.have.status(400);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.message).to.include('Username is already taken');",
+									"    console.log('Duplicate username correctly rejected');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"administrator\",\n  \"email\": \"newemail@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Try to create user with existing username (should fail)"
+					},
+					"response": []
+				},
+				{
+					"name": "Fail - Duplicate Email",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Get admin email from environment/variables",
+									"// Default admin email is usually set in UserInitializer"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Duplicate Email Rejected', () => {",
+									"    pm.response.to.have.status(400);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.message).to.include('Email is already in use');",
+									"    console.log('Duplicate email correctly rejected');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"newusername{{$timestamp}}\",\n  \"email\": \"admin@fims.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Try to create user with existing email (should fail)"
+					},
+					"response": []
+				},
+				{
+					"name": "Fail - Invalid Email Format",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Invalid Email Format Rejected', () => {",
+									"    pm.response.to.have.status(400);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.error).to.eql('Validation Error');",
+									"    console.log('Invalid email format correctly rejected');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser{{$timestamp}}\",\n  \"email\": \"invalid-email-format\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Try to create user with invalid email format"
+					},
+					"response": []
+				},
+				{
+					"name": "Fail - Short Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Short Password Rejected', () => {",
+									"    pm.response.to.have.status(400);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.error).to.eql('Validation Error');",
+									"    console.log('Short password correctly rejected');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser{{$timestamp}}\",\n  \"email\": \"test{{$timestamp}}@example.com\",\n  \"password\": \"123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Try to create user with password shorter than 6 characters"
+					},
+					"response": []
+				},
+				{
+					"name": "Fail - Short Username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Short Username Rejected', () => {",
+									"    pm.response.to.have.status(400);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.error).to.eql('Validation Error');",
+									"    console.log('Short username correctly rejected');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"ab\",\n  \"email\": \"test{{$timestamp}}@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Try to create user with username shorter than 3 characters"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Get Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Login Successful', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.token).to.exist;",
+									"    pm.expect(response.type).to.eql('Bearer');",
+									"    pm.expect(response.username).to.exist;",
+									"    pm.expect(response.email).to.exist;",
+									"    pm.expect(response.roles).to.be.an('array');",
+									"    ",
+									"    // Store token for authenticated requests",
+									"    pm.collectionVariables.set('testUserToken', response.token);",
+									"    pm.collectionVariables.set('testUserId', response.id);",
+									"    pm.collectionVariables.set('testUsername', response.username);",
+									"    ",
+									"    console.log('Login successful');",
+									"    console.log('User ID:', response.id);",
+									"    console.log('Username:', response.username);",
+									"    console.log('Roles:', response.roles);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"administrator\",\n  \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login and receive JWT token"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User Info",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get Current User Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.id).to.exist;",
+									"    pm.expect(response.username).to.exist;",
+									"    pm.expect(response.email).to.exist;",
+									"    pm.expect(response.roles).to.be.an('array');",
+									"    pm.expect(response.roles.length).to.be.greaterThan(0);",
+									"    ",
+									"    console.log('Current user info retrieved');",
+									"    console.log('Username:', response.username);",
+									"    console.log('Email:', response.email);",
+									"    console.log('Roles:', response.roles);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Get information about the currently authenticated user"
+					},
+					"response": []
+				},
+				{
+					"name": "Fail - Get Current User Without Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Unauthorized Without Token', () => {",
+									"    pm.response.to.have.status(401);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.error).to.eql('Unauthorized');",
+									"    console.log('Correctly rejected request without token');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Try to get user info without authentication token (should fail)"
+					},
+					"response": []
+				},
+				{
+					"name": "Fail - Invalid Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Invalid Token Rejected', () => {",
+									"    pm.response.to.have.status(401);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.error).to.eql('Unauthorized');",
+									"    pm.expect(response.message).to.exist;",
+									"    console.log('Invalid token correctly rejected');",
+									"    console.log('Message:', response.message);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "invalid.jwt.token.here",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Try to access protected endpoint with invalid token"
+					},
+					"response": []
+				},
+				{
+					"name": "Fail - Wrong Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Wrong Password Rejected', () => {",
+									"    pm.response.to.have.status(401);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.error).to.eql('Invalid Credentials');",
+									"    pm.expect(response.message).to.include('Invalid username or password');",
+									"    console.log('Wrong password correctly rejected');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"administrator\",\n  \"password\": \"wrongpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Try to login with wrong password"
+					},
+					"response": []
+				},
+				{
+					"name": "Fail - Non-existent User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Non-existent User Rejected', () => {",
+									"    pm.response.to.have.status(401);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.error).to.include('Unauthorized');",
+									"    console.log('Non-existent user correctly rejected');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"nonexistentuser99999\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Try to login with non-existent username"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Logout Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.message).to.include('logged out successfully');",
+									"    console.log('User logged out successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logout (clears security context)"
+					},
+					"response": []
+				},
+				{
+					"name": "Token Validation - Valid Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Valid Token Accepted', () => {",
+									"    pm.response.to.have.status(200);",
+									"    console.log('Valid token accepted for protected resource');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/api/clients",
 							"host": [
@@ -1588,35 +3770,40 @@
 								"api",
 								"clients"
 							]
-						}
+						},
+						"description": "Test that valid token allows access to protected resources"
 					},
 					"response": []
 				},
 				{
-					"name": "400 - Missing Required",
+					"name": "Role Verification - ADMIN Access",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('400', () => pm.response.to.have.status(400));"
+									"pm.test('Admin Can Access Protected Resource', () => {",
+									"    pm.response.to.have.status(200);",
+									"    console.log('Admin role verified - access granted');",
+									"});"
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"number\": \"100\"\n}"
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
 						},
+						"method": "GET",
+						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/api/addresses",
 							"host": [
@@ -1626,78 +3813,104 @@
 								"api",
 								"addresses"
 							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "400 - Negative Score",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('400', () => pm.response.to.have.status(400));"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"contractAccount\": { \"id\": 1 },\n  \"type\": \"RULES\",\n  \"score\": -0.5\n}"
 						},
-						"url": {
-							"raw": "{{baseUrl}}/api/targets",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"targets"
-							]
-						}
+						"description": "Verify that admin role can access protected resources"
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "User management, authentication, and role-based access control tests"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Log request details",
+					"console.log('→ ' + pm.request.method + ' ' + pm.request.url.toString());"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Log response status",
+					"console.log('← ' + pm.response.code + ' ' + pm.response.status);"
+				]
+			}
 		}
 	],
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "http://localhost:8080"
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "createdAtLocal",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
 		},
 		{
 			"key": "addressId",
-			"value": ""
+			"value": "",
+			"type": "string"
 		},
 		{
 			"key": "clientId",
-			"value": ""
+			"value": "",
+			"type": "string"
 		},
 		{
 			"key": "installationId",
-			"value": ""
+			"value": "",
+			"type": "string"
 		},
 		{
 			"key": "contractId",
-			"value": ""
+			"value": "",
+			"type": "string"
 		},
 		{
 			"key": "targetId",
-			"value": ""
+			"value": "",
+			"type": "string"
 		},
 		{
 			"key": "serviceOrderId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "deletedAtLocal",
+			"value": ""
+		},
+		{
+			"key": "statusStartLocal",
 			"value": ""
 		}
 	]
