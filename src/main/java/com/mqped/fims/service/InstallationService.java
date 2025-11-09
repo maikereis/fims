@@ -2,7 +2,9 @@ package com.mqped.fims.service;
 
 import com.mqped.fims.exceptions.InvalidDataException;
 import com.mqped.fims.exceptions.ResourceNotFoundException;
+import com.mqped.fims.model.entity.Address;
 import com.mqped.fims.model.entity.Installation;
+import com.mqped.fims.repository.AddressRepository;
 import com.mqped.fims.repository.InstallationRepository;
 import org.springframework.stereotype.Service;
 
@@ -12,14 +14,21 @@ import java.util.List;
 public class InstallationService implements CrudService<Installation, Integer> {
 
     private final InstallationRepository repository;
+    private final AddressRepository addressRepository;
 
-    public InstallationService(InstallationRepository repository) {
+    public InstallationService(InstallationRepository repository, AddressRepository addressRepository) {
         this.repository = repository;
+        this.addressRepository = addressRepository;
     }
 
     @Override
     public Installation add(Installation installation) {
         validate(installation);
+
+        // Aditional validation needed only when addind new contracts
+        if (installation.getCreatedAt() == null) {
+            throw new InvalidDataException("Installation creation date is required");
+        }
         return repository.save(installation);
     }
 
@@ -39,9 +48,12 @@ public class InstallationService implements CrudService<Installation, Integer> {
         validate(installation);
 
         Installation existing = findById(id); // throws if not found
-        
-        existing.setAddress(installation.getAddress());
-        existing.setCreatedAt(installation.getCreatedAt());
+
+        Address managedAddress = addressRepository.findById(installation.getAddress().getId())
+                .orElseThrow(() -> new InvalidDataException("Address not found"));
+
+        existing.setAddress(managedAddress);
+        // existing.setCreatedAt(installation.getCreatedAt());
         existing.setDeletedAt(installation.getDeletedAt());
 
         return repository.save(existing);
@@ -79,9 +91,6 @@ public class InstallationService implements CrudService<Installation, Integer> {
         }
         if (installation.getAddress() == null) {
             throw new InvalidDataException("Installation must have an address");
-        }
-        if (installation.getCreatedAt() == null) {
-            throw new InvalidDataException("Installation creation date is required");
         }
     }
 }

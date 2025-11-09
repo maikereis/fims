@@ -30,17 +30,22 @@ public class ContractAccountService implements CrudService<ContractAccount, Inte
     @Override
     public ContractAccount add(ContractAccount contractAccount) {
         validate(contractAccount);
-        
+
+        // Aditional validation needed only when addind new contracts
+        if (contractAccount.getCreatedAt() == null) {
+            throw new InvalidDataException("Creation date is required");
+        }
+
         if (!clientRepository.existsById(contractAccount.getClient().getId())) {
             throw new ResourceNotFoundException(
-                "Client with id " + contractAccount.getClient().getId() + " not found");
+                    "Client with id " + contractAccount.getClient().getId() + " not found");
         }
-        
+
         if (!installationRepository.existsById(contractAccount.getInstallation().getId())) {
             throw new ResourceNotFoundException(
-                "Installation with id " + contractAccount.getInstallation().getId() + " not found");
+                    "Installation with id " + contractAccount.getInstallation().getId() + " not found");
         }
-        
+
         return repository.save(contractAccount);
     }
 
@@ -60,21 +65,21 @@ public class ContractAccountService implements CrudService<ContractAccount, Inte
         validate(contractAccount);
 
         ContractAccount existing = findById(id); // throws if not found
-        
+
         if (!clientRepository.existsById(contractAccount.getClient().getId())) {
             throw new ResourceNotFoundException(
-                "Client with id " + contractAccount.getClient().getId() + " not found");
+                    "Client with id " + contractAccount.getClient().getId() + " not found");
         }
-        
+
         if (!installationRepository.existsById(contractAccount.getInstallation().getId())) {
             throw new ResourceNotFoundException(
-                "Installation with id " + contractAccount.getInstallation().getId() + " not found");
+                    "Installation with id " + contractAccount.getInstallation().getId() + " not found");
         }
-        
-        existing.setAccountNumber(contractAccount.getAccountNumber());
-        existing.setClient(contractAccount.getClient());
-        existing.setInstallation(contractAccount.getInstallation());
-        existing.setCreatedAt(contractAccount.getCreatedAt());
+
+        // existing.setAccountNumber(contractAccount.getAccountNumber());
+        // existing.setClient(contractAccount.getClient());
+        // existing.setInstallation(contractAccount.getInstallation());
+        // existing.setCreatedAt(contractAccount.getCreatedAt());
         existing.setDeletedAt(contractAccount.getDeletedAt());
         existing.setStatus(contractAccount.getStatus());
         existing.setStatusStart(contractAccount.getStatusStart());
@@ -113,9 +118,6 @@ public class ContractAccountService implements CrudService<ContractAccount, Inte
         }
         if (contractAccount.getInstallation() == null) {
             throw new InvalidDataException("Installation is required");
-        }
-        if (contractAccount.getCreatedAt() == null) {
-            throw new InvalidDataException("Creation date is required");
         }
     }
 }

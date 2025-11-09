@@ -46,7 +46,7 @@ public class ClientService implements CrudService<Client, Integer> {
         existing.setMotherName(client.getMotherName());
         existing.setCnpj(client.getCnpj());
         existing.setGenre(client.getGenre());
-        existing.setCreatedAt(client.getCreatedAt());
+        //existing.setCreatedAt(client.getCreatedAt());
 
         return repository.save(existing);
     }
