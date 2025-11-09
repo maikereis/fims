@@ -199,3 +199,26 @@ README.html
 *.iml
 .idea
 .exercism
+
+# Environment variables with secrets
+.env
+.env.local
+.env.*.local
+.env.development
+.env.staging
+.env.production
+env.properties
+
+
+# Database files
+*.db
+*.sqlite
+*.sql.backup
+
+# SSH keys and certificates
+*.pem
+*.key
+*.cert
+*.p12
+*.jks
+*.keystore

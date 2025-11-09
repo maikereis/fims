@@ -116,7 +116,7 @@ class ContractAccountServiceTest {
         ContractAccount saved = service.add(account);
 
         ContractAccount result = service.findById(saved.getId());
-        
+
         assertNotNull(result);
         assertEquals("ACC-123", result.getAccountNumber());
     }
@@ -145,18 +145,18 @@ class ContractAccountServiceTest {
     @Test
     void testUpdate_ExistingAccount() {
         ContractAccount original = createValidContractAccount();
-        original.setAccountNumber("OLD-ACC");
+        original.setAccountNumber("ACC-010");
         ContractAccount saved = service.add(original);
 
         ContractAccount updated = createValidContractAccount();
-        updated.setAccountNumber("NEW-ACC");
+
         updated.setDeletedAt(LocalDateTime.now().plusDays(1));
 
         ContractAccount result = service.update(saved.getId(), updated);
 
         assertNotNull(result);
         assertEquals(saved.getId(), result.getId());
-        assertEquals("NEW-ACC", result.getAccountNumber());
+        assertEquals("ACC-010", result.getAccountNumber());
         assertNotNull(result.getDeletedAt());
     }
 

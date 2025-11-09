@@ -28,7 +28,7 @@ class InstallationServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new InstallationService(repository);
+        service = new InstallationService(repository, addressRepository);
         repository.deleteAll();
         addressRepository.deleteAll();
     }
@@ -129,7 +129,7 @@ class InstallationServiceTest {
     @Test
     void testUpdate_NonExistingInstallation_ThrowsException() {
         Installation installation = createValidInstallation();
-        
+
         assertThrows(ResourceNotFoundException.class, () -> service.update(999, installation));
     }
 
@@ -175,7 +175,7 @@ class InstallationServiceTest {
         service.add(installation);
 
         List<Installation> result = service.findByAddressId(addressId);
-        
+
         assertFalse(result.isEmpty());
         assertEquals(addressId, result.get(0).getAddress().getAddressId());
     }
@@ -189,7 +189,7 @@ class InstallationServiceTest {
         service.add(installation);
 
         List<Installation> result = service.findByAddressIdWithContracts(addressId);
-        
+
         assertFalse(result.isEmpty());
         assertEquals(addressId, result.get(0).getAddress().getAddressId());
     }
