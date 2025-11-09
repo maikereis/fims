@@ -69,7 +69,7 @@ public class SecurityConfig {
                         .permitAll()
 
                         // Actuator endpoints
-                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/info", "/actuator/prometheus").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
 
                         // All other endpoints require authentication
