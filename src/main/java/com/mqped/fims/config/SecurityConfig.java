@@ -18,82 +18,92 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CorsConfig corsConfig;
-    private final AuthenticationConfig authenticationConfig;
+        private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
+        private final CorsConfig corsConfig;
+        private final AuthenticationConfig authenticationConfig;
 
-    public SecurityConfig(
-            JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
-            JwtAuthenticationFilter jwtAuthenticationFilter,
-            CorsConfig corsConfig,
-            AuthenticationConfig authenticationConfig) {
-        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.corsConfig = corsConfig;
-        this.authenticationConfig = authenticationConfig;
-    }
+        public SecurityConfig(
+                        JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
+                        JwtAuthenticationFilter jwtAuthenticationFilter,
+                        CorsConfig corsConfig,
+                        AuthenticationConfig authenticationConfig) {
 
-    @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                // CSRF Configuration - disabled for JWT
-                .csrf(AbstractHttpConfigurer::disable)
+                this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+                this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+                this.corsConfig = corsConfig;
+                this.authenticationConfig = authenticationConfig;
+        }
 
-                // CORS Configuration
-                .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-                // Exception Handling
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                http
+                                // Stateless + token-based, so disable CSRF
+                                .csrf(AbstractHttpConfigurer::disable)
 
-                // Session Management - Stateless for JWT
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                // Enable CORS using your configuration bean
+                                .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
 
-                // Authorization Rules
-                .authorizeHttpRequests(auth -> auth
-                        // Public endpoints - authentication
-                        .requestMatchers("/api/auth/**").permitAll()
+                                // Unauthorized / entry point handling
+                                .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
-                        // Public endpoints - health checks
-                        .requestMatchers(HttpMethod.GET, "/api/*/check").permitAll()
+                                // Stateless sessions (JWT carries identity)
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                        // H2 Console (Development only)
-                        .requestMatchers("/h2-console/**").permitAll()
+                                // Define authorization rules
+                                .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers(
-                                "/",
-                                "/favicon.ico",
-                                "/images/**",
-                                "/css/**",
-                                "/js/**",
-                                "/webjars/**")
-                        .permitAll()
+                                                // Public authentication endpoints
+                                                .requestMatchers("/api/auth/**").permitAll()
 
-                        // Swagger/OpenAPI endpoints
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**",
-                                "/swagger-resources/**",
-                                "/webjars/**")
-                        .permitAll()
+                                                // Public health checks
+                                                .requestMatchers(HttpMethod.GET, "/api/*/check").permitAll()
 
-                        // Actuator endpoints
-                        .requestMatchers("/actuator/health", "/actuator/info", "/actuator/prometheus").permitAll()
-                        .requestMatchers("/actuator/**").hasRole("ADMIN")
+                                                // Allow H2 console (use only in dev)
+                                                .requestMatchers("/h2-console/**").permitAll()
 
-                        // All other endpoints require authentication
-                        .anyRequest().authenticated())
+                                                // Static resources
+                                                .requestMatchers(
+                                                                "/",
+                                                                "/favicon.ico",
+                                                                "/images/**",
+                                                                "/css/**",
+                                                                "/js/**",
+                                                                "/webjars/**")
+                                                .permitAll()
 
-                // Authentication Provider
-                .authenticationProvider(authenticationConfig.authenticationProvider())
+                                                // OpenAPI/Swagger
+                                                .requestMatchers(
+                                                                "/swagger-ui/**",
+                                                                "/swagger-ui.html",
+                                                                "/v3/api-docs/**",
+                                                                "/swagger-resources/**",
+                                                                "/webjars/**")
+                                                .permitAll()
 
-                // JWT Filter
-                .addFilterBefore(jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class);
-                
-                http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
+                                                // Actuator endpoints
+                                                .requestMatchers(
+                                                                "/actuator/health",
+                                                                "/actuator/info",
+                                                                "/actuator/prometheus")
+                                                .permitAll()
+                                                .requestMatchers("/actuator/**").hasRole("ADMIN")
 
-        return http.build();
-    }
+                                                // All other routes require auth
+                                                .anyRequest().authenticated())
+
+                                // Authentication Provider
+                                .authenticationProvider(authenticationConfig.authenticationProvider())
+
+                                // Add JWT filter before UsernamePasswordAuthenticationFilter
+                                .addFilterBefore(jwtAuthenticationFilter,
+                                                UsernamePasswordAuthenticationFilter.class)
+
+                                // Allow H2 console frames (only for dev!)
+                                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
+
+                return http.build();
+        }
 }

@@ -13,8 +13,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Configuration
@@ -23,35 +24,44 @@ public class UserInitializer {
 
     private static final Logger userInitializerLogger = LoggerFactory.getLogger(UserInitializer.class);
 
-    // Inject values from application-dev.properties or .env
-    @Value("${admin.user}")
+    @Value("${admin.user:admin}")
     private String adminUsername;
 
-    @Value("${admin.email}")
+    @Value("${admin.email:admin@example.com}")
     private String adminEmail;
 
-    @Value("${admin.password}")
+    @Value("${admin.password:admin123}")
     private String adminPassword;
 
     @Bean
     @Order(2)
-    CommandLineRunner initUsers(UserRepository userRepository, RoleRepository roleRepository) {
+    CommandLineRunner initUsers(
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder) {
         return args -> {
-            if (userRepository.findByUsername(adminUsername).isEmpty()) {
-                Role adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN)
-                        .orElseThrow(() -> new RuntimeException("ROLE_ADMIN not found"));
+            // Check if admin user already exists
+            Optional<User> existingAdmin = userRepository.findByUsername(adminUsername);
 
-                User admin = new User();
-                admin.setUsername(adminUsername);
-                admin.setEmail(adminEmail);
-                admin.setPassword(new BCryptPasswordEncoder().encode(adminPassword));
-                admin.setRoles(Set.of(adminRole));
-
-                userRepository.save(admin);
-                userInitializerLogger.info("Created default admin user: {} / {}", adminUsername, adminPassword);
-            } else {
-                userInitializerLogger.info("Default admin user '{}' already exists", adminUsername);
+            if (existingAdmin.isPresent()) {
+                userInitializerLogger.info("✅ Default admin user '{}' already exists", adminUsername);
+                return;
             }
+
+            // Ensure admin role exists
+            Role adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN)
+                    .orElseThrow(() -> new IllegalStateException("ROLE_ADMIN not found. Did DatabaseInitializer run?"));
+
+            // Create default admin user
+            User admin = new User();
+            admin.setUsername(adminUsername);
+            admin.setEmail(adminEmail);
+            admin.setPassword(passwordEncoder.encode(adminPassword));
+            admin.setRoles(Set.of(adminRole));
+
+            userRepository.save(admin);
+            userInitializerLogger.info("Created default admin user: username='{}', email='{}'", adminUsername,
+                    adminEmail);
         };
     }
 }
