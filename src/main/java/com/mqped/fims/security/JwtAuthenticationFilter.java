@@ -1,5 +1,6 @@
 package com.mqped.fims.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,17 +21,26 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Security filter responsible for extracting and validating JWT tokens
+ * from incoming HTTP requests. If valid, it populates the Spring Security
+ * context with the corresponding authenticated user.
+ *
+ * <p>
+ * This filter runs once per request, before the controller layer.
+ * </p>
+ */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger authLogger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    private static final String AUTH_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
-    private static final int BEARER_PREFIX_LENGTH = 7;
+    private static final int BEARER_PREFIX_LENGTH = BEARER_PREFIX.length();
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
-    // Add @Lazy annotation to break circular dependency
     public JwtAuthenticationFilter(JwtUtil jwtUtil, @Lazy UserDetailsService userDetailsService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
@@ -45,53 +55,63 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = extractJwtFromRequest(request);
 
-            if (StringUtils.hasText(jwt)) {
+            if (jwt != null) {
                 String username = jwtUtil.extractUsername(jwt);
 
-                if (StringUtils.hasText(username) &&
-                        SecurityContextHolder.getContext().getAuthentication() == null) {
-
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     authenticateUser(jwt, username, request);
                 }
             }
+
+        } catch (ExpiredJwtException ex) {
+            authLogger.warn("JWT expired for user '{}': {}", ex.getClaims().getSubject(), ex.getMessage());
         } catch (JwtException ex) {
-            authLogger.error("JWT token validation failed: {}", ex.getMessage());
+            authLogger.warn("Invalid JWT token: {}", ex.getMessage());
         } catch (Exception ex) {
-            authLogger.error("Cannot set user authentication: {}", ex.getMessage());
+            authLogger.error("Error during JWT authentication: {}", ex.getMessage(), ex);
         }
 
+        // Continue the filter chain even if JWT validation fails
         filterChain.doFilter(request, response);
     }
 
     /**
-     * Extract JWT token from Authorization header
+     * Extracts the JWT token from the Authorization header if present and valid.
+     *
+     * @param request the HTTP request
+     * @return the extracted JWT token or null if none
      */
     private String extractJwtFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
+        String bearerToken = request.getHeader(AUTH_HEADER);
 
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
-            return bearerToken.substring(BEARER_PREFIX_LENGTH);
+            return bearerToken.substring(BEARER_PREFIX_LENGTH).trim();
         }
 
         return null;
     }
 
     /**
-     * Authenticate user with JWT token
+     * Authenticates the user based on the JWT token and sets the authentication
+     * context for the current request.
+     *
+     * @param jwt      the raw JWT token
+     * @param username the username extracted from the token
+     * @param request  the current HTTP request
      */
     private void authenticateUser(String jwt, String username, HttpServletRequest request) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         if (Boolean.TRUE.equals(jwtUtil.validateToken(jwt, userDetails))) {
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities());
+                    userDetails, null, userDetails.getAuthorities());
 
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
 
-            authLogger.debug("User '{}' authenticated successfully", username);
+            authLogger.debug("User '{}' successfully authenticated from JWT", username);
+        } else {
+            authLogger.debug("Invalid JWT for user '{}'", username);
         }
     }
 }

@@ -10,11 +10,19 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.time.Instant;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * Utility class for generating, parsing, and validating JWT tokens.
+ *
+ * <p>
+ * Uses HS256 symmetric signing algorithm with a base64-encoded secret key.
+ * Provides typed exceptions for token errors.
+ * </p>
+ */
 @Component
 public class JwtUtil {
 
@@ -22,95 +30,106 @@ public class JwtUtil {
     private String secret;
 
     @Value("${jwt.expiration}")
-    private Long expiration;
+    private long expirationMs;
 
+    /**
+     * Extracts the username (subject) from a valid JWT.
+     *
+     * @throws TokenExpiredException if the token is expired
+     * @throws InvalidTokenException if malformed or invalid
+     */
     public String extractUsername(String token) {
-        try {
-            return extractClaim(token, Claims::getSubject);
-        } catch (ExpiredJwtException e) {
-            throw new TokenExpiredException("JWT token has expired");
-        } catch (MalformedJwtException e) {
-            throw new InvalidTokenException("Invalid JWT token");
-        } catch (JwtException e) {
-            throw new InvalidTokenException("JWT token validation failed: " + e.getMessage());
-        }
+        return extractClaim(token, Claims::getSubject);
     }
 
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    public <T> T extractClaim(String token, Function<Claims, T> resolver) {
         final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+        return resolver.apply(claims);
     }
 
     private Claims extractAllClaims(String token) {
         try {
             return Jwts.parser()
-                    .verifyWith(getSignKey())
+                    .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
-        } catch (ExpiredJwtException e) {
-            throw new TokenExpiredException("JWT token has expired");
-        } catch (MalformedJwtException e) {
-            throw new InvalidTokenException("Invalid JWT token signature");
-        } catch (JwtException e) {
-            throw new InvalidTokenException("JWT token validation failed");
+        } catch (ExpiredJwtException ex) {
+            throw new TokenExpiredException("JWT token has expired", ex);
+        } catch (MalformedJwtException | UnsupportedJwtException | IllegalArgumentException ex) {
+            throw new InvalidTokenException("Invalid JWT token: " + ex.getMessage(), ex);
+        } catch (JwtException ex) {
+            throw new InvalidTokenException("JWT parsing failed: " + ex.getMessage(), ex);
         }
     }
 
-    private Boolean isTokenExpired(String token) {
+    private boolean isTokenExpired(String token) {
         try {
             return extractExpiration(token).before(new Date());
-        } catch (ExpiredJwtException e) {
+        } catch (TokenExpiredException ex) {
             return true;
         }
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails) {
+    /**
+     * Validates a JWT token against the given user details.
+     *
+     * @return true if token is valid and belongs to the given user
+     */
+    public boolean validateToken(String token, UserDetails userDetails) {
         try {
             final String username = extractUsername(token);
-            return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
-        } catch (TokenExpiredException e) {
-            throw new TokenExpiredException("Token has expired");
-        } catch (InvalidTokenException e) {
-            throw new InvalidTokenException("Token validation failed: " + e.getMessage());
+            return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        } catch (TokenExpiredException ex) {
+            throw new TokenExpiredException("JWT token expired", ex);
+        } catch (InvalidTokenException ex) {
+            throw new InvalidTokenException("JWT validation failed: " + ex.getMessage(), ex);
         }
     }
 
+    /**
+     * Generates a new JWT token for the given user with no extra claims.
+     */
     public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userDetails.getUsername());
+        return generateToken(Map.of(), userDetails);
     }
 
+    /**
+     * Generates a new JWT token for the given user with extra claims.
+     */
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return createToken(extraClaims, userDetails.getUsername());
-    }
-
-    private String createToken(Map<String, Object> claims, String subject) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expiration);
+        Instant now = Instant.now();
+        Instant expiry = now.plusMillis(expirationMs);
 
         return Jwts.builder()
-                .claims(claims)
-                .subject(subject)
-                .issuedAt(now)
-                .expiration(expiryDate)
-                .signWith(getSignKey(), Jwts.SIG.HS256)
+                .claims(extraClaims)
+                .subject(userDetails.getUsername())
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiry))
+                .signWith(getSigningKey(), Jwts.SIG.HS256)
                 .compact();
     }
 
-    private SecretKey getSignKey() {
+    /**
+     * Returns the signing key derived from the base64-encoded secret.
+     */
+    private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    /**
+     * Checks if a JWT has a valid structure and signature.
+     * Useful for early rejection before deeper validation.
+     */
     public boolean validateTokenStructure(String token) {
         try {
             Jwts.parser()
-                    .verifyWith(getSignKey())
+                    .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(token);
             return true;
