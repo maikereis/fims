@@ -3,6 +3,12 @@ package com.mqped.fims.controller;
 import com.mqped.fims.model.dto.InstallationDTO;
 import com.mqped.fims.model.entity.Installation;
 import com.mqped.fims.service.InstallationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +50,7 @@ import java.util.List;
  * @author Rodrigo
  * @since 1.0
  */
+@Tag(name = "Installation API", description = "Endpoints for managing Installation entities, including CRUD operations and health check.")
 @RestController
 @RequestMapping("/api/installations")
 public class InstallationController {
@@ -70,6 +77,11 @@ public class InstallationController {
      *         {@link InstallationDTO}
      *         and HTTP status {@code 201 (Created)}.
      */
+    @Operation(summary = "Create installation", description = "Creates a new installation record.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Installation created successfully", content = @Content(schema = @Schema(implementation = InstallationDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid installation data", content = @Content)
+    })
     @PostMapping
     public ResponseEntity<InstallationDTO> createInstallation(@RequestBody Installation installation) {
         Installation savedInstallation = service.add(installation);
@@ -83,6 +95,10 @@ public class InstallationController {
      *         objects
      *         and HTTP status {@code 200 (OK)}.
      */
+    @Operation(summary = "Get all installations", description = "Retrieves all installations with full details, including address data.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Installations retrieved successfully", content = @Content(schema = @Schema(implementation = InstallationDTO.class)))
+    })
     @GetMapping
     public ResponseEntity<List<InstallationDTO>> getAllInstallations() {
         List<InstallationDTO> dtos = service.findAll().stream()
@@ -102,6 +118,10 @@ public class InstallationController {
      *         {@link InstallationDTO}
      *         and HTTP status {@code 200 (OK)}.
      */
+    @Operation(summary = "Get all installations (minimal)", description = "Retrieves all installations excluding address details, useful for tables or summary views.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Minimal installations retrieved successfully", content = @Content(schema = @Schema(implementation = InstallationDTO.class)))
+    })
     @GetMapping("/minimal")
     public ResponseEntity<List<InstallationDTO>> getAllInstallationsMinimal() {
         List<InstallationDTO> dtos = service.findAll().stream()
@@ -122,6 +142,11 @@ public class InstallationController {
      *                                                                is found with
      *                                                                the given ID.
      */
+    @Operation(summary = "Get installation by ID", description = "Retrieves a specific installation by its unique ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Installation retrieved successfully", content = @Content(schema = @Schema(implementation = InstallationDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Installation not found", content = @Content)
+    })
     @GetMapping("/{id}")
     public ResponseEntity<InstallationDTO> getInstallationById(@PathVariable Integer id) {
         Installation installation = service.findById(id);
@@ -141,6 +166,11 @@ public class InstallationController {
      *                                                                does not
      *                                                                exist.
      */
+    @Operation(summary = "Update installation", description = "Updates an existing installation by ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Installation updated successfully", content = @Content(schema = @Schema(implementation = InstallationDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Installation not found", content = @Content)
+    })
     @PutMapping("/{id}")
     public ResponseEntity<InstallationDTO> updateInstallation(@PathVariable Integer id,
             @RequestBody Installation installation) {
@@ -155,6 +185,11 @@ public class InstallationController {
      * @return a {@link ResponseEntity} with HTTP status {@code 204 (No Content)} if
      *         deletion is successful.
      */
+    @Operation(summary = "Delete installation", description = "Deletes an installation by its unique ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Installation deleted successfully", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Installation not found", content = @Content)
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInstallation(@PathVariable Integer id) {
         service.deleteById(id);
@@ -170,6 +205,10 @@ public class InstallationController {
      * @return a {@link ResponseEntity} containing a status message
      *         and HTTP status {@code 200 (OK)}.
      */
+    @Operation(summary = "Health check", description = "Simple endpoint to verify that the Installation API is running.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "API is up and running", content = @Content)
+    })
     @GetMapping("/check")
     public ResponseEntity<String> check() {
         return ResponseEntity.ok("Installation API is up and running!");

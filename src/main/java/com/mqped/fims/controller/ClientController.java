@@ -3,6 +3,12 @@ package com.mqped.fims.controller;
 import com.mqped.fims.model.dto.ClientDTO;
 import com.mqped.fims.model.entity.Client;
 import com.mqped.fims.service.ClientService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +44,7 @@ import java.util.List;
  * @author Rodrigo
  * @since 1.0
  */
+@Tag(name = "Client API", description = "Endpoints for managing client entities, including CRUD operations and health check.")
 @RestController
 @RequestMapping("/api/clients")
 public class ClientController {
@@ -92,6 +99,11 @@ public class ClientController {
      * @throws org.springframework.web.server.ResponseStatusException if the client
      *                                                                is not found.
      */
+    @Operation(summary = "Get client by ID", description = "Retrieves a client by its unique ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Client retrieved successfully", content = @Content(schema = @Schema(implementation = ClientDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Client not found", content = @Content)
+    })
     @GetMapping("/{id}")
     public ResponseEntity<ClientDTO> getClientById(@PathVariable Integer id) {
         Client client = service.findById(id);
@@ -108,6 +120,11 @@ public class ClientController {
      * @throws org.springframework.web.server.ResponseStatusException if the client
      *                                                                is not found.
      */
+    @Operation(summary = "Update client", description = "Updates an existing client's information.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Client updated successfully", content = @Content(schema = @Schema(implementation = ClientDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Client not found", content = @Content)
+    })
     @PutMapping("/{id}")
     public ResponseEntity<ClientDTO> updateClient(@PathVariable Integer id, @RequestBody Client client) {
         Client updated = service.update(id, client);
@@ -121,6 +138,11 @@ public class ClientController {
      * @return a {@link ResponseEntity} with no content and HTTP status
      *         {@code 204 (No Content)}.
      */
+    @Operation(summary = "Delete client", description = "Deletes a client by its unique ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Client deleted successfully", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Client not found", content = @Content)
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteClient(@PathVariable Integer id) {
         service.deleteById(id);
@@ -136,6 +158,10 @@ public class ClientController {
      * @return a {@link ResponseEntity} containing a confirmation message and HTTP
      *         status {@code 200 (OK)}.
      */
+    @Operation(summary = "Health check", description = "Simple endpoint to verify that the Client API is running.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "API is up and running", content = @Content)
+    })
     @GetMapping("/check")
     public ResponseEntity<String> check() {
         return ResponseEntity.ok("Client API is up and running!");

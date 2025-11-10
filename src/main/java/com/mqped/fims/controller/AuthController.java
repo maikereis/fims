@@ -11,6 +11,12 @@ import com.mqped.fims.model.entity.User;
 import com.mqped.fims.repository.RoleRepository;
 import com.mqped.fims.repository.UserRepository;
 import com.mqped.fims.security.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +58,7 @@ import java.util.stream.Collectors;
  * @author Rodrigo
  * @since 1.0
  */
+@Tag(name = "Authentication API", description = "Endpoints for user authentication, registration, and session management.")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -103,6 +110,11 @@ public class AuthController {
          *                                                                   authentication
          *                                                                   fails.
          */
+        @Operation(summary = "Authenticate user", description = "Logs in a user using username and password and returns a JWT token with user details.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Authentication successful", content = @Content(schema = @Schema(implementation = JwtResponseDTO.class))),
+                        @ApiResponse(responseCode = "401", description = "Invalid credentials", content = @Content)
+        })
         @PostMapping("/login")
         public ResponseEntity<JwtResponseDTO> authenticateUser(@Valid @RequestBody LoginRequestDTO loginRequest) {
                 Authentication authentication = authenticationManager.authenticate(
@@ -143,6 +155,11 @@ public class AuthController {
          * @return a {@link ResponseEntity} with a {@link MessageResponseDTO} indicating
          *         success or failure.
          */
+        @Operation(summary = "Register user", description = "Registers a new user and assigns roles. Validates username/email uniqueness.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "201", description = "User registered successfully", content = @Content(schema = @Schema(implementation = MessageResponseDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Username or email already exists", content = @Content)
+        })
         @PostMapping("/signup")
         public ResponseEntity<MessageResponseDTO> registerUser(@Valid @RequestBody SignupRequestDTO signupRequest) {
                 if (Boolean.TRUE.equals(userRepository.existsByUsername(signupRequest.getUsername()))) {
@@ -204,6 +221,10 @@ public class AuthController {
          * @return a {@link ResponseEntity} with a {@link MessageResponseDTO} confirming
          *         the logout.
          */
+        @Operation(summary = "Logout user", description = "Logs out the current user by clearing the authentication context.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "User logged out successfully", content = @Content)
+        })
         @PostMapping("/logout")
         public ResponseEntity<MessageResponseDTO> logoutUser() {
                 SecurityContextHolder.clearContext();
@@ -220,6 +241,11 @@ public class AuthController {
          * @throws UnauthorizedException if no user is authenticated or the
          *                               authentication is invalid.
          */
+        @Operation(summary = "Get current user", description = "Returns information about the currently authenticated user.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "User information retrieved successfully", content = @Content(schema = @Schema(implementation = JwtResponseDTO.class))),
+                        @ApiResponse(responseCode = "401", description = "User is not authenticated", content = @Content)
+        })
         @GetMapping("/me")
         public ResponseEntity<JwtResponseDTO> getCurrentUser(Authentication authentication) {
                 if (authentication == null || !authentication.isAuthenticated()) {

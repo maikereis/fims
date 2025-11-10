@@ -4,6 +4,12 @@ import com.mqped.fims.model.dto.ServiceOrderDTO;
 import com.mqped.fims.model.entity.ServiceOrder;
 import com.mqped.fims.model.enums.ServiceOrderStatus;
 import com.mqped.fims.service.ServiceOrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,6 +58,7 @@ import java.util.List;
  * @author Rodrigo
  * @since 1.0
  */
+@Tag(name = "Service Order API", description = "Endpoints for managing ServiceOrder entities including CRUD and advanced queries")
 @RestController
 @RequestMapping("/api/service-orders")
 public class ServiceOrderController {
@@ -76,6 +83,11 @@ public class ServiceOrderController {
      *         {@link ServiceOrderDTO}
      *         and HTTP status {@code 201 (Created)}.
      */
+    @Operation(summary = "Create service order", description = "Creates a new service order record")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Service order created successfully", content = @Content(schema = @Schema(implementation = ServiceOrderDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content)
+    })
     @PostMapping
     public ResponseEntity<ServiceOrderDTO> createServiceOrder(@RequestBody ServiceOrder order) {
         ServiceOrder savedOrder = service.add(order);
@@ -88,6 +100,10 @@ public class ServiceOrderController {
      * @return a {@link ResponseEntity} containing a list of {@link ServiceOrderDTO}
      *         and HTTP status {@code 200 (OK)}.
      */
+    @Operation(summary = "Get all service orders", description = "Retrieves all existing service orders")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Service orders retrieved successfully", content = @Content(schema = @Schema(implementation = ServiceOrderDTO.class)))
+    })
     @GetMapping
     public ResponseEntity<List<ServiceOrderDTO>> getAll() {
         List<ServiceOrderDTO> dtos = service.findAll().stream()
@@ -103,6 +119,11 @@ public class ServiceOrderController {
      * @return a {@link ResponseEntity} containing the {@link ServiceOrderDTO}
      *         and HTTP status {@code 200 (OK)}.
      */
+    @Operation(summary = "Get service order by ID", description = "Retrieves a service order by its unique ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Service order retrieved successfully", content = @Content(schema = @Schema(implementation = ServiceOrderDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Service order not found", content = @Content)
+    })
     @GetMapping("/{id}")
     public ResponseEntity<ServiceOrderDTO> getById(@PathVariable Integer id) {
         ServiceOrder order = service.findById(id);
@@ -118,6 +139,11 @@ public class ServiceOrderController {
      *         {@link ServiceOrderDTO}
      *         and HTTP status {@code 200 (OK)}.
      */
+    @Operation(summary = "Update service order", description = "Updates an existing service order by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Service order updated successfully", content = @Content(schema = @Schema(implementation = ServiceOrderDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Service order not found", content = @Content)
+    })
     @PutMapping("/{id}")
     public ResponseEntity<ServiceOrderDTO> update(@PathVariable Integer id, @RequestBody ServiceOrder order) {
         ServiceOrder updated = service.update(id, order);
@@ -131,6 +157,11 @@ public class ServiceOrderController {
      * @return a {@link ResponseEntity} with HTTP status {@code 204 (No Content)}
      *         upon successful deletion.
      */
+    @Operation(summary = "Delete service order", description = "Deletes a service order by its unique ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Service order deleted successfully", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Service order not found", content = @Content)
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         service.deleteById(id);
@@ -145,6 +176,10 @@ public class ServiceOrderController {
      * @return a {@link ResponseEntity} containing a filtered list of
      *         {@link ServiceOrderDTO}.
      */
+    @Operation(summary = "Filter by status", description = "Retrieves service orders with a specific status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Filtered service orders retrieved successfully", content = @Content(schema = @Schema(implementation = ServiceOrderDTO.class)))
+    })
     @GetMapping("/status/{status}")
     public ResponseEntity<List<ServiceOrderDTO>> getByStatus(@PathVariable ServiceOrderStatus status) {
         List<ServiceOrderDTO> dtos = service.findByStatus(status).stream()
@@ -160,6 +195,7 @@ public class ServiceOrderController {
      * @return a {@link ResponseEntity} containing the list of matching
      *         {@link ServiceOrderDTO}.
      */
+    @Operation(summary = "Filter by target ID", description = "Retrieves service orders associated with a specific target ID")
     @GetMapping("/target/{targetId}")
     public ResponseEntity<List<ServiceOrderDTO>> getByTargetId(@PathVariable Integer targetId) {
         List<ServiceOrderDTO> dtos = service.findByTargetId(targetId).stream()
@@ -177,6 +213,7 @@ public class ServiceOrderController {
      * @return a {@link ResponseEntity} containing the list of matching
      *         {@link ServiceOrderDTO}.
      */
+    @Operation(summary = "Filter by target distance", description = "Retrieves service orders within a target distance range")
     @GetMapping("/target/distance")
     public ResponseEntity<List<ServiceOrderDTO>> getByTargetDistance(
             @RequestParam Double min,
@@ -194,6 +231,7 @@ public class ServiceOrderController {
      * @return a {@link ResponseEntity} containing the list of matching
      *         {@link ServiceOrderDTO}.
      */
+    @Operation(summary = "Filter by exact target signature", description = "Retrieves service orders with an exact target signature match")
     @GetMapping("/target/signature/{signature}")
     public ResponseEntity<List<ServiceOrderDTO>> getByTargetSignature(@PathVariable String signature) {
         List<ServiceOrderDTO> dtos = service.findByTargetSignature(signature).stream()
@@ -209,6 +247,7 @@ public class ServiceOrderController {
      * @return a {@link ResponseEntity} containing the list of matching
      *         {@link ServiceOrderDTO}.
      */
+    @Operation(summary = "Filter by partial target signature", description = "Retrieves service orders whose target signature contains a given substring")
     @GetMapping("/target/signature/contains/{partial}")
     public ResponseEntity<List<ServiceOrderDTO>> getByTargetSignatureContaining(@PathVariable String partial) {
         List<ServiceOrderDTO> dtos = service.findByTargetSignatureContaining(partial).stream()
@@ -224,6 +263,7 @@ public class ServiceOrderController {
      * @return a {@link ResponseEntity} containing the list of matching
      *         {@link ServiceOrderDTO}.
      */
+    @Operation(summary = "Filter orders older than X days", description = "Retrieves service orders older than the specified number of days")
     @GetMapping("/older-than/{days}")
     public ResponseEntity<List<ServiceOrderDTO>> getOlderThanDays(@PathVariable long days) {
         List<ServiceOrderDTO> dtos = service.findOlderThanDays(days).stream()
@@ -240,6 +280,7 @@ public class ServiceOrderController {
      * @return a {@link ResponseEntity} containing the list of matching
      *         {@link ServiceOrderDTO}.
      */
+    @Operation(summary = "Filter by creation date range", description = "Retrieves service orders created between two date-time values")
     @GetMapping("/created-between")
     public ResponseEntity<List<ServiceOrderDTO>> getByCreatedAtBetween(
             @RequestParam LocalDateTime start,
@@ -256,6 +297,7 @@ public class ServiceOrderController {
      * @return a {@link ResponseEntity} containing a status message and HTTP status
      *         {@code 200 (OK)}.
      */
+    @Operation(summary = "Health check", description = "Simple endpoint to verify that the ServiceOrder API is running")
     @GetMapping("/check")
     public ResponseEntity<String> check() {
         return ResponseEntity.ok("ServiceOrder API is up and running!");

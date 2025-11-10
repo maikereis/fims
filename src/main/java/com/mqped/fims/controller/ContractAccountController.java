@@ -3,6 +3,12 @@ package com.mqped.fims.controller;
 import com.mqped.fims.model.dto.ContractAccountDTO;
 import com.mqped.fims.model.entity.ContractAccount;
 import com.mqped.fims.service.ContractAccountService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -47,6 +53,7 @@ import java.util.List;
  * @author Rodrigo
  * @since 1.0
  */
+@Tag(name = "ContractAccount API", description = "Endpoints for managing contract account entities, including CRUD operations and health check.")
 @RestController
 @RequestMapping("/api/contract-accounts")
 public class ContractAccountController {
@@ -73,6 +80,11 @@ public class ContractAccountController {
      *         {@link ContractAccountDTO}
      *         and HTTP status {@code 201 (Created)}.
      */
+    @Operation(summary = "Create contract account", description = "Creates a new contract account record.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Contract account created successfully", content = @Content(schema = @Schema(implementation = ContractAccountDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid contract account data", content = @Content)
+    })
     @PostMapping
     public ResponseEntity<ContractAccountDTO> createContractAccount(@RequestBody ContractAccount contractAccount) {
         ContractAccount saved = service.add(contractAccount);
@@ -87,6 +99,10 @@ public class ContractAccountController {
      *         {@link ContractAccountDTO} objects
      *         and HTTP status {@code 200 (OK)}.
      */
+    @Operation(summary = "Get all contract accounts", description = "Retrieves all contract accounts with full details including related installation data.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Contract accounts retrieved successfully", content = @Content(schema = @Schema(implementation = ContractAccountDTO.class)))
+    })
     @GetMapping
     public ResponseEntity<List<ContractAccountDTO>> getAllContractAccounts() {
         List<ContractAccountDTO> dtos = service.findAll().stream()
@@ -106,6 +122,10 @@ public class ContractAccountController {
      *         {@link ContractAccountDTO}
      *         objects and HTTP status {@code 200 (OK)}.
      */
+    @Operation(summary = "Get all contract accounts (minimal)", description = "Retrieves all contract accounts without installation details, useful for listing or summary views.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Minimal contract accounts retrieved successfully", content = @Content(schema = @Schema(implementation = ContractAccountDTO.class)))
+    })
     @GetMapping("/minimal")
     public ResponseEntity<List<ContractAccountDTO>> getAllContractAccountsMinimal() {
         List<ContractAccountDTO> dtos = service.findAll().stream()
@@ -126,6 +146,11 @@ public class ContractAccountController {
      *                                                                account is not
      *                                                                found.
      */
+    @Operation(summary = "Get contract account by ID", description = "Retrieves a specific contract account by its unique ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Contract account retrieved successfully", content = @Content(schema = @Schema(implementation = ContractAccountDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Contract account not found", content = @Content)
+    })
     @GetMapping("/{id}")
     public ResponseEntity<ContractAccountDTO> getContractAccountById(@PathVariable Integer id) {
         ContractAccount account = service.findById(id);
@@ -145,6 +170,11 @@ public class ContractAccountController {
      * @throws org.springframework.web.server.ResponseStatusException if the account
      *                                                                is not found.
      */
+    @Operation(summary = "Update contract account", description = "Updates an existing contract account by ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Contract account updated successfully", content = @Content(schema = @Schema(implementation = ContractAccountDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Contract account not found", content = @Content)
+    })
     @PutMapping("/{id}")
     public ResponseEntity<ContractAccountDTO> updateContractAccount(@PathVariable Integer id,
             @RequestBody ContractAccount contractAccount) {
@@ -159,6 +189,11 @@ public class ContractAccountController {
      * @return a {@link ResponseEntity} with no content and HTTP status
      *         {@code 204 (No Content)}.
      */
+    @Operation(summary = "Delete contract account", description = "Deletes a contract account by its unique ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Contract account deleted successfully", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Contract account not found", content = @Content)
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContractAccount(@PathVariable Integer id) {
         service.deleteById(id);
@@ -175,6 +210,10 @@ public class ContractAccountController {
      * @return a {@link ResponseEntity} containing a simple status message
      *         and HTTP status {@code 200 (OK)}.
      */
+    @Operation(summary = "Health check", description = "Simple endpoint to verify that the ContractAccount API is running.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "API is up and running", content = @Content)
+    })
     @GetMapping("/check")
     public ResponseEntity<String> check() {
         return ResponseEntity.ok("ContractAccount API is up and running!");
