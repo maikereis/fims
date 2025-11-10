@@ -36,6 +36,8 @@ jobs:
               run: mvn javadoc:javadoc
 
             - name: Start Spring Boot app
+              env:
+                  JWT_SECRET: ${{ secrets.JWT_SECRET }}
               run: |
                   mvn spring-boot:start -Dspring-boot.run.arguments="--server.port=8080"
                   echo "Waiting for app to start..."
