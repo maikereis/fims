@@ -5,7 +5,7 @@
 ![Maven](https://img.shields.io/badge/Maven-3.9+-C71A36?logo=apachemaven&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
-![Coverage](https://maikereis.github.io/fims/coverage.svg)
+![Coverage](https://github.com/maikereis/fims/blob/gh-pages/coverage.svg)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 
 > A production-ready REST API for managing field inspection operations, service orders, and customer installations with enterprise-grade authentication, monitoring, and analytics capabilities.
