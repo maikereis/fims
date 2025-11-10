@@ -41,7 +41,7 @@ import java.util.Map;
  */
 @Component
 @Order(4)
-@Profile("!test")
+@Profile("dev")
 public class ContractAccountLoader implements ApplicationRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractAccountLoader.class);

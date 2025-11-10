@@ -22,7 +22,7 @@ import java.time.format.DateTimeParseException;
 
 @Component
 @Order(3)
-@Profile("!test")
+@Profile("dev")
 public class InstallationLoader implements ApplicationRunner {
 
     @Value("${installation.csv.path}")
@@ -48,14 +48,15 @@ public class InstallationLoader implements ApplicationRunner {
 
             String line;
             int lineNumber = 1; // track line number for better error messages
-            
+
             while ((line = reader.readLine()) != null) {
                 lineNumber++;
-                
+
                 try {
                     String[] fields = line.split(",", -1);
                     if (fields.length < 15) {
-                        System.err.println("Line " + lineNumber + ": Skipping malformed line (expected 15 fields, got " + fields.length + "): " + line);
+                        System.err.println("Line " + lineNumber + ": Skipping malformed line (expected 15 fields, got "
+                                + fields.length + "): " + line);
                         errorCount++;
                         continue;
                     }
@@ -63,7 +64,7 @@ public class InstallationLoader implements ApplicationRunner {
                     // --- Fetch existing Address ---
                     String addressId = fields[0];
                     Address address;
-                    
+
                     try {
                         address = addressService.findByAddressId(addressId);
                     } catch (ResourceNotFoundException e) {
@@ -75,7 +76,7 @@ public class InstallationLoader implements ApplicationRunner {
                     // --- Build Installation ---
                     Installation installation = new Installation();
                     installation.setAddress(address);
-                    
+
                     try {
                         installation.setCreatedAt(parseDate(fields[13]));
                         installation.setDeletedAt(parseDate(fields[14]));
@@ -87,7 +88,7 @@ public class InstallationLoader implements ApplicationRunner {
 
                     installationService.add(installation);
                     successCount++;
-                    
+
                 } catch (Exception e) {
                     System.err.println("Line " + lineNumber + ": Unexpected error - " + e.getMessage());
                     errorCount++;

@@ -17,7 +17,7 @@ import com.mqped.fims.service.AddressService;
 
 @Component
 @Order(1)
-@Profile("!test")
+@Profile("dev")
 public class AddressLoader implements ApplicationRunner {
 
     @Value("${address.csv.path}")

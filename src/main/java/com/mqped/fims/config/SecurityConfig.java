@@ -44,12 +44,10 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
 
                 // Exception Handling
-                .exceptionHandling(exception -> 
-                    exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
                 // Session Management - Stateless for JWT
-                .sessionManagement(session -> 
-                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 // Authorization Rules
                 .authorizeHttpRequests(auth -> auth
@@ -58,6 +56,18 @@ public class SecurityConfig {
 
                         // Public endpoints - health checks
                         .requestMatchers(HttpMethod.GET, "/api/*/check").permitAll()
+
+                        // H2 Console (Development only)
+                        .requestMatchers("/h2-console/**").permitAll()
+
+                        .requestMatchers(
+                                "/",
+                                "/favicon.ico",
+                                "/images/**",
+                                "/css/**",
+                                "/js/**",
+                                "/webjars/**")
+                        .permitAll()
 
                         // Swagger/OpenAPI endpoints
                         .requestMatchers(
@@ -69,7 +79,7 @@ public class SecurityConfig {
                         .permitAll()
 
                         // Actuator endpoints
-                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/info", "/actuator/prometheus").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
 
                         // All other endpoints require authentication
@@ -79,8 +89,10 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationConfig.authenticationProvider())
 
                 // JWT Filter
-                .addFilterBefore(jwtAuthenticationFilter, 
-                    UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class);
+                
+                http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
 
         return http.build();
     }
