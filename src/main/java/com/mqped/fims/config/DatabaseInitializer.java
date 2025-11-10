@@ -10,39 +10,36 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
+import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Initializes essential database data such as default roles.
+ * <p>
+ * Runs only when the "test" profile is NOT active.
+ */
 @Configuration
 @Profile("!test")
 public class DatabaseInitializer {
 
-    private static final Logger databaseInitializerLogger = LoggerFactory.getLogger(DatabaseInitializer.class);
+    private static final Logger log = LoggerFactory.getLogger(DatabaseInitializer.class);
 
-    /**
-     * Initialize default roles in the database
-     */
     @Bean
     @Order(1)
+    @Transactional
     CommandLineRunner initRoles(RoleRepository roleRepository) {
         return args -> {
-            if (Boolean.FALSE.equals(roleRepository.existsByName(RoleName.ROLE_USER))) {
-                Role userRole = new Role(RoleName.ROLE_USER);
-                roleRepository.save(userRole);
-                databaseInitializerLogger.info("Created ROLE_USER");
-            }
+            createRoleIfNotExists(roleRepository, RoleName.ROLE_USER);
+            createRoleIfNotExists(roleRepository, RoleName.ROLE_ADMIN);
+            createRoleIfNotExists(roleRepository, RoleName.ROLE_MODERATOR);
 
-            if (Boolean.FALSE.equals(roleRepository.existsByName(RoleName.ROLE_ADMIN))) {
-                Role adminRole = new Role(RoleName.ROLE_ADMIN);
-                roleRepository.save(adminRole);
-                databaseInitializerLogger.info("Created ROLE_ADMIN");
-            }
-
-            if (Boolean.FALSE.equals(roleRepository.existsByName(RoleName.ROLE_MODERATOR))) {
-                Role modRole = new Role(RoleName.ROLE_MODERATOR);
-                roleRepository.save(modRole);
-                databaseInitializerLogger.info("Created ROLE_MODERATOR");
-            }
-
-            databaseInitializerLogger.info("Database initialization complete!");
+            log.info("✅ Database initialization complete.");
         };
+    }
+
+    private void createRoleIfNotExists(RoleRepository roleRepository, RoleName roleName) {
+        if (Boolean.FALSE.equals(roleRepository.existsByName(roleName))) {
+            roleRepository.save(new Role(roleName));
+            log.info("Created role: {}", roleName);
+        }
     }
 }

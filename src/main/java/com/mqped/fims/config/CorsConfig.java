@@ -11,6 +11,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Global CORS configuration for FIMS API.
+ * <p>
+ * Configures allowed origins, methods, headers, and other policies to
+ * enable secure cross-origin communication with frontend clients.
+ */
 @Configuration
 public class CorsConfig {
 
@@ -19,13 +25,13 @@ public class CorsConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
+        CorsConfiguration config = new CorsConfiguration();
 
-        // Configure allowed origins from properties
-        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
+        // Allowed origins from configuration property
+        config.setAllowedOrigins(Arrays.asList(allowedOrigins));
 
-        // Allow common HTTP methods
-        configuration.setAllowedMethods(Arrays.asList(
+        // Common HTTP methods for RESTful APIs
+        config.setAllowedMethods(Arrays.asList(
                 HttpMethod.GET.name(),
                 HttpMethod.POST.name(),
                 HttpMethod.PUT.name(),
@@ -33,20 +39,23 @@ public class CorsConfig {
                 HttpMethod.PATCH.name(),
                 HttpMethod.OPTIONS.name()));
 
-        // Allow common headers
-        configuration.setAllowedHeaders(List.of("*"));
+        // Allow headers needed for authorization, content-type, etc.
+        config.setAllowedHeaders(List.of("*"));
 
-        // Expose headers that frontend needs
-        configuration.setExposedHeaders(Arrays.asList(
+        // Expose headers commonly read by frontend
+        config.setExposedHeaders(Arrays.asList(
                 "Authorization",
                 "Content-Type",
                 "X-Total-Count"));
 
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
+        // Allow credentials (cookies or Authorization headers)
+        config.setAllowCredentials(true);
+
+        // Cache preflight response for 1 hour
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", config);
 
         return source;
     }

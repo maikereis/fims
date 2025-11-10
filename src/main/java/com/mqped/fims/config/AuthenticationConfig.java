@@ -14,52 +14,80 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+/**
+ * Configures authentication components:
+ * <ul>
+ * <li>Custom {@link AuthenticationProvider} for username/password
+ * validation</li>
+ * <li>{@link AuthenticationManager} bean</li>
+ * <li>BCrypt password encoder</li>
+ * </ul>
+ *
+ * <p>
+ * This provider uses {@link UserDetailsService} to fetch users and
+ * {@link BCryptPasswordEncoder}
+ * for password verification.
+ * </p>
+ */
 @Configuration
 public class AuthenticationConfig {
 
     private final UserDetailsService userDetailsService;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthenticationConfig(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
+        this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
+    /**
+     * Provides a custom authentication provider that validates user credentials
+     * using the
+     * injected {@link UserDetailsService}.
+     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         return new AuthenticationProvider() {
             @Override
             public Authentication authenticate(Authentication authentication)
                     throws AuthenticationException {
+
                 String username = authentication.getName();
-                String password = authentication.getCredentials().toString();
+                String rawPassword = String.valueOf(authentication.getCredentials());
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                if (passwordEncoder().matches(password, userDetails.getPassword())) {
-                    return new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            password,
-                            userDetails.getAuthorities());
+                if (!passwordEncoder.matches(rawPassword, userDetails.getPassword())) {
+                    throw new BadCredentialsException("Invalid username or password");
                 }
 
-                throw new BadCredentialsException("Invalid username or password");
+                return new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null, // credentials are not stored after successful auth
+                        userDetails.getAuthorities());
             }
 
             @Override
             public boolean supports(Class<?> authentication) {
-                return UsernamePasswordAuthenticationToken.class
-                    .isAssignableFrom(authentication);
+                return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
             }
         };
     }
 
+    /**
+     * Provides the {@link AuthenticationManager} bean, required for authentication
+     * endpoints.
+     */
     @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
+    /**
+     * Provides a reusable password encoder bean.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return passwordEncoder;
     }
 }
