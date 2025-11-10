@@ -103,6 +103,13 @@
 			<artifactId>micrometer-tracing-bridge-brave</artifactId>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.8.14</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
