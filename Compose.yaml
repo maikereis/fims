@@ -12,7 +12,7 @@ services:
     ports:
       - "${DB_PORT}:${DB_PORT}"
     volumes:
-      - /var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - fims-network
     healthcheck:
@@ -152,6 +152,7 @@ networks:
     driver: bridge
 
 volumes:
+  postgres_data:
   pgadmin_data:
   grafana_data:
   prometheus_data:
