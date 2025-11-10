@@ -1,141 +1,425 @@
-# Field Inspection Management System
+# Field Installation Management System (FIMS)
 
-![Java](https://img.shields.io/badge/Java-21-007396?logo=java&logoColor=white)
-![Maven](https://img.shields.io/badge/Maven-3.5.6-C71A36?logo=apachemaven&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-6DB33F?logo=springboot&logoColor=white)
-![Coverage Badge](https://github.com/maikereis/fims/blob/gh-pages/coverage.svg)
+![Java](https://img.shields.io/badge/Java-21-007396?logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-6DB33F?logo=springboot&logoColor=white)
+![Maven](https://img.shields.io/badge/Maven-3.9+-C71A36?logo=apachemaven&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![Coverage](https://maikereis.github.io/fims/coverage.svg)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
+
+> A production-ready REST API for managing field inspection operations, service orders, and customer installations with enterprise-grade authentication, monitoring, and analytics capabilities.
+
+## Documentation
+
+- **[API Documentation (Swagger UI)](https://maikereis.github.io/fims/swagger.html)** - Interactive API explorer
+- **[JavaDoc Documentation](https://maikereis.github.io/fims/javadoc/index.html)** - Comprehensive code documentation
+- **[Postman Collection](FIMS%20API%20Test%20Suite.postman_collection.json)** - Complete API test suite
+
 ---
 
-## Sobre
+## Overview
 
-O FIMS (Field Inspection Management System) é um sistema desenvolvido em Java com Spring Boot, projetado para centralizar e gerenciar alvos de inspeção de campo.
-Seu principal objetivo é fornecer uma plataforma unificada para o controle completo do ciclo de inspeção — desde a identificação e priorização de alvos até o acompanhamento das ordens de serviço e inspeções executadas.
+FIMS (Field Installation Management System) is an enterprise-grade Spring Boot application designed to centralize and streamline field inspection operations. The platform provides a unified interface for managing the complete lifecycle of field operations, from target identification to service order execution.
 
-Destina-se a empresas que precisam gerir operações de campo de forma eficiente, auditável e orientada a dados, garantindo maior controle e transparência sobre suas atividades externas.
+### Core Capabilities
 
-## Motivação
+**Customer & Location Management**
+- Client records with CPF/CNPJ validation
+- Geocoded address management with coordinate support
+- Installation tracking and lifecycle management
 
-Em muitas operações de campo — como serviços públicos, auditorias de infraestrutura, inspeções de segurança ou monitoramento ambiental — as equipes frequentemente têm dificuldades para coordenar inspeções e manter a rastreabilidade entre metas, tarefas e inspeções executadas.
+**Contract & Service Operations**
+- Contract account management with status tracking
+- Inspection target generation from multiple sources (ML, rules, complaints)
+- Service order creation, assignment, and execution tracking
 
-O FIMS resolve esse problema oferecendo um serviço de back-end minimalista, porém robusto, para:
+**Security & Observability**
+- JWT-based authentication with role-based access control
+- Comprehensive monitoring via Prometheus and Grafana
+- Health checks and metrics for all service components
 
-* Registrar e monitorar alvos de inspeção originados de diferentes fontes (machine learning, regras de negócio, denúncias, etc.);
+### Key Features
 
-* Controlar quais inspeções foram geradas a partir de quais alvos, mantendo rastreabilidade total;
+- Complete CRUD operations for all domain entities
+- JWT authentication with role-based authorization
+- Custom validation annotations for domain-specific rules
+- Comprehensive error handling with structured exception responses
+- Real-time monitoring and metrics via Spring Actuator
+- Containerized deployment with Docker Compose
+- RESTful API design following industry best practices
+- Extensive test coverage with automated test suite
 
-* Acompanhar o status das ordens de serviço e o progresso das inspeções em campo;
+---
 
-* Obter uma visão estruturada e integrada das operações externas, facilitando a tomada de decisão e o planejamento estratégico.
+## Motivation
 
-## Features
+In field operations such as utilities management, infrastructure audits, safety inspections, or environmental monitoring, organizations face significant challenges in coordinating inspections and maintaining traceability between objectives, tasks, and executed work.
 
-* CRUD APIs
-* Camadas de service e repository com Spring Boot
-* Persistência em H2 para desenvolvimento rápido
-* Build com Maven (pom.xml)
-* Coleção Postman (postman.json) para testar os endpoints
-* Código modular, permitindo extensões como autenticação, dashboards e integração com ML
+FIMS addresses these challenges by providing a robust backend service that enables:
 
-## Documentação
+- **Centralized Target Management**: Register and monitor inspection targets from diverse sources including machine learning models, business rules, and customer complaints
 
-- [Endpoints da API](API.md) - Documentação completa de todos os endpoints
+- **Complete Traceability**: Maintain full audit trails linking targets to generated inspections and service orders
 
-## Requisitos
+- **Operational Visibility**: Track work order status and field inspection progress in real-time
 
-| Dependência    | Versão mínima |
-| -------------- | ------------- |
-| Java           | 21            |
-| Maven          | 3.5.6+        |
-| Banco de dados | H2 (default)  |
+- **Strategic Decision Support**: Provide structured, integrated views of field operations to facilitate data-driven decision-making and strategic planning
 
+---
 
-## Relacionamentos entre classes
+## Architecture
 
-**Address → Installation**
-
-```
-Address "1" --> "*" Installation : has (CASCADE.ALL)
-```
-* Significado: Um Address (endereço) pode estar associado a múltiplas Installations (instalações).
-Exemplo: um prédio (um endereço) pode conter várias instalações de serviço, como diferentes medidores de energia ou unidades operacionais.
-
-* CASCADE.ALL: Caso um Address seja removido ou persistido, todas as suas Installations associadas serão automaticamente atualizadas ou excluídas.
-
-**Installation → ContractAccount**
-
-```
-Installation "1" --> "*" ContractAccount : has (orphanRemoval)
-```
-
-* Significado: Uma Installation pode estar vinculada a várias ContractAccounts (contas contratuais).
-Exemplo: uma mesma instalação pode ter tido diferentes contratos ativos ao longo do tempo.
-
-* orphanRemoval: Se uma ContractAccount for removida da lista de uma Installation, ela será automaticamente excluída do banco de dados.
-
-**Client → ContractAccount**
-
-```
-Client "1" --> "*" ContractAccount : owns (CASCADE.ALL)
-```
-
-* Significado: Um Client (cliente, pessoa ou empresa) pode possuir múltiplas ContractAccounts.
-Exemplo: um cliente pode manter diversos contratos de energia em locais diferentes.
-
-* CASCADE.ALL: Quando um Client é modificado, as ContractAccounts associadas também são afetadas (criadas, atualizadas ou removidas automaticamente).
-
-**ContractAccount → Client**
-
-```
-ContractAccount "*" --> "1" Client : belongs to
-```
-
-* Significado: Cada ContractAccount pertence a exatamente um Client (relação inversa da anterior).
-
-**ContractAccount → Installation**
-
-```
-ContractAccount "*" --> "1" Installation : belongs to
-```
-
-* Significado: Cada ContractAccount está vinculada a uma única Installation, que representa o local físico do serviço.
-Assim, a combinação de Client + Installation define de forma única um contrato.
-
-**ContractAccount → Target**
-
-```
-ContractAccount "1" --> "*" Target : has
-```
-
-* Significado: Uma ContractAccount pode ter múltiplos Targets.
-Os Targets representam análises, metas ou avaliações associadas ao contrato — por exemplo, detecção de fraude, pontuação de machine learning ou priorização de serviços.
-
-**Target → ContractAccount**
-
-```
-Target "*" --> "1" ContractAccount : belongs to
-```
-
-* Significado: Cada Target está associado a exatamente uma ContractAccount (relação inversa da anterior).
-
-**Target → ServiceOrder**
-
-```
-Target "1" --> "*" ServiceOrder : has (CASCADE.ALL)
-```
-
-* Significado: Um Target (por exemplo, uma conta sinalizada por regras ou modelos de ML) pode gerar várias ServiceOrders (ordens de serviço, inspeções ou intervenções de campo).
-
-* CASCADE.ALL: As ServiceOrders são gerenciadas em conjunto com o Target — ou seja, são persistidas ou removidas automaticamente junto a ele.
-
-**ServiceOrder → Target**
-
-```
-ServiceOrder "*" --> "1" Target : belongs to
-```
-
-* Significado: Cada ServiceOrder está vinculada a exatamente um Target, representando a origem ou motivação daquela ordem de serviço.
-
-## Diagrama de Relacionamentos
+### Domain Model
 
 <img src="img/relationships.png" weight=2000px width=2000px>
+
+### Technology Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Backend Framework** | Spring Boot 3.5.6, Java 21 |
+| **Security** | Spring Security, JWT (jjwt 0.12.6) |
+| **Persistence** | PostgreSQL 16, Spring Data JPA |
+| **Validation** | Jakarta Validation, Custom Validators |
+| **Monitoring** | Prometheus, Grafana, Spring Actuator |
+| **API Documentation** | SpringDoc OpenAPI 3 |
+| **Build Tool** | Maven 3.9+ |
+| **Containerization** | Docker, Docker Compose |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- **Java Development Kit 21+** - [Download OpenJDK](https://adoptium.net/)
+- **Docker & Docker Compose** - [Install Docker](https://docs.docker.com/get-docker/)
+- **Apache Maven 3.9+** (optional, wrapper included)
+
+### Docker Compose Deployment (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/maikereis/fims.git
+cd fims
+
+# Configure environment variables
+cp .env.example .env
+# Edit .env with your configuration
+
+# Start all services
+docker-compose up -d
+
+# Verify service health
+docker-compose ps
+```
+
+**Service Endpoints:**
+
+| Service             | Description                                | URL                                                                            |
+| ------------------- | ------------------------------------------ | ------------------------------------------------------------------------------ |
+| **Application API** | Main backend API (requires authentication) | [http://localhost:8080](http://localhost:8080)                                 |
+| **Swagger UI**      | API documentation & testing interface      | [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) |
+| **pgAdmin**         | PostgreSQL administration dashboard        | [http://localhost:5050](http://localhost:5050)                                 |
+| **Grafana**         | Metrics visualization and dashboards       | [http://localhost:3000](http://localhost:3000)                                 |
+| **Prometheus**      | Metrics scraping and monitoring            | [http://localhost:9090](http://localhost:9090)                                 |
+| **Node Exporter**   | Host system metrics                        | [http://localhost:9100](http://localhost:9100)                                 |
+
+
+### Local Development
+
+```bash
+# Build the project
+./mvnw clean install
+
+# Run with development profile (H2 in-memory database)
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+
+# Run with production profile (PostgreSQL)
+./mvnw spring-boot:run -Dspring-boot.run.profiles=prod
+```
+
+---
+
+## Authentication
+
+FIMS implements JWT (JSON Web Token) authentication with role-based access control for secure API access.
+
+### Default Administrative Credentials
+
+```
+Username: administrator
+Password: password
+```
+
+**Note:** Change these credentials immediately in production environments.
+
+### Authentication Workflow
+
+**Step 1: Obtain JWT Token**
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "administrator",
+    "password": "password"
+  }'
+```
+
+**Step 2: Authenticate Subsequent Requests**
+```bash
+curl -X GET http://localhost:8080/api/clients \
+  -H "Authorization: Bearer <your-jwt-token>"
+```
+
+### Role-Based Access Control
+
+| Role | Access Level |
+|------|-------------|
+| `ROLE_USER` | Read-only access to standard endpoints |
+| `ROLE_MODERATOR` | User permissions plus update operations |
+| `ROLE_ADMIN` | Full system access including user management |
+
+---
+
+## API Reference
+
+### Core Resources
+
+| Resource | Endpoint | Description |
+|----------|----------|-------------|
+| **Authentication** | `/api/auth` | User authentication, registration, and session management |
+| **Addresses** | `/api/addresses` | Physical location management with geocoding support |
+| **Clients** | `/api/clients` | Customer information and profile management |
+| **Installations** | `/api/installations` | Service installation point tracking |
+| **Contract Accounts** | `/api/contract-accounts` | Service contract lifecycle management |
+| **Targets** | `/api/targets` | Inspection target management (ML, rules, complaints) |
+| **Service Orders** | `/api/service-orders` | Field work order creation and tracking |
+
+### Example API Operations
+
+**Create Client Record:**
+```bash
+curl -X POST http://localhost:8080/api/clients \
+  -H "Authorization: Bearer ${TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "João Silva",
+    "cpf": "123.456.789-00",
+    "birthDate": "1990-05-15T00:00:00",
+    "motherName": "Maria Silva",
+    "genre": "Masculino",
+    "createdAt": "2025-01-10T10:00:00"
+  }'
+```
+
+**Query Service Orders by Status:**
+```bash
+curl -X GET "http://localhost:8080/api/service-orders/status/CREATED" \
+  -H "Authorization: Bearer ${TOKEN}"
+```
+
+**Filter Targets by Score Range:**
+```bash
+curl -X GET "http://localhost:8080/api/targets/score/between?min=0.8&max=1.0" \
+  -H "Authorization: Bearer ${TOKEN}"
+```
+
+---
+
+## Monitoring & Observability
+
+### Health Check Endpoints
+
+Each API module provides a health check endpoint accessible without authentication:
+
+```bash
+curl http://localhost:8080/api/addresses/check
+curl http://localhost:8080/api/clients/check
+curl http://localhost:8080/api/installations/check
+```
+
+### Actuator Metrics
+
+Spring Boot Actuator exposes operational insights and metrics:
+
+```bash
+# Application health status
+curl http://localhost:8080/actuator/health
+
+# Prometheus-compatible metrics
+curl http://localhost:8080/actuator/prometheus
+
+# Application metadata
+curl http://localhost:8080/actuator/info
+```
+
+### Grafana Monitoring
+
+Pre-configured dashboards provide visibility into:
+- HTTP request rates and response latency (p95, p99 percentiles)
+- JVM memory utilization and garbage collection metrics
+- Database connection pool statistics
+- System resource utilization (CPU, memory)
+
+**Dashboard Access:** http://localhost:3000 (admin/admin)
+
+---
+
+## Testing
+
+### Automated Test Suite
+
+Import the [Postman collection](FIMS%20API%20Test%20Suite.postman_collection.json) for comprehensive API testing:
+
+- Authentication workflows (login, signup, token validation)
+- Complete CRUD operations for all entities
+- Advanced query operations (filtering, date ranges, status queries)
+- Error handling and edge case scenarios
+- Automated token management and request chaining
+
+### Running Unit Tests
+
+```bash
+# Execute unit test suite
+./mvnw test
+
+# Generate coverage report
+./mvnw verify
+
+# View coverage report in browser
+open target/site/jacoco/index.html
+```
+
+---
+
+## Configuration
+
+### Environment Variables
+
+Create a `.env` file in the project root directory:
+
+```bash
+# Database Configuration
+DB_NAME=fims_db
+DB_USERNAME=fims_user
+DB_PASSWORD=your_secure_password
+DB_PORT=5432
+
+# Application Configuration
+SERVER_PORT=8080
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:4200
+
+# Administrative User
+ADMIN_USER=administrator
+ADMIN_EMAIL=admin@fims.com
+ADMIN_PASSWORD=your_admin_password
+
+# JWT Configuration
+JWT_SECRET=your_base64_encoded_secret_key_at_least_256_bits
+JWT_EXPIRATION=86400000
+
+# Monitoring Services
+GRAFANA_PASSWORD=admin
+PGADMIN_EMAIL=admin@admin.com
+PGADMIN_PASSWORD=admin
+```
+
+### Application Profiles
+
+| Profile | Database | Purpose |
+|---------|----------|---------|
+| `doc` | H2 (in-memory) | GitHub Actions documentation generation |
+| `dev` | H2 (in-memory) | Local development and testing |
+| `prod` | PostgreSQL | Production deployment |
+| `test` | H2 (in-memory) | Unit and integration testing |
+
+**Activate Profile:**
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=prod
+```
+
+---
+
+## Project Structure
+
+```
+fims/
+├── src/main/java/com/mqped/fims/
+│   ├── config/              # Application configuration (Security, CORS, Database)
+│   ├── controller/          # REST API endpoints
+│   ├── exceptions/          # Custom exception hierarchy
+│   ├── model/
+│   │   ├── dto/            # Data Transfer Objects
+│   │   ├── entity/         # JPA entity definitions
+│   │   └── enums/          # Domain enumerations
+│   ├── repository/         # Spring Data JPA repositories
+│   ├── security/           # JWT utilities and security filters
+│   ├── service/            # Business logic layer
+│   ├── util/               # Utility classes
+│   └── validation/         # Custom validation annotations
+├── src/main/resources/
+│   ├── application.yml         # Primary configuration
+│   ├── application-dev.yml     # Development overrides
+│   └── application-prod.yml    # Production overrides
+├── monitoring/
+│   ├── grafana/               # Dashboard definitions and provisioning
+│   └── prometheus.yml         # Prometheus scrape configuration
+├── Dockerfile                 # Container image definition
+├── Compose.yaml              # Multi-container orchestration
+└── pom.xml                   # Maven project descriptor
+```
+
+---
+
+## Contributing
+
+Contributions are welcome and appreciated. Please follow the standard Git workflow:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/enhancement-name`)
+3. Commit your changes with clear, descriptive messages
+4. Push to your fork (`git push origin feature/enhancement-name`)
+5. Submit a Pull Request with a detailed description
+
+### Development Standards
+
+- Adhere to Java naming conventions and coding standards
+- Document all public APIs with comprehensive JavaDoc
+- Include unit tests for new features and bug fixes
+- Maintain method complexity (aim for < 50 lines per method)
+- Use descriptive, self-documenting variable and method names
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for complete terms and conditions.
+
+---
+
+## Acknowledgments
+
+- Spring Boot development team for the exceptional framework
+- PostgreSQL community for a reliable, feature-rich database system
+- Grafana Labs for powerful visualization and monitoring tools
+- Open source contributors and project maintainers
+
+---
+
+## Support
+
+- **Issue Tracking:** [GitHub Issues](https://github.com/maikereis/fims/issues)
+- **Documentation:** [GitHub Pages](https://maikereis.github.io/fims/)
+- **Email Contact:** maikerdralcantara@gmail.com
+
+---
+
+<div align="center">
+
+**Built with Spring Boot and modern Java**
+
+[Documentation](https://maikereis.github.io/fims/) • [API Reference](https://maikereis.github.io/fims/swagger.html) • [Report Issues](https://github.com/maikereis/fims/issues)
+
+</div>
