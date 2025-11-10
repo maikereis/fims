@@ -20,7 +20,7 @@ import com.mqped.fims.util.StringNormalizer;
 
 @Component
 @Order(2)
-@Profile("!test")
+@Profile("dev")
 public class ClientLoader implements ApplicationRunner {
 
     @Value("${client.csv.path}")
