@@ -39,7 +39,7 @@ jobs:
               env:
                   JWT_SECRET: ${{ secrets.JWT_SECRET }}
               run: |
-                  mvn spring-boot:start -Dspring-boot.run.arguments="--server.port=8080 --server.port=8080 --spring.profiles.active=doc"
+                  mvn spring-boot:start -Dspring-boot.run.arguments="--server.port=8080 --spring.profiles.active=doc"
                   echo "Waiting for app to start..."
                   timeout 60 bash -c 'until curl -f http://localhost:8080/actuator/health > /dev/null 2>&1; do sleep 2; done'
 
