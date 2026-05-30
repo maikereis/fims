@@ -20,7 +20,7 @@
 
 ## Overview
 
-FIMS (Field Installation Management System) is an enterprise-grade Spring Boot application designed to centralize and streamline field inspection operations. The platform provides a unified interface for managing the complete lifecycle of field operations, from target identification to service order execution.
+FIMS (Field Inspection Management System) is an enterprise-grade Spring Boot application designed to centralize and streamline field inspection operations. The platform provides a unified interface for managing the complete lifecycle of field operations, from target identification to service order execution.
 
 ### Core Capabilities
 
